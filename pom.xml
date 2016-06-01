@@ -1,0 +1,51 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>jacz.interface</groupId>
+  <artifactId>interface</artifactId>
+  <version>0.1.1</version>
+  <packaging>jar</packaging>
+
+  <name>interface</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>jacz.util</groupId>
+      <artifactId>util</artifactId>
+      <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>jacz.peerengine</groupId>
+      <artifactId>peerengineservice</artifactId>
+      <version>1.0a</version>
+    </dependency>
+    <dependency>
+      <groupId>jacz.peerengine</groupId>
+      <artifactId>peerengineclient</artifactId>
+      <version>0.1a</version>
+    </dependency>
+    <dependency>
+      <groupId>org.controlsfx</groupId>
+      <artifactId>controlsfx</artifactId>
+      <version>8.40.10</version>
+    </dependency>
+  </dependencies>
+</project>
