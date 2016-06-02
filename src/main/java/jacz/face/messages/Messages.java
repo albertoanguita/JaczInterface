@@ -16,6 +16,8 @@ public final class Messages {
 
         public static String CONNECTED() { return "Connected";}
 
+        public static String CONNECTING() { return "Connecting...";}
+
         public static String DISCONNECTED() { return "Disconnected";}
 
         public static String NULL_ADDRESS() { return "-";}

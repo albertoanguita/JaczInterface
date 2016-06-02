@@ -1,4 +1,4 @@
-package jacz.face.actions;
+package jacz.face.state;
 
 import jacz.face.messages.Messages;
 import jacz.face.util.Util;

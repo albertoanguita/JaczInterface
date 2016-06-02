@@ -55,7 +55,7 @@ public class CreateConfigController implements Initializable {
         assert progressBar != null : "fx:id=\"progressBar\" was not injected: check your FXML file 'IssueTrackingLite.fxml'.";
 //        assert rectangle != null : "fx:id=\"rectangle\" was not injected: check your FXML file 'IssueTrackingLite.fxml'.";
         assert label != null : "fx:id=\"label\" was not injected: check your FXML file 'IssueTrackingLite.fxml'.";
-        mouseToRandom = new MouseToRandom(100);
+        mouseToRandom = new MouseToRandom(300);
         List<CountryCode> countries = Arrays.asList(CountryCode.values());
         countrySelector.setItems(FXCollections.observableList(countries));
         System.out.println(countrySelector.getValue());
