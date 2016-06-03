@@ -2,6 +2,7 @@ package jacz.face.state;
 
 import jacz.face.messages.Messages;
 import jacz.face.util.Util;
+import jacz.peerengineservice.client.connection.ConnectionState;
 import jacz.peerengineservice.client.connection.State;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -82,7 +83,7 @@ public class ConnectionToServerStatus {
     }
 
 
-    public void connectionEstablished(State state) {
+    public void connectionEstablished(ConnectionState state) {
         setConnected(state.getExternalPort());
     }
 

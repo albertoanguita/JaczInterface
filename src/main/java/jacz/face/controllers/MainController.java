@@ -1,7 +1,7 @@
 package jacz.face.controllers;
 
 import jacz.face.messages.Messages;
-import jacz.face.state.ConnectionState;
+import jacz.face.state.ConnectionStateProperties;
 import jacz.face.state.ConnectionToServerStatus;
 import jacz.face.actions.ints.*;
 import jacz.peerengineclient.PeerEngineClient;
@@ -51,7 +51,7 @@ public class MainController implements Initializable {
 
     ConnectionToServerStatus connectionToServerStatus;
 
-    private ConnectionState connectionState;
+    private ConnectionStateProperties connectionStateProperties;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -71,26 +71,36 @@ public class MainController implements Initializable {
 
 
 
-        connectionState = new ConnectionState();
+        connectionStateProperties = new ConnectionStateProperties();
 
         connectedLabel.textProperty().bind(new StringBinding() {
             {
-                super.bind(connectionState.connectionToServerStateProperty());
+                super.bind(connectionStateProperties.aggregatedConnectionStatusProperty());
             }
             @Override
             protected String computeValue() {
-                switch (connectionState.connectionToServerStateProperty().get()) {
+                switch (connectionStateProperties.aggregatedConnectionStatusProperty().get()) {
 
-                    case UNREGISTERED:
-                    case REGISTERING:
+//                    case UNREGISTERED:
+//                    case REGISTERING:
+//                    case DISCONNECTED:
+//                        return Messages.ServerMessages.DISCONNECTED();
+//                    case CONNECTING:
+//                    case WAITING_FOR_NEXT_CONNECTION_TRY:
+//                        return Messages.ServerMessages.CONNECTING();
+//                    case CONNECTED:
+//                        return Messages.ServerMessages.CONNECTED();
+//
+//                    default:
+//                        return Messages.ServerMessages.DISCONNECTED();
                     case DISCONNECTED:
                         return Messages.ServerMessages.DISCONNECTED();
                     case CONNECTING:
-                    case WAITING_FOR_NEXT_CONNECTION_TRY:
                         return Messages.ServerMessages.CONNECTING();
+                    case DISCONNECTING:
+                        return Messages.ServerMessages.DISCONNECTING();
                     case CONNECTED:
                         return Messages.ServerMessages.CONNECTED();
-
                     default:
                         return Messages.ServerMessages.DISCONNECTED();
                 }
@@ -108,7 +118,7 @@ public class MainController implements Initializable {
         Duple<PeerEngineClient, List<String>> duple = SessionManager.load(
                 listAvailableConfigs(baseDir).get(0),
                 new GeneralEventsImpl(),
-                new ConnectionEventsImpl(connectionToServerStatus, connectionState),
+                new ConnectionEventsImpl(connectionToServerStatus, connectionStateProperties),
                 new PeersEventsImpl(),
                 new ResourceTransferEventsImpl(),
                 new TempFileManagerEventsImpl(),

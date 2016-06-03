@@ -1,9 +1,9 @@
 package jacz.face.actions.ints;
 
-import jacz.face.state.ConnectionState;
+import jacz.face.state.ConnectionStateProperties;
 import jacz.face.state.ConnectionToServerStatus;
 import jacz.peerengineservice.client.connection.ConnectionEvents;
-import jacz.peerengineservice.client.connection.State;
+import jacz.peerengineservice.client.connection.ConnectionState;
 import jacz.util.network.IP4Port;
 
 /**
@@ -12,216 +12,188 @@ import jacz.util.network.IP4Port;
 public class ConnectionEventsImpl implements ConnectionEvents {
 
     private final ConnectionToServerStatus connectionToServerStatus;
-    private final ConnectionState connectionState;
+    private final ConnectionStateProperties connectionStateProperties;
 
-    public ConnectionEventsImpl(ConnectionToServerStatus connectionToServerStatus, ConnectionState connectionState) {
+    public ConnectionEventsImpl(ConnectionToServerStatus connectionToServerStatus, ConnectionStateProperties connectionStateProperties) {
         this.connectionToServerStatus = connectionToServerStatus;
-        this.connectionState = connectionState;
+        this.connectionStateProperties = connectionStateProperties;
     }
 
     @Override
-    public void localPortModified(int port) {
-        System.out.println("Local port modified: " + port);
-        //connectionState.updateState(port);
+    public void localPortModified(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void externalPortModified(int port) {
-        System.out.println("External port modified: " + port);
-        //connectionState.updateState(port);
+    public void externalPortModified(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void initializingConnection() {
-        System.out.println("Initializing connection");
+    public void initializingConnection(ConnectionState state) {
+        System.out.println("initializing connection");
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void localAddressFetched(String localAddress, State state) {
-        System.out.println("Local address fetched. Local address: " + localAddress + ". State: " + state);
-        connectionState.updateState(state);
+    public void localAddressFetched(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void couldNotFetchLocalAddress(State state) {
-        System.out.println("Could not fetch local address. State: " + state);
-        connectionState.updateState(state);
+    public void couldNotFetchLocalAddress(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void tryingToFetchExternalAddress(State state) {
-        System.out.println("Trying to fetch external address. State: " + state);
-        connectionState.updateState(state);
+    public void tryingToFetchExternalAddress(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void externalAddressFetched(String externalAddress, boolean hasGateway, State state) {
-        System.out.println("External address fetched. External address: " + externalAddress + ". Has gateway: " + hasGateway + ". State: " + state);
-        connectionState.updateState(state);
+    public void externalAddressFetched(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void couldNotFetchExternalAddress(State state) {
-        System.out.println("Could not fetch external address. State: " + state);
-        connectionState.updateState(state);
+    public void couldNotFetchExternalAddress(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void unrecognizedMessageFromServer(State state) {
-        System.out.println("Unrecognized message from server. State: " + state);
-        connectionState.updateState(state);
+    public void unrecognizedMessageFromServer(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void tryingToConnectToServer(State state) {
-        System.out.println("Trying to connect to server. State: " + state);
-        connectionState.updateState(state);
+    public void tryingToConnectToServer(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void connectionToServerEstablished(State state) {
+    public void connectionToServerEstablished(ConnectionState state) {
         connectionToServerStatus.connectionEstablished(state);
-        System.out.println("Connected to server. State: " + state);
-        connectionState.updateState(state);
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void registrationRequired(State state) {
-        System.out.println("Registration with server required. State: " + state);
-        connectionState.updateState(state);
+    public void registrationRequired(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void localServerUnreachable(State state) {
-        System.out.println("Local server unreachable. State: " + state);
-        connectionState.updateState(state);
+    public void localServerUnreachable(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void unableToConnectToServer(State state) {
+    public void unableToConnectToServer(ConnectionState state) {
         connectionToServerStatus.unableToConnect();
-        System.out.println("Unable to connect to server. State: " + state);
-        connectionState.updateState(state);
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void tryingToOpenLocalServer(State state) {
-        System.out.println("Trying to open Local server. State: " + state);
-        connectionState.updateState(state);
+    public void tryingToOpenLocalServer(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void localServerOpen(State state) {
-        System.out.println("Local server open. State: " + state);
-        connectionState.updateState(state);
+    public void localServerOpen(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void couldNotOpenLocalServer(State state) {
-        System.out.println("Could not open local server. State: " + state);
-        connectionState.updateState(state);
+    public void couldNotOpenLocalServer(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void tryingToCloseLocalServer(State state) {
-        System.out.println("Trying to close local server. State: " + state);
-        connectionState.updateState(state);
+    public void tryingToCloseLocalServer(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void localServerClosed(State state) {
-        System.out.println("Local server closed. State: " + state);
-        connectionState.updateState(state);
+    public void localServerClosed(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void tryingToCreateNATRule(State state) {
-        System.out.println("Trying to create NAT rule. State: " + state);
-        connectionState.updateState(state);
+    public void tryingToCreateNATRule(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void NATRuleCreated(State state) {
-        System.out.println("NAT rule created. State: " + state);
-        connectionState.updateState(state);
+    public void NATRuleCreated(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void couldNotFetchUPNPGateway(State state) {
-        System.out.println("Could not fetch UPNP gateway. State: " + state);
-        connectionState.updateState(state);
+    public void couldNotFetchUPNPGateway(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void errorCreatingNATRule(State state) {
-        System.out.println("Error creating NAT rule. State: " + state);
-        connectionState.updateState(state);
+    public void errorCreatingNATRule(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void tryingToDestroyNATRule(State state) {
-        System.out.println("Trying to destroy NAT rule. State: " + state);
-        connectionState.updateState(state);
+    public void tryingToDestroyNATRule(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void NATRuleDestroyed(State state) {
-        System.out.println("NAT rule destroyed. State: " + state);
-        connectionState.updateState(state);
+    public void NATRuleDestroyed(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void couldNotDestroyNATRule(State state) {
-        System.out.println("Could not destroy NAT rule. State: " + state);
-        connectionState.updateState(state);
+    public void couldNotDestroyNATRule(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void listeningConnectionsWithoutNATRule(State state) {
-        System.out.println("Listening connections without NAT rule. State: " + state);
-        connectionState.updateState(state);
+    public void listeningConnectionsWithoutNATRule(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void disconnectedFromServer(State state) {
+    public void disconnectedFromServer(ConnectionState state) {
         connectionToServerStatus.disconnected();
-        System.out.println("Disconnected from server. State: " + state);
-        connectionState.updateState(state);
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void failedToRefreshServerConnection(State state) {
-        System.out.println("Failed to refresh server connection. State: " + state);
-        connectionState.updateState(state);
+    public void failedToRefreshServerConnection(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void tryingToRegisterWithServer(State state) {
-        System.out.println("Trying to register with server. State: " + state);
-        connectionState.updateState(state);
+    public void tryingToRegisterWithServer(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void registrationSuccessful(State state) {
-        System.out.println("Registration with server successful. State: " + state);
-        connectionState.updateState(state);
+    public void registrationSuccessful(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void alreadyRegistered(State state) {
-        System.out.println("Already registered. State: " + state);
-        connectionState.updateState(state);
+    public void alreadyRegistered(ConnectionState state) {
+        connectionStateProperties.updateState(state);
     }
 
     @Override
     public void peerCouldNotConnectToUs(Exception e, IP4Port ip4Port) {
+        // todo
         System.out.println("Peer failed to connect to us from " + ip4Port.toString() + ". " + e.getMessage());
-        //connectionState.updateState(state);
+        //connectionStateProperties.updateState(state);
     }
 
     @Override
-    public void localServerError(Exception e) {
+    public void localServerError(ConnectionState state, Exception e) {
+        // todo
         System.out.println("Error in the peer connections listener. All connections closed. Error: " + e.getMessage());
-        //connectionState.updateState(state);
+        connectionStateProperties.updateState(state);
     }
 }
