@@ -1,48 +1,42 @@
 package jacz.face.controllers;
 
+import jacz.face.actions.ints.*;
 import jacz.face.messages.Messages;
 import jacz.face.state.ConnectionStateProperties;
 import jacz.face.state.ConnectionToServerStatus;
-import jacz.face.actions.ints.*;
+import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
 import jacz.util.lists.tuple.Duple;
-import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.concurrent.Task;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import org.controlsfx.control.ToggleSwitch;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable {
+public class MainController extends GenericController {
 
-
-
-    public class MyTask extends Task<String> {
-
-        @Override
-        protected String call() throws Exception {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-    }
+    //@FXML
+    //private Label label;
 
     @FXML
-    private Label label;
+    private ToggleSwitch connectSwitch;
 
-    @FXML
-    private Button connectionButton;
+    //@FXML
+    //private Button connectionButton;
 
     @FXML
     private Label connectedLabel;
 
-    @FXML
-    private Label serverAddressLabel;
+    //@FXML
+    //private Label serverAddressLabel;
 
     /**
      * Jacuzzi peer client
@@ -66,8 +60,8 @@ public class MainController implements Initializable {
 
 
         //connectedLabel.textProperty().bind(connectionToServerStatus.connectedLabelTextProperty());
-        serverAddressLabel.textProperty().bind(connectionToServerStatus.serverAddressProperty());
-        connectionButton.textProperty().bind(connectionToServerStatus.connectionButtonTextProperty());
+        //serverAddressLabel.textProperty().bind(connectionToServerStatus.serverAddressProperty());
+        //connectionButton.textProperty().bind(connectionToServerStatus.connectionButtonTextProperty());
 
 
 
@@ -80,19 +74,6 @@ public class MainController implements Initializable {
             @Override
             protected String computeValue() {
                 switch (connectionStateProperties.aggregatedConnectionStatusProperty().get()) {
-
-//                    case UNREGISTERED:
-//                    case REGISTERING:
-//                    case DISCONNECTED:
-//                        return Messages.ServerMessages.DISCONNECTED();
-//                    case CONNECTING:
-//                    case WAITING_FOR_NEXT_CONNECTION_TRY:
-//                        return Messages.ServerMessages.CONNECTING();
-//                    case CONNECTED:
-//                        return Messages.ServerMessages.CONNECTED();
-//
-//                    default:
-//                        return Messages.ServerMessages.DISCONNECTED();
                     case DISCONNECTED:
                         return Messages.ServerMessages.DISCONNECTED();
                     case CONNECTING:
@@ -106,7 +87,37 @@ public class MainController implements Initializable {
                 }
             }
         });
-        //UserOfTask userOfTask = new UserOfTask("hola", label.textProperty(), this);
+
+        BooleanProperty receiveWishForConnectionStatus = new SimpleBooleanProperty(false);
+        receiveWishForConnectionStatus.bind(new BooleanBinding() {
+            {
+                super.bind(connectionStateProperties.aggregatedConnectionStatusProperty());
+            }
+            @Override
+            protected boolean computeValue() {
+                System.out.println("change");
+                switch (connectionStateProperties.aggregatedConnectionStatusProperty().get()) {
+                    case CONNECTED:
+                        System.out.println("heeeeeeeeeee");
+                        Util.setLater(connectSwitch.selectedProperty(), false);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+        connectionStateProperties.isWishForConnectionProperty().addListener((observable, oldValue, newValue) -> {
+            Util.setLater(connectSwitch.selectedProperty(), newValue);
+        });
+        //connectSwitch.selectedProperty().bind(connectionStateProperties.isWishForConnectionProperty());
+
+        connectSwitch.setOnMouseClicked(event -> {
+            if (connectSwitch.isSelected()) {
+                client.connect();
+            } else {
+                client.disconnect();
+            }
+        });
     }
 
     public List<String> listAvailableConfigs(String baseDir) throws IOException {
@@ -130,11 +141,13 @@ public class MainController implements Initializable {
     }
 
     public void connectAction() {
-        client.connect();
+        //client.connect();
+        //ThreadUtil.safeSleep(3000);
+        Util.setLater(connectSwitch.selectedProperty(), false);
     }
 
     public void setText(final String str) {
-        Platform.runLater(() -> label.setText(str));
+        //Platform.runLater(() -> label.setText(str));
     }
 
     public void stop() {
