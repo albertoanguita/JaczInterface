@@ -29,9 +29,6 @@ public class MainController extends GenericController {
     @FXML
     private ToggleSwitch connectSwitch;
 
-    //@FXML
-    //private Button connectionButton;
-
     @FXML
     private Label connectedLabel;
 
@@ -109,7 +106,6 @@ public class MainController extends GenericController {
         connectionStateProperties.isWishForConnectionProperty().addListener((observable, oldValue, newValue) -> {
             Util.setLater(connectSwitch.selectedProperty(), newValue);
         });
-        //connectSwitch.selectedProperty().bind(connectionStateProperties.isWishForConnectionProperty());
 
         connectSwitch.setOnMouseClicked(event -> {
             if (connectSwitch.isSelected()) {

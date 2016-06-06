@@ -4,7 +4,7 @@ import jacz.database.DatabaseMediator;
 import jacz.peerengineclient.databases.integration.IntegrationEvents;
 
 /**
- * Created by Alberto on 28/04/2016.
+ * todo add modified integrated item
  */
 public class IntegrationEventsImpl implements IntegrationEvents {
 

@@ -2,9 +2,7 @@ package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
 import javafx.application.Platform;
-import javafx.beans.value.WritableBooleanValue;
-import javafx.beans.value.WritableIntegerValue;
-import javafx.beans.value.WritableObjectValue;
+import javafx.beans.value.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,13 +31,26 @@ public class Util {
         });
     }
 
-    public static <T> void setLater(final WritableIntegerValue property, final int value) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                property.set(value);
-            }
-        });
+//    public static <T> void setLater(final WritableIntegerValue property, final int value) {
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                property.set(value);
+//            }
+//        });
+//    }
+//
+//    public static <T> void setLater(final WritableLongValue property, final long value) {
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                property.set(value);
+//            }
+//        });
+//    }
+
+    public static <T> void setLater(final WritableNumberValue property, final Number value) {
+        Platform.runLater(() -> property.setValue(value));
     }
 
     public static List<String> getCountriesNames() {

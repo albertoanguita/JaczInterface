@@ -23,7 +23,6 @@
                   <Insets top="3.0" />
                </padding>
             </ToggleSwitch>
-            <ToggleButton fx:id="toggleSwitch" mnemonicParsing="false" onAction="#connectAction" text="Connect" />
             <Label text="Status:" />
             <Label fx:id="connectedLabel" minWidth="150.0" text="disconnected" />
             <ToggleButton disable="true" mnemonicParsing="false" selected="true" text="Show remote" />
