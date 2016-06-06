@@ -1,14 +1,10 @@
 package jacz.face.state;
 
-import jacz.commengine.communication.CommError;
 import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.client.connection.peers.PeerInfo;
-import jacz.peerengineservice.client.connection.peers.kb.PeerEntryFacade;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
-
-import java.util.Date;
 
 /**
  * Stores internal state referring to connected peers. Includes list of connected peers, and for each
@@ -21,17 +17,16 @@ public class PeersStateProperties {
 
     public static class PeerPropertyInfo {
 
-        private final PeerId peerId;
+        public final PeerId peerId;
 
-        private final PeerInfo peerInfo;
+        public final PeerInfo peerInfo;
 
-        private Date favoriteSince;
+        public final String nick;
 
-        private Date connectedSince;
-
-        public PeerPropertyInfo(PeerId peerId, PeerInfo peerInfo) {
+        public PeerPropertyInfo(PeerId peerId, PeerInfo peerInfo, String nick) {
             this.peerId = peerId;
             this.peerInfo = peerInfo;
+            this.nick = nick;
         }
 
         @Override
@@ -66,7 +61,7 @@ public class PeersStateProperties {
     }
 
     public void newPeerConnected(PeerId peerId, PeerInfo peerInfo) {
-        observedPeers.add(new PeerPropertyInfo(peerId, peerInfo));
+        observedPeers.add(new PeerPropertyInfo(peerId, peerInfo, nick));
     }
 
     public void peerDisconnected(PeerId peerId, PeerInfo peerInfo) {
@@ -74,7 +69,7 @@ public class PeersStateProperties {
     }
 
     public void updatePeerInfo(PeerId peerId, PeerInfo peerInfo) {
-        PeerPropertyInfo peerPropertyInfo = new PeerPropertyInfo(peerId, peerInfo);
+        PeerPropertyInfo peerPropertyInfo = new PeerPropertyInfo(peerId, peerInfo, nick);
         int index = observedPeers.indexOf(peerPropertyInfo);
         if (index >= 0) {
             // replace existing datum
