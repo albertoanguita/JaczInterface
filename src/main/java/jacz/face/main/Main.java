@@ -3,6 +3,7 @@ package jacz.face.main;
 import jacz.face.controllers.CreateConfigController;
 import jacz.face.controllers.GenericController;
 import jacz.face.controllers.MainController;
+import jacz.face.state.PropertiesAccessor;
 import jacz.util.lists.tuple.Duple;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -22,10 +23,14 @@ public class Main extends Application {
 
     private Duple<CreateConfigController, Parent> createConfigController;
 
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         this.primaryStage = primaryStage;
         primaryStage.setTitle("media manager");
+
+        // build the singleton instance of the properties accessor
+        PropertiesAccessor.getInstance();
 
         if (!mainController.element1.listAvailableConfigs(BASE_DIR).isEmpty()) {
             // there is a profile available
@@ -67,7 +72,7 @@ public class Main extends Application {
     private <T extends GenericController> Duple<T, Parent> loadController(String resourcePath) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
         Parent root = fxmlLoader.load(getClass().getResource(resourcePath).openStream());
-        ((GenericController )fxmlLoader.getController()).setMain(this);
+        ((GenericController)fxmlLoader.getController()).setMain(this);
         return new Duple<>(fxmlLoader.getController(), root);
     }
 

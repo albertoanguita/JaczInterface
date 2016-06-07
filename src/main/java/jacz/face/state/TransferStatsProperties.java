@@ -31,8 +31,7 @@ public class TransferStatsProperties implements TimerAction {
 
     public TransferStatsProperties(TransferStatistics transferStatistics) {
         this.transferStatistics = transferStatistics;
-        // todo checkSpeedTimer = new Timer(this, TransferStatistics. / 2);
-        checkSpeedTimer = new Timer(1000, this);
+        checkSpeedTimer = new Timer(TransferStatistics.SPEED_MONITOR_FREQUENCY, this);
         totalUploadedBytes = new SimpleLongProperty(transferStatistics.getUploadedBytes());
         totalDownloadedBytes = new SimpleLongProperty(transferStatistics.getDownloadedBytes());
         currentUploadSpeed = new SimpleDoubleProperty(0d);

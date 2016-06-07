@@ -43,15 +43,15 @@
                <children>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="30.0">
                      <children>
-                        <Label id="movies_selector" styleClass="left_menu_selector" text="Movies">
+                        <Label id="movies_selector" onMouseClicked="#switchToMoviesView" styleClass="left_menu_selector" text="Movies">
                            <effect>
                               <Glow />
                            </effect></Label>
-                        <Label id="series_selector" styleClass="left_menu_selector" text="Series" />
-                        <Label id="favorites_selector" styleClass="left_menu_selector" text="Favorites" />
+                        <Label id="series_selector" onMouseClicked="#switchToSeriesView" styleClass="left_menu_selector" text="Series" />
+                        <Label id="favorites_selector" onMouseClicked="#switchToFavoritesView" styleClass="left_menu_selector" text="Favorites" />
                         <Separator prefWidth="200.0" />
-                        <Label id="transfers_selector" styleClass="left_menu_selector" text="Transfers" />
-                        <Label id="peers_selector" styleClass="left_menu_selector" text="Peers" />
+                        <Label id="transfers_selector" onMouseClicked="#switchToTransfersView" styleClass="left_menu_selector" text="Transfers" />
+                        <Label id="peers_selector" onMouseClicked="#switchToPeersView" styleClass="left_menu_selector" text="Peers" />
                      </children>
                   </VBox>
                </children>
@@ -62,7 +62,7 @@
    <center>
       <VBox minHeight="100.0" BorderPane.alignment="CENTER">
          <children>
-            <AnchorPane maxHeight="10000.0" minHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+            <AnchorPane fx:id="viewContainer" maxHeight="10000.0" minHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
             <Separator prefHeight="0.0" prefWidth="640.0" />
             <AnchorPane maxHeight="30.0" minHeight="30.0" prefHeight="30.0" VBox.vgrow="NEVER">
                <children>

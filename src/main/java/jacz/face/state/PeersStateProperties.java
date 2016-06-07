@@ -21,12 +21,9 @@ public class PeersStateProperties {
 
         public final PeerInfo peerInfo;
 
-        public final String nick;
-
-        public PeerPropertyInfo(PeerId peerId, PeerInfo peerInfo, String nick) {
+        public PeerPropertyInfo(PeerId peerId, PeerInfo peerInfo) {
             this.peerId = peerId;
             this.peerInfo = peerInfo;
-            this.nick = nick;
         }
 
         @Override
@@ -61,7 +58,7 @@ public class PeersStateProperties {
     }
 
     public void newPeerConnected(PeerId peerId, PeerInfo peerInfo) {
-        observedPeers.add(new PeerPropertyInfo(peerId, peerInfo, nick));
+        observedPeers.add(new PeerPropertyInfo(peerId, peerInfo));
     }
 
     public void peerDisconnected(PeerId peerId, PeerInfo peerInfo) {
@@ -69,7 +66,7 @@ public class PeersStateProperties {
     }
 
     public void updatePeerInfo(PeerId peerId, PeerInfo peerInfo) {
-        PeerPropertyInfo peerPropertyInfo = new PeerPropertyInfo(peerId, peerInfo, nick);
+        PeerPropertyInfo peerPropertyInfo = new PeerPropertyInfo(peerId, peerInfo);
         int index = observedPeers.indexOf(peerPropertyInfo);
         if (index >= 0) {
             // replace existing datum

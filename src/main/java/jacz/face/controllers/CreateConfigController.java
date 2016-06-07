@@ -117,7 +117,6 @@ public class CreateConfigController extends GenericController {
         nickQuestion.setGraphic(Glyph.create("FontAwesome|" + FontAwesome.Glyph.QUESTION_CIRCLE));
         seedQuestion.setGraphic(Glyph.create("FontAwesome|" + FontAwesome.Glyph.QUESTION_CIRCLE));
         countryQuestion.setGraphic(Glyph.create("FontAwesome|" + FontAwesome.Glyph.QUESTION_CIRCLE));
-
     }
 
     public void mouseMoved(MouseEvent mouseEvent) {

@@ -4,7 +4,7 @@ import jacz.database.DatabaseMediator;
 import jacz.peerengineclient.databases.integration.IntegrationEvents;
 
 /**
- * todo add modified integrated item
+ *
  */
 public class IntegrationEventsImpl implements IntegrationEvents {
 
@@ -16,6 +16,11 @@ public class IntegrationEventsImpl implements IntegrationEvents {
     @Override
     public void integratedItemHasNewMediaContent(DatabaseMediator.ItemType type, Integer id) {
         System.out.println("Integrated item has new media content. Type: " + type + ", id: " + id);
+    }
+
+    @Override
+    public void integratedItemHasBeenModified(DatabaseMediator.ItemType type, Integer id) {
+        System.out.println("Integrated item has been modified. Type: " + type + ", id: " + id);
     }
 
     @Override
