@@ -7,11 +7,11 @@ public class PropertiesAccessor {
 
     private static PropertiesAccessor instance = new PropertiesAccessor();
 
-    private final GeneralStateProperties generalStateProperties;
+    private GeneralStateProperties generalStateProperties;
 
-    private final ConnectionStateProperties connectionStateProperties;
+    private ConnectionStateProperties connectionStateProperties;
 
-    private final PeersStateProperties peersStateProperties;
+    private PeersStateProperties peersStateProperties;
 
     public static PropertiesAccessor getInstance() {
         return instance;

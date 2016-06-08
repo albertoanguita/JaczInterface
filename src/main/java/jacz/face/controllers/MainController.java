@@ -7,6 +7,7 @@ import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
+import jacz.peerengineservice.PeerId;
 import jacz.util.lists.tuple.Duple;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
@@ -137,6 +138,13 @@ public class MainController extends GenericController {
                 new ErrorEventsImpl());
         client = duple.element1;
         ClientAccessor.setup(client);
+
+//        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP20"));
+//        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP21"));
+//        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP22"));
+//        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP27"));
+//        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP28"));
+//        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP29"));
     }
 
     public void connectAction() {

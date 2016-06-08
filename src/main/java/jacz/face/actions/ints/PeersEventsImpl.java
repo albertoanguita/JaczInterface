@@ -20,40 +20,40 @@ public class PeersEventsImpl implements PeersEvents {
     @Override
     public void newPeerConnected(PeerId peerId, PeerInfo peerInfo) {
         System.out.println("New peer connected: " + formatPeer(peerId) + ", " + peerInfo);
-        peersStateProperties.updatePeerInfo(peerId, peerInfo);
+        peersStateProperties.updatePeerInfo(peerInfo);
     }
 
     @Override
     public void modifiedPeerRelationship(PeerId peerId, PeerInfo peerInfo) {
         System.out.println("Modified peer relationship: " + formatPeer(peerId) + ", " + peerInfo);
-        peersStateProperties.updatePeerInfo(peerId, peerInfo);
+        peersStateProperties.updatePeerInfo(peerInfo);
     }
 
     @Override
     public void modifiedMainCountry(PeerId peerId, PeerInfo peerInfo) {
         System.out.println("Modified peer main country: " + formatPeer(peerId) + ", " + peerInfo);
-        peersStateProperties.updatePeerInfo(peerId, peerInfo);
+        peersStateProperties.updatePeerInfo(peerInfo);
     }
 
     @Override
     public void modifiedAffinity(PeerId peerId, PeerInfo peerInfo) {
         System.out.println("Modified peer affinity: " + formatPeer(peerId) + ", " + peerInfo);
-        peersStateProperties.updatePeerInfo(peerId, peerInfo);
+        peersStateProperties.updatePeerInfo(peerInfo);
     }
 
     @Override
     public void newPeerNick(PeerId peerId, PeerInfo peerInfo) {
         System.out.println("Peer " + formatPeer(peerId) + " changed his nick to " + peerInfo.nick + ", " + peerInfo);
-        peersStateProperties.updatePeerInfo(peerId, peerInfo);
+        peersStateProperties.updatePeerInfo(peerInfo);
     }
 
     @Override
     public void peerDisconnected(PeerId peerId, PeerInfo peerInfo, CommError error) {
         System.out.println("Peer disconnected (" + formatPeer(peerId) + "). Error = " + error);
-        peersStateProperties.updatePeerInfo(peerId, peerInfo);
+        peersStateProperties.updatePeerInfo(peerInfo);
     }
 
     private String formatPeer(PeerId peerId) {
-        return "{" + peerId.toString().substring(40) + "}";
+        return "{" + peerId.toString().substring(35) + "}";
     }
 }
