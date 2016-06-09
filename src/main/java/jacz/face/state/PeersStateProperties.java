@@ -1,89 +1,130 @@
 package jacz.face.state;
 
+import com.neovisionaries.i18n.CountryCode;
 import jacz.face.controllers.ClientAccessor;
 import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.client.connection.peers.PeerInfo;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import jacz.peerengineservice.util.PeerRelationship;
+import javafx.beans.Observable;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.Callback;
 
+import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Stores internal state referring to connected peers. Includes list of connected peers, and for each
  * peer their connection status (nick, relationship, ...)
- *
- * todo add sortedlist wrapper to sort the peers
  */
 public class PeersStateProperties {
 
-    public static class PeerPropertyInfo2 {
+    public static class PeerPropertyInfo {
 
-        private final PeerId peerId;
+        private final PeerId peerIdValue;
 
-        private final ObjectProperty<PeerId> peerIdProperty;
+        private final ObjectProperty<PeerId> peerId;
 
-        private final StringProperty shortIdProperty;
+        private final BooleanProperty connected;
 
-        private final StringProperty relationProperty;
+        private final ObjectProperty<PeerRelationship> relation;
 
-        private final StringProperty nickProperty;
+        private final StringProperty nick;
 
-        public PeerPropertyInfo2(PeerId peerId) {
-            this.peerId = peerId;
-            peerIdProperty = null;
-            shortIdProperty = null;
-            relationProperty = null;
-            nickProperty = null;
+        private final ObjectProperty<CountryCode> country;
+
+        private final IntegerProperty affinity;
+
+        private Date connectionDate;
+
+        private final LongProperty secondsConnected;
+
+        public PeerPropertyInfo(PeerId peerIdValue) {
+            this.peerIdValue = peerIdValue;
+            peerId = null;
+            connected = null;
+            relation = null;
+            nick = null;
+            country = null;
+            affinity = null;
+            secondsConnected = null;
         }
 
-        public PeerPropertyInfo2(PeerInfo peerInfo) {
-            peerId = peerInfo.peerId;
-            peerIdProperty = new SimpleObjectProperty<>(peerInfo.peerId);
-            shortIdProperty = new SimpleStringProperty(peerInfo.peerId.toString().substring(35));
-            relationProperty = new SimpleStringProperty(peerInfo.relationship.toString());
-            nickProperty = new SimpleStringProperty(peerInfo.nick);
+        public PeerPropertyInfo(PeerInfo peerInfo) {
+            peerIdValue = peerInfo.peerId;
+            peerId = new SimpleObjectProperty<>(peerInfo.peerId);
+            connected = new SimpleBooleanProperty(peerInfo.connected);
+            relation = new SimpleObjectProperty<>(peerInfo.relationship);
+            nick = new SimpleStringProperty(peerInfo.nick);
+            country = new SimpleObjectProperty<>(CountryCode.ES);
+            affinity = new SimpleIntegerProperty(peerInfo.affinity);
+            connectionDate = peerInfo.connected ? peerInfo.lastConnectionDate : null;
+            secondsConnected = peerInfo.connected ? new SimpleLongProperty(-1) : new SimpleLongProperty(0);
         }
 
         public void update(PeerInfo peerInfo) {
-            relationProperty.set(peerInfo.relationship.toString());
-            nickProperty.set(peerInfo.nick);
+            System.out.println("Updated relation: " + peerInfo.relationship.toString());
+            connected.setValue(peerInfo.connected);
+            relation.set(peerInfo.relationship);
+            nick.set(peerInfo.nick);
+            country.set(peerInfo.mainCountry);
+            affinity.set(peerInfo.affinity);
+            connectionDate = peerInfo.connected ? peerInfo.lastConnectionDate : null;
+            updateSecondsConnected();
         }
 
-        public PeerId getPeerIdProperty() {
-            return peerIdProperty.get();
+        public void updateSecondsConnected() {
+            secondsConnected.set((System.currentTimeMillis() - connectionDate.getTime()) / 1000);
         }
 
-        public ObjectProperty<PeerId> peerIdPropertyProperty() {
-            return peerIdProperty;
+        public PeerId getPeerId() {
+            return peerId.get();
         }
 
-        public String getShortIdProperty() {
-            return shortIdProperty.get();
+        public ObjectProperty<PeerId> peerIdProperty() {
+            return peerId;
         }
 
-        public StringProperty shortIdPropertyProperty() {
-            return shortIdProperty;
+        public boolean getConnected() {
+            return connected.get();
         }
 
-        public String getRelationProperty() {
-            return relationProperty.get();
+        public BooleanProperty connectedProperty() {
+            return connected;
         }
 
-        public StringProperty relationPropertyProperty() {
-            return relationProperty;
+        public PeerRelationship getRelation() {
+            return relation.get();
         }
 
-        public String getNickProperty() {
-            return nickProperty.get();
+        public ObjectProperty<PeerRelationship> relationProperty() {
+            return relation;
         }
 
-        public StringProperty nickPropertyProperty() {
-            return nickProperty;
+        public String getNick() {
+            return nick.get();
+        }
+
+        public StringProperty nickProperty() {
+            return nick;
+        }
+
+        public CountryCode getCountry() {
+            return country.get();
+        }
+
+        public ObjectProperty<CountryCode> countryProperty() {
+            return country;
+        }
+
+        public int getAffinity() {
+            return affinity.get();
+        }
+
+        public IntegerProperty affinityProperty() {
+            return affinity;
         }
 
         @Override
@@ -91,51 +132,24 @@ public class PeersStateProperties {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            PeerPropertyInfo2 that = (PeerPropertyInfo2) o;
+            PeerPropertyInfo that = (PeerPropertyInfo) o;
 
-            return peerId.equals(that.peerId);
+            return peerIdValue.equals(that.peerIdValue);
         }
 
         @Override
         public int hashCode() {
-            return peerId.hashCode();
+            return peerIdValue.hashCode();
         }
     }
 
-//    public static class PeerPropertyInfo {
-//
-//        public final PeerId peerId;
-//
-//        public final PeerInfo peerInfo;
-//
-//        public PeerPropertyInfo(PeerId peerId, PeerInfo peerInfo) {
-//            this.peerId = peerId;
-//            this.peerInfo = peerInfo;
-//        }
-//
-//        @Override
-//        public boolean equals(Object o) {
-//            if (this == o) return true;
-//            if (o == null || getClass() != o.getClass()) return false;
-//
-//            PeerPropertyInfo that = (PeerPropertyInfo) o;
-//
-//            return peerId.equals(that.peerId);
-//
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            return peerId.hashCode();
-//        }
-//    }
 
 
 
     /**
      * Peers observed in this class
      */
-    ObservableList<PeerPropertyInfo2> observedPeers = null;
+    ObservableList<PeerPropertyInfo> observedPeers = null;
 
 
 
@@ -153,17 +167,30 @@ public class PeersStateProperties {
 //        }
 //    }
 
-    public ObservableList<PeerPropertyInfo2> observedPeers() {
+    public ObservableList<PeerPropertyInfo> observedPeers() {
         if (observedPeers == null) {
             Stream<PeerId> firstPeers =
                     Stream.concat(
                             ClientAccessor.getInstance().getClient().getFavoritePeers().stream(),
                             ClientAccessor.getInstance().getClient().getBlockedPeers().stream());
-            observedPeers = FXCollections.observableArrayList(
+
+            observedPeers = FXCollections.observableArrayList(new Callback<PeerPropertyInfo, Observable[]>() {
+                @Override
+                public Observable[] call(PeerPropertyInfo p) {
+                    return new Observable[]{p.peerIdProperty(), p.connectedProperty(), p.relationProperty(), p.nickProperty(), p.countryProperty(), p.affinityProperty()};
+                }
+            });
+            observedPeers.addAll(
                     firstPeers
-                            .map(p -> ClientAccessor.getInstance().getClient().getPeerInfo(p))
-                            .map(PeerPropertyInfo2::new)
-                            .collect(Collectors.toList()));
+                    .map(p -> ClientAccessor.getInstance().getClient().getPeerInfo(p))
+                    .map(PeerPropertyInfo::new)
+                    .collect(Collectors.toList()));
+
+//            observedPeers = FXCollections.observableArrayList(
+//                    firstPeers
+//                            .map(p -> ClientAccessor.getInstance().getClient().getPeerInfo(p))
+//                            .map(PeerPropertyInfo::new)
+//                            .collect(Collectors.toList()));
         }
         return observedPeers;
     }
@@ -181,13 +208,13 @@ public class PeersStateProperties {
         } else {
             // new item
             if (includeInList(peerInfo)) {
-                observedPeers.add(new PeerPropertyInfo2(peerInfo));
+                observedPeers.add(new PeerPropertyInfo(peerInfo));
             }
         }
     }
 
     private int indexOfPeerInfo(PeerInfo peerInfo) {
-        return observedPeers.indexOf(new PeerPropertyInfo2(peerInfo.peerId));
+        return observedPeers.indexOf(new PeerPropertyInfo(peerInfo.peerId));
     }
 
     private static boolean includeInList(PeerInfo peerInfo) {
