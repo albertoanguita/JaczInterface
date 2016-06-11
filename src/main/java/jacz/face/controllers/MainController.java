@@ -38,6 +38,15 @@ public class MainController extends GenericController {
     @FXML
     private AnchorPane viewContainer;
 
+    @FXML
+    private Label connectedFavoritePeersLabel;
+
+    @FXML
+    private Label totalFavoritePeersLabel;
+
+    @FXML
+    private Label connectedRegularPeersLabel;
+
     //@FXML
     //private Label serverAddressLabel;
 
@@ -59,18 +68,16 @@ public class MainController extends GenericController {
         connectionToServerStatus = new ConnectionToServerStatus();
 
 
-
         //connectedLabel.textProperty().bind(connectionToServerStatus.connectedLabelTextProperty());
         //serverAddressLabel.textProperty().bind(connectionToServerStatus.serverAddressProperty());
         //connectionButton.textProperty().bind(connectionToServerStatus.connectionButtonTextProperty());
-
-
 
 
         connectedLabel.textProperty().bind(new StringBinding() {
             {
                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty());
             }
+
             @Override
             protected String computeValue() {
                 switch (PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty().get()) {
@@ -93,12 +100,11 @@ public class MainController extends GenericController {
             {
                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty());
             }
+
             @Override
             protected boolean computeValue() {
-                System.out.println("change");
                 switch (PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty().get()) {
                     case CONNECTED:
-                        System.out.println("heeeeeeeeeee");
                         Util.setLater(connectSwitch.selectedProperty(), false);
                         return true;
                     default:
@@ -115,6 +121,37 @@ public class MainController extends GenericController {
                 client.connect();
             } else {
                 client.disconnect();
+            }
+        });
+
+        connectedFavoritePeersLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(PropertiesAccessor.getInstance().getPeersStateProperties().connectedFavoritePeersProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return Integer.toString(PropertiesAccessor.getInstance().getPeersStateProperties().connectedFavoritePeersProperty().get());
+            }
+        });
+        totalFavoritePeersLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(PropertiesAccessor.getInstance().getPeersStateProperties().totalFavoritePeersProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return Integer.toString(PropertiesAccessor.getInstance().getPeersStateProperties().totalFavoritePeersProperty().get());
+            }
+        });
+        connectedRegularPeersLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(PropertiesAccessor.getInstance().getPeersStateProperties().connectedRegularPeersProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return Integer.toString(PropertiesAccessor.getInstance().getPeersStateProperties().connectedRegularPeersProperty().get());
             }
         });
     }
@@ -181,7 +218,7 @@ public class MainController extends GenericController {
 
         FXMLLoader fxmlLoader = new FXMLLoader();
         AnchorPane page = fxmlLoader.load(getClass().getResource(fxml).openStream());
-        ((GenericController)fxmlLoader.getController()).setMain(main);
+        ((GenericController) fxmlLoader.getController()).setMain(main);
 
 
         //FXMLLoader loader = new FXMLLoader();

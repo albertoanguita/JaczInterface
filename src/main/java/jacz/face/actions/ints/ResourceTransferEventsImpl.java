@@ -1,5 +1,6 @@
 package jacz.face.actions.ints;
 
+import jacz.face.state.TransferStatsProperties;
 import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.util.datatransfer.*;
 import jacz.peerengineservice.util.datatransfer.master.DownloadManager;
@@ -9,6 +10,8 @@ import jacz.peerengineservice.util.datatransfer.slave.UploadManager;
  * Created by Alberto on 28/04/2016.
  */
 public class ResourceTransferEventsImpl implements ResourceTransferEvents {
+
+    private final TransferStatsProperties transferStatsProperties;
 
     @Override
     public void addLocalResourceStore(String name) {
@@ -93,6 +96,7 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
                 part = (double) size / (double) length * 100d;
             }
             System.out.println("Speed for " + downloadManager.getResourceID() + ": " + speed + "KB, downloaded part: " + part);
+            transferStatsProperties.updateDownloadState(downloadManager);
         }
     }
 

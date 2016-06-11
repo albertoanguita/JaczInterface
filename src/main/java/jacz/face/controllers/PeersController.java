@@ -3,11 +3,10 @@ package jacz.face.controllers;
 import com.neovisionaries.i18n.CountryCode;
 import jacz.face.state.PeersStateProperties;
 import jacz.face.state.PropertiesAccessor;
+import jacz.peerengineservice.PeerId;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.transformation.SortedList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -16,13 +15,10 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.controlsfx.glyphfont.Glyph;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -140,6 +136,9 @@ public class PeersController extends MainController {
     @FXML
     private TableView<PeersStateProperties.PeerPropertyInfo> peersTableView;
 
+    @FXML
+    private Button addFavoriteButton;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // todo rest of bindings
@@ -156,19 +155,67 @@ public class PeersController extends MainController {
         // peers table
         // relation column
         TableColumn<PeersStateProperties.PeerPropertyInfo, String> relationColumn = new TableColumn<>("rel");
-        relationColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getRelation().toString()));
+        relationColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().relationProperty());
+                }
+                @Override
+                protected String computeValue() {
+                    return p.getValue().getRelation().toString();
+                }
+            });
+            return sp;
+        });
         // nick column
         TableColumn<PeersStateProperties.PeerPropertyInfo, String> nickColumn = new TableColumn<>("nick");
-        nickColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getNick() == null ? UNKNOWN_VALUE : p.getValue().getNick()));
+        nickColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().nickProperty());
+                }
+                @Override
+                protected String computeValue() {
+                    return p.getValue().getNick() == null ? UNKNOWN_VALUE : p.getValue().getNick();
+                }
+            });
+            return sp;
+        });
         // id column
         TableColumn<PeersStateProperties.PeerPropertyInfo, String> idColumn = new TableColumn<>("id");
         idColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getPeerId().toString().substring(38)));
         // country column
         TableColumn<PeersStateProperties.PeerPropertyInfo, String> countryColumn = new TableColumn<>("country");
-        countryColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getCountry() == null ? UNKNOWN_VALUE : p.getValue().getCountry().getName()));
+        countryColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().countryProperty());
+                }
+                @Override
+                protected String computeValue() {
+                    return p.getValue().getCountry() == null ? UNKNOWN_VALUE : p.getValue().getCountry().getName();
+                }
+            });
+            return sp;
+        });
         // affinity column
         TableColumn<PeersStateProperties.PeerPropertyInfo, String> affinityColumn = new TableColumn<>("affinity");
-        affinityColumn.setCellValueFactory(p -> new SimpleStringProperty(Integer.toString(p.getValue().getAffinity())));
+        affinityColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().affinityProperty());
+                }
+                @Override
+                protected String computeValue() {
+                    return Integer.toString(p.getValue().getAffinity());
+                }
+            });
+            return sp;
+        });
 
         // action example
         TableColumn<PeersStateProperties.PeerPropertyInfo, Boolean> actionCol = new TableColumn<>("Action");
@@ -201,21 +248,6 @@ public class PeersController extends MainController {
         //noinspection unchecked
         peersTableView.getColumns().setAll(relationColumn, nickColumn, idColumn, countryColumn, affinityColumn, actionCol);
         //peersTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-
-
-//        peersTableView.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("relationProperty"));
-//        peersTableView.getColumns().get(1).setCellValueFactory(new PropertyValueFactory<>("nickProperty"));
-//        //peersTableView.getColumns().get(2).setCellValueFactory(new PropertyValueFactory<>("shortIdProperty"));
-//        //peersTableView.getColumns().get(2).setCellValueFactory(param -> new SimpleObjectProperty<String>(param.getValue().getPeerIdProperty().toString()));
-//        TableColumn<PeersStateProperties.PeerPropertyInfo2, String> peerColumn = (TableColumn<PeersStateProperties.PeerPropertyInfo2, String>) peersTableView.getColumns().get(2);
-//        peerColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getPeerIdProperty().toString().substring(38)));
-//
-//        TableColumn<PeersStateProperties.PeerPropertyInfo2, CountryCode> countryColumn = (TableColumn<PeersStateProperties.PeerPropertyInfo2, CountryCode>) peersTableView.getColumns().get(3);
-//        countryColumn.setCellValueFactory(new PropertyValueFactory<>("countryProperty"));
-//        countryColumn.setCellFactory(param -> new CountryCell());
-//
-//        peersTableView.setItems(PropertiesAccessor.getInstance().getPeersStateProperties().observedPeers());
     }
 
     public void changeOwnNick() {
@@ -233,5 +265,30 @@ public class PeersController extends MainController {
         final ClipboardContent content = new ClipboardContent();
         content.putString(ClientAccessor.getInstance().getClient().getOwnPeerId().toString());
         clipboard.setContent(content);
+    }
+
+    public void addFavorite() {
+        TextInputDialog dlg = new TextInputDialog();
+        //dlg.setTitle("Name Guess");
+        dlg.setHeaderText("Add a new favorite peer");
+        //String optionalMasthead = "Name Guess";
+        dlg.getDialogPane().setContentText("Enter the peer id");
+        Optional<String> result = dlg.showAndWait();
+        result.ifPresent(peerIdString -> {
+            try {
+                PeerId peerId = new PeerId(peerIdString);
+                if (peerId.equals(ClientAccessor.getInstance().getClient().getOwnPeerId())) {
+                    throw new IllegalArgumentException();
+                }
+                ClientAccessor.getInstance().getClient().addFavoritePeer(peerId);
+            } catch (IllegalArgumentException e) {
+                // wrong peer id value!
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                //alert.setHeaderText("Look, an Error Dialog");
+                alert.setContentText("The given string is not a valid id value");
+                alert.showAndWait();
+            }
+        });
     }
 }

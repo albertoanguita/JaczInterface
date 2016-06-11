@@ -2,6 +2,7 @@ package jacz.face.state;
 
 import com.neovisionaries.i18n.CountryCode;
 import jacz.face.controllers.ClientAccessor;
+import jacz.face.util.Util;
 import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.client.connection.peers.PeerInfo;
 import jacz.peerengineservice.util.PeerRelationship;
@@ -58,14 +59,13 @@ public class PeersStateProperties {
             connected = new SimpleBooleanProperty(peerInfo.connected);
             relation = new SimpleObjectProperty<>(peerInfo.relationship);
             nick = new SimpleStringProperty(peerInfo.nick);
-            country = new SimpleObjectProperty<>(CountryCode.ES);
+            country = new SimpleObjectProperty<>(peerInfo.mainCountry);
             affinity = new SimpleIntegerProperty(peerInfo.affinity);
             connectionDate = peerInfo.connected ? peerInfo.lastConnectionDate : null;
             secondsConnected = peerInfo.connected ? new SimpleLongProperty(-1) : new SimpleLongProperty(0);
         }
 
         public void update(PeerInfo peerInfo) {
-            System.out.println("Updated relation: " + peerInfo.relationship.toString());
             connected.setValue(peerInfo.connected);
             relation.set(peerInfo.relationship);
             nick.set(peerInfo.nick);
@@ -149,11 +149,22 @@ public class PeersStateProperties {
     /**
      * Peers observed in this class
      */
-    ObservableList<PeerPropertyInfo> observedPeers = null;
+    private ObservableList<PeerPropertyInfo> observedPeers = null;
 
+    private IntegerProperty totalFavoritePeers;
 
+    private IntegerProperty connectedFavoritePeers;
 
-//    public PeersStateProperties() {
+    private IntegerProperty connectedRegularPeers;
+
+    public PeersStateProperties() {
+        observedPeers = null;
+        totalFavoritePeers = new SimpleIntegerProperty(0);
+        connectedFavoritePeers = new SimpleIntegerProperty(0);
+        connectedRegularPeers = new SimpleIntegerProperty(0);
+    }
+
+    //    public PeersStateProperties() {
 //        if (observedPeers == null) {
 //            Stream<PeerId> firstPeers =
 //                    Stream.concat(
@@ -185,17 +196,24 @@ public class PeersStateProperties {
                     .map(p -> ClientAccessor.getInstance().getClient().getPeerInfo(p))
                     .map(PeerPropertyInfo::new)
                     .collect(Collectors.toList()));
-
-//            observedPeers = FXCollections.observableArrayList(
-//                    firstPeers
-//                            .map(p -> ClientAccessor.getInstance().getClient().getPeerInfo(p))
-//                            .map(PeerPropertyInfo::new)
-//                            .collect(Collectors.toList()));
         }
         return observedPeers;
     }
 
+    public IntegerProperty totalFavoritePeersProperty() {
+        return totalFavoritePeers;
+    }
+
+    public IntegerProperty connectedFavoritePeersProperty() {
+        return connectedFavoritePeers;
+    }
+
+    public IntegerProperty connectedRegularPeersProperty() {
+        return connectedRegularPeers;
+    }
+
     public void updatePeerInfo(PeerInfo peerInfo) {
+        updateConnectionNumbers();
         int index = indexOfPeerInfo(peerInfo);
         if (index >= 0) {
             if (includeInList(peerInfo)) {
@@ -211,6 +229,21 @@ public class PeersStateProperties {
                 observedPeers.add(new PeerPropertyInfo(peerInfo));
             }
         }
+    }
+
+    private void updateConnectionNumbers() {
+        Util.setLater(totalFavoritePeers, ClientAccessor.getInstance().getClient().getFavoritePeers().size());
+        int connectedFavoriteCount = 0;
+        int connectedRegularCount = 0;
+        for (PeerId peerId : ClientAccessor.getInstance().getClient().getConnectedPeers()) {
+            if (ClientAccessor.getInstance().getClient().getPeerInfo(peerId).relationship.isFavorite()) {
+                connectedFavoriteCount++;
+            } else {
+                connectedRegularCount++;
+            }
+        }
+        Util.setLater(connectedFavoritePeers, connectedFavoriteCount);
+        Util.setLater(connectedRegularPeers, connectedRegularCount);
     }
 
     private int indexOfPeerInfo(PeerInfo peerInfo) {
