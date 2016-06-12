@@ -7,7 +7,6 @@ import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
-import jacz.peerengineservice.PeerId;
 import jacz.util.lists.tuple.Duple;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
@@ -170,7 +169,7 @@ public class MainController extends GenericController {
                 new ResourceTransferEventsImpl(),
                 new TempFileManagerEventsImpl(),
                 new DatabaseSynchEventsImpl(),
-                new DownloadEventsImpl(),
+                new DownloadEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties()),
                 new IntegrationEventsImpl(),
                 new ErrorEventsImpl());
         client = duple.element1;

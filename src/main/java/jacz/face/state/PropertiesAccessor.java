@@ -13,6 +13,8 @@ public class PropertiesAccessor {
 
     private PeersStateProperties peersStateProperties;
 
+    private TransferStatsProperties transferStatsProperties;
+
     public static PropertiesAccessor getInstance() {
         return instance;
     }
@@ -21,6 +23,8 @@ public class PropertiesAccessor {
         generalStateProperties = new GeneralStateProperties();
         connectionStateProperties = new ConnectionStateProperties();
         peersStateProperties = new PeersStateProperties();
+        // todo
+        transferStatsProperties = new TransferStatsProperties(null);
     }
 
     public GeneralStateProperties getGeneralStateProperties() {
@@ -33,5 +37,9 @@ public class PropertiesAccessor {
 
     public PeersStateProperties getPeersStateProperties() {
         return peersStateProperties;
+    }
+
+    public TransferStatsProperties getTransferStatsProperties() {
+        return transferStatsProperties;
     }
 }

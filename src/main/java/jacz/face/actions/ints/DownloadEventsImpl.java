@@ -13,6 +13,10 @@ public class DownloadEventsImpl implements DownloadEvents {
 
     private final TransferStatsProperties transferStatsProperties;
 
+    public DownloadEventsImpl(TransferStatsProperties transferStatsProperties) {
+        this.transferStatsProperties = transferStatsProperties;
+    }
+
     @Override
     public void started(DownloadInfo downloadInfo, DownloadManager downloadManager) {
         System.out.println("Download started: " + downloadInfo);

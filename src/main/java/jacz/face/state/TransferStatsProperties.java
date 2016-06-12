@@ -12,6 +12,7 @@ import jacz.peerengineservice.util.datatransfer.master.DownloadManager;
 import jacz.peerengineservice.util.datatransfer.master.DownloadState;
 import jacz.util.concurrency.timer.Timer;
 import jacz.util.concurrency.timer.TimerAction;
+import jacz.util.numeric.NumericUtil;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -123,6 +124,8 @@ public class TransferStatsProperties implements TimerAction {
 
         private final LongProperty fileSize;
 
+        private final IntegerProperty perTenThousandDownloaded;
+
         private final FloatProperty priority;
 
         private final DoubleProperty streamingNeed;
@@ -138,6 +141,7 @@ public class TransferStatsProperties implements TimerAction {
             itemId = null;
             downloadState = null;
             fileSize = null;
+            perTenThousandDownloaded = null;
             priority = null;
             streamingNeed = null;
             providersCount = null;
@@ -158,12 +162,15 @@ public class TransferStatsProperties implements TimerAction {
             itemId = downloadInfo.itemId;
             downloadState = new SimpleObjectProperty<>(downloadManager.getState());
             fileSize = new SimpleLongProperty(downloadManager.getLength());
+            perTenThousandDownloaded = new SimpleIntegerProperty(calculatePerTenThousand(downloadManager.getStatistics().getDownloadedSizeThisResource(), downloadManager.getLength()));
             priority = new SimpleFloatProperty(downloadManager.getPriority());
             streamingNeed = new SimpleDoubleProperty(downloadManager.getStreamingNeed());
             providersCount = new SimpleIntegerProperty(downloadManager.getStatistics().getProviders().size());
         }
 
-
+        private Integer calculatePerTenThousand(long downloadedSize, Long fileSize) {
+            return fileSize != null ? (int) NumericUtil.displaceInRange(downloadedSize, 0, fileSize, 0, 10000) : null;
+        }
 
         public String getContainerTitle() {
             return containerTitle;
@@ -189,8 +196,20 @@ public class TransferStatsProperties implements TimerAction {
             return downloadState;
         }
 
+        public Long getFileSize() {
+            return fileSize.get();
+        }
+
         public LongProperty fileSizeProperty() {
             return fileSize;
+        }
+
+        public int getPerTenThousandDownloaded() {
+            return perTenThousandDownloaded.get();
+        }
+
+        public IntegerProperty perTenThousandDownloadedProperty() {
+            return perTenThousandDownloaded;
         }
 
         public FloatProperty priorityProperty() {
