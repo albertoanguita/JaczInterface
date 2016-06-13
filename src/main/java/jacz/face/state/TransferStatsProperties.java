@@ -156,9 +156,9 @@ public class TransferStatsProperties extends GenericStateProperties implements T
             super(downloadManager.getId(), downloadInfo.fileHash, downloadInfo.fileName, downloadManager.getStatistics().getCreationDate(), downloadManager.getStatistics().getDownloadedSizeThisResource());
             CreationItem creationItem;
             if (downloadInfo.containerType == DatabaseMediator.ItemType.MOVIE) {
-                creationItem = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), downloadInfo.itemId);
+                creationItem = Movie.getMovieById(client.getDatabases().getIntegratedDB(), downloadInfo.itemId);
             } else {
-                creationItem = Chapter.getChapterById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), downloadInfo.itemId);
+                creationItem = Chapter.getChapterById(client.getDatabases().getIntegratedDB(), downloadInfo.itemId);
             }
             this.downloadManager = downloadManager;
             containerTitle = creationItem != null ? creationItem.getTitle() : null;

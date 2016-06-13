@@ -1,6 +1,7 @@
 package jacz.face.state;
 
 import jacz.face.util.Util;
+import jacz.peerengineclient.PeerEngineClient;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
@@ -14,7 +15,13 @@ public class GeneralStateProperties extends GenericStateProperties {
         ownNickProperty = new SimpleStringProperty();
     }
 
-    public void updateOwnNick(String ownNick) {
+    @Override
+    public void setClient(PeerEngineClient client) {
+        super.setClient(client);
+        updateOwnNick(client.getOwnNick());
+    }
+
+    private void updateOwnNick(String ownNick) {
         Util.setLater(ownNickProperty, ownNick);
     }
 

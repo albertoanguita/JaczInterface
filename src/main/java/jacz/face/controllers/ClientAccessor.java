@@ -22,7 +22,6 @@ public class ClientAccessor {
 
     private ClientAccessor(PeerEngineClient client) {
         this.client = client;
-        PropertiesAccessor.getInstance().getGeneralStateProperties().updateOwnNick(client.getOwnNick());
     }
 
     public PeerEngineClient getClient() {
