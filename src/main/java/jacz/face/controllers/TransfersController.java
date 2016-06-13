@@ -2,12 +2,16 @@ package jacz.face.controllers;
 
 import jacz.face.state.PeersStateProperties;
 import jacz.face.state.TransferStatsProperties;
+import jacz.peerengineservice.util.datatransfer.master.DownloadState;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.util.Callback;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -26,7 +30,7 @@ public class TransfersController extends MainController {
     private static final String UNKNOWN_ETA = "?";
 
     @FXML
-    private TableView<PeersStateProperties.PeerPropertyInfo> downloadsTableView;
+    private TableView<TransferStatsProperties.DownloadPropertyInfo> downloadsTableView;
 
 
     @Override
@@ -120,22 +124,82 @@ public class TransfersController extends MainController {
             });
             return sp;
         });
+
+
         // action column
-        TableColumn<TransferStatsProperties.DownloadPropertyInfo, String> actionColumn = new TableColumn<>("eta");
-        fileSizeColumn.setCellValueFactory(p -> {
-            StringProperty sp = new SimpleStringProperty();
-            sp.bind(new StringBinding() {
-                {
-                    super.bind(p.getValue().fileSizeProperty(), p.getValue().speedProperty());
-                }
+//        TableColumn<TransferStatsProperties.DownloadPropertyInfo, String> actionColumn = new TableColumn<>("eta");
+//        fileSizeColumn.setCellValueFactory(p -> {
+//            StringProperty sp = new SimpleStringProperty();
+//            sp.bind(new StringBinding() {
+//                {
+//                    super.bind(p.getValue().fileSizeProperty(), p.getValue().speedProperty());
+//                }
+//
+//                @Override
+//                protected String computeValue() {
+//                    return p.getValue().getFileSize() != null ? Double.toString(p.getValue().getFileSize().doubleValue() / p.getValue().getSpeed() / 60) + "m" : UNKNOWN_ETA;
+//                }
+//            });
+//            return sp;
+//        });
 
-                @Override
-                protected String computeValue() {
-                    return p.getValue().getFileSize() != null ? Double.toString(p.getValue().getFileSize().doubleValue() / p.getValue().getSpeed() / 60) + "m" : UNKNOWN_ETA;
-                }
-            });
-            return sp;
+        //noinspection unchecked
+        downloadsTableView.getColumns().setAll(titleColumn, fileNameColumn, fileSizeColumn, downloadedSizeColumn, percentageColumn, speedColumn, etaColumn);
+
+        downloadsTableView.setRowFactory(tableView -> {
+            final TableRow<TransferStatsProperties.DownloadPropertyInfo> row = new TableRow<>();
+            final ContextMenu contextMenu = new ContextMenu();
+            final MenuItem resumeMenuItem = new MenuItem("Resume");
+            resumeMenuItem.setOnAction(event -> resume(row.getItem()));
+            final MenuItem pauseMenuItem = new MenuItem("Pause");
+            pauseMenuItem.setOnAction(event -> pause(row.getItem()));
+            final MenuItem stopMenuItem = new MenuItem("Stop");
+            stopMenuItem.setOnAction(event -> stop(row.getItem()));
+            final MenuItem cancelMenuItem = new MenuItem("Cancel");
+            cancelMenuItem.setOnAction(event -> cancel(row.getItem()));
+
+            switch (row.getItem().downloadStateProperty().getValue()) {
+
+                case RUNNING:
+                    contextMenu.getItems().addAll(pauseMenuItem, stopMenuItem, cancelMenuItem);
+                    break;
+                case PAUSED:
+                    contextMenu.getItems().addAll(resumeMenuItem, stopMenuItem, cancelMenuItem);
+                    break;
+                case STOPPED:
+                    contextMenu.getItems().addAll(resumeMenuItem, cancelMenuItem);
+                    break;
+            }
+            //contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
+            // Set context menu on row, but use a binding to make it only show for non-empty rows:
+//            row.contextMenuProperty().bind(
+//                    Bindings.when(row.emptyProperty())
+//                            .then((ContextMenu) null)
+//                            .otherwise(contextMenu)
+//            );
+            row.setContextMenu(contextMenu);
+            return row ;
         });
+    }
 
+    private void resume(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {
+        if (downloadPropertyInfo.downloadStateProperty().get() != DownloadState.STOPPED) {
+            downloadPropertyInfo.getDownloadManager().resume();
+        } else {
+            // a new download is created, and the existing one is deleted
+            // todo
+        }
+    }
+
+    private void pause(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {
+        downloadPropertyInfo.getDownloadManager().pause();
+    }
+
+    private void stop(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {
+        downloadPropertyInfo.getDownloadManager().stop();
+    }
+
+    private void cancel(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {
+        downloadPropertyInfo.getDownloadManager().cancel();
     }
 }

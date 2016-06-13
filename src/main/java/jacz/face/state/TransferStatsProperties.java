@@ -20,6 +20,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -109,6 +110,8 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
     public static class DownloadPropertyInfo extends TransferPropertyInfo {
 
+        private final DownloadManager downloadManager;
+
         private final String containerTitle;
 
         private final DatabaseMediator.ItemType containerType;
@@ -135,6 +138,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         public DownloadPropertyInfo(String transferId) {
             super(transferId);
+            downloadManager = null;
             containerTitle = null;
             containerType = null;
             containerId = null;
@@ -150,12 +154,15 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         public DownloadPropertyInfo(DownloadInfo downloadInfo, DownloadManager downloadManager, PeerEngineClient client) {
             super(downloadManager.getId(), downloadInfo.fileHash, downloadInfo.fileName, downloadManager.getStatistics().getCreationDate(), downloadManager.getStatistics().getDownloadedSizeThisResource());
-            CreationItem creationItem = null;
+            CreationItem creationItem;
             if (downloadInfo.containerType == DatabaseMediator.ItemType.MOVIE) {
                 creationItem = Movie.getMovieById(client.getIntegratedDB(), downloadInfo.itemId);
+                creationItem = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), downloadInfo.itemId);
             } else {
                 creationItem = Chapter.getChapterById(client.getIntegratedDB(), downloadInfo.itemId);
+                creationItem = Chapter.getChapterById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), downloadInfo.itemId);
             }
+            this.downloadManager = downloadManager;
             containerTitle = creationItem != null ? creationItem.getTitle() : null;
             containerType = downloadInfo.containerType;
             containerId = downloadInfo.containerId;
@@ -171,6 +178,10 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         private Integer calculatePerTenThousand(long downloadedSize, Long fileSize) {
             return fileSize != null ? (int) NumericUtil.displaceInRange(downloadedSize, 0, fileSize, 0, 10000) : null;
+        }
+
+        public DownloadManager getDownloadManager() {
+            return downloadManager;
         }
 
         public String getContainerTitle() {
@@ -312,6 +323,12 @@ public class TransferStatsProperties extends GenericStateProperties implements T
             Util.setLater(currentDownloadSpeedProperty(), downloadSpeedRegistry[0]);
         }
         return null;
+    }
+
+    public synchronized void addInitialStoppedDownloads(Collection<DownloadManager> initialStoppedDownloads) {
+        for (DownloadManager downloadManager : initialStoppedDownloads) {
+            addDownload(DownloadInfo.buildDownloadInfo(downloadManager.getResourceWriter().getUserDictionary()), downloadManager);
+        }
     }
 
     public synchronized void addDownload(DownloadInfo downloadInfo, DownloadManager downloadManager) {

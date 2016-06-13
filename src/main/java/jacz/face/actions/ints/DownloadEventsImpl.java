@@ -44,7 +44,7 @@ public class DownloadEventsImpl implements DownloadEvents {
     @Override
     public void stopped(DownloadInfo downloadInfo, DownloadManager downloadManager) {
         System.out.println("Download stopped: " + downloadInfo);
-        transferStatsProperties.removeDownload(downloadManager);
+        transferStatsProperties.updateDownloadState(downloadManager);
     }
 
     @Override
