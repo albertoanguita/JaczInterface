@@ -1,5 +1,7 @@
 package jacz.face.controllers;
 
+import jacz.database.Movie;
+import jacz.database.VideoFile;
 import jacz.face.actions.ints.*;
 import jacz.face.messages.Messages;
 import jacz.face.state.ConnectionToServerStatus;
@@ -175,6 +177,8 @@ public class MainController extends GenericController {
         client = duple.element1;
         ClientAccessor.setup(client);
 
+        setupLocal(client.getDatabases().getLocalDB(), client);
+
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP20"));
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP21"));
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP22"));
@@ -182,6 +186,16 @@ public class MainController extends GenericController {
 //        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP28"));
 //        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP29"));
     }
+
+    private static void setupLocal(String db, PeerEngineClient peerEngineClient) {
+        Movie movie = new Movie(db, "Alien");
+        VideoFile videoFile = new VideoFile(db, "abcdef");
+        movie.addVideoFile(videoFile);
+
+        peerEngineClient.localItemModified(movie);
+    }
+
+
 
     public void connectAction() {
         //client.connect();
