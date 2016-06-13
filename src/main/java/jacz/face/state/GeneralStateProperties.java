@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 /**
  * Created by alberto on 6/7/16.
  */
-public class GeneralStateProperties {
+public class GeneralStateProperties extends GenericStateProperties {
 
     private final SimpleStringProperty ownNickProperty;
 

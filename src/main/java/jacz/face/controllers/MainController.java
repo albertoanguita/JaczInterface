@@ -174,6 +174,7 @@ public class MainController extends GenericController {
                 new ErrorEventsImpl());
         client = duple.element1;
         ClientAccessor.setup(client);
+        PropertiesAccessor.getInstance().setup(client);
 
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP20"));
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP21"));

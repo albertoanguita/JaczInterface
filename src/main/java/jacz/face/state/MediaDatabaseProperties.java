@@ -11,7 +11,7 @@ import javafx.collections.ObservableList;
  *
  * todo add timer that allows marking items with new media content for some time (and for sorting)
  */
-public class MediaDatabaseProperties {
+public class MediaDatabaseProperties extends GenericStateProperties {
 
     public static class MediaItem {
 

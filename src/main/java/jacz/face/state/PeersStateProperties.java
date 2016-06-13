@@ -1,8 +1,8 @@
 package jacz.face.state;
 
 import com.neovisionaries.i18n.CountryCode;
-import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.Util;
+import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.client.connection.peers.PeerInfo;
 import jacz.peerengineservice.util.PeerRelationship;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * Stores internal state referring to connected peers. Includes list of connected peers, and for each
  * peer their connection status (nick, relationship, ...)
  */
-public class PeersStateProperties {
+public class PeersStateProperties extends GenericStateProperties {
 
     public static class PeerPropertyInfo {
 
@@ -164,39 +164,28 @@ public class PeersStateProperties {
         connectedRegularPeers = new SimpleIntegerProperty(0);
     }
 
-    //    public PeersStateProperties() {
-//        if (observedPeers == null) {
-//            Stream<PeerId> firstPeers =
-//                    Stream.concat(
-//                            ClientAccessor.getInstance().getClient().getFavoritePeers().stream(),
-//                            ClientAccessor.getInstance().getClient().getBlockedPeers().stream());
-//            observedPeers = FXCollections.observableArrayList(
-//                    firstPeers
-//                            .map(p -> ClientAccessor.getInstance().getClient().getPeerInfo(p))
-//                            .map(PeerPropertyInfo2::new)
-//                            .collect(Collectors.toList()));
-//        }
-//    }
+    @Override
+    public void setClient(PeerEngineClient client) {
+        super.setClient(client);
+        Stream<PeerId> firstPeers =
+                Stream.concat(
+                        client.getFavoritePeers().stream(),
+                        client.getBlockedPeers().stream());
+
+        observedPeers = FXCollections.observableArrayList(new Callback<PeerPropertyInfo, Observable[]>() {
+            @Override
+            public Observable[] call(PeerPropertyInfo p) {
+                return new Observable[]{p.peerIdProperty(), p.connectedProperty(), p.relationProperty(), p.nickProperty(), p.countryProperty(), p.affinityProperty()};
+            }
+        });
+        observedPeers.addAll(
+                firstPeers
+                .map(client::getPeerInfo)
+                .map(PeerPropertyInfo::new)
+                .collect(Collectors.toList()));
+    }
 
     public ObservableList<PeerPropertyInfo> observedPeers() {
-        if (observedPeers == null) {
-            Stream<PeerId> firstPeers =
-                    Stream.concat(
-                            ClientAccessor.getInstance().getClient().getFavoritePeers().stream(),
-                            ClientAccessor.getInstance().getClient().getBlockedPeers().stream());
-
-            observedPeers = FXCollections.observableArrayList(new Callback<PeerPropertyInfo, Observable[]>() {
-                @Override
-                public Observable[] call(PeerPropertyInfo p) {
-                    return new Observable[]{p.peerIdProperty(), p.connectedProperty(), p.relationProperty(), p.nickProperty(), p.countryProperty(), p.affinityProperty()};
-                }
-            });
-            observedPeers.addAll(
-                    firstPeers
-                    .map(p -> ClientAccessor.getInstance().getClient().getPeerInfo(p))
-                    .map(PeerPropertyInfo::new)
-                    .collect(Collectors.toList()));
-        }
         return observedPeers;
     }
 
@@ -232,11 +221,11 @@ public class PeersStateProperties {
     }
 
     private void updateConnectionNumbers() {
-        Util.setLater(totalFavoritePeers, ClientAccessor.getInstance().getClient().getFavoritePeers().size());
+        Util.setLater(totalFavoritePeers, client.getFavoritePeers().size());
         int connectedFavoriteCount = 0;
         int connectedRegularCount = 0;
-        for (PeerId peerId : ClientAccessor.getInstance().getClient().getConnectedPeers()) {
-            if (ClientAccessor.getInstance().getClient().getPeerInfo(peerId).relationship.isFavorite()) {
+        for (PeerId peerId : client.getConnectedPeers()) {
+            if (client.getPeerInfo(peerId).relationship.isFavorite()) {
                 connectedFavoriteCount++;
             } else {
                 connectedRegularCount++;

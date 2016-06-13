@@ -7,6 +7,7 @@ import jacz.database.Movie;
 import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.Util;
 import jacz.peerengineclient.DownloadInfo;
+import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineservice.util.datatransfer.TransferStatistics;
 import jacz.peerengineservice.util.datatransfer.master.DownloadManager;
 import jacz.peerengineservice.util.datatransfer.master.DownloadState;
@@ -29,7 +30,7 @@ import java.util.Date;
  * todo add assigned part, shared part, downloaded part... (like e-mule)
  * todo add download providers detail (peerId, time providing, speed...)
  */
-public class TransferStatsProperties implements TimerAction {
+public class TransferStatsProperties extends GenericStateProperties implements TimerAction {
 
     public static class TransferPropertyInfo {
 
@@ -147,13 +148,13 @@ public class TransferStatsProperties implements TimerAction {
             providersCount = null;
         }
 
-        public DownloadPropertyInfo(DownloadInfo downloadInfo, DownloadManager downloadManager) {
+        public DownloadPropertyInfo(DownloadInfo downloadInfo, DownloadManager downloadManager, PeerEngineClient client) {
             super(downloadManager.getId(), downloadInfo.fileHash, downloadInfo.fileName, downloadManager.getStatistics().getCreationDate(), downloadManager.getStatistics().getDownloadedSizeThisResource());
             CreationItem creationItem = null;
             if (downloadInfo.containerType == DatabaseMediator.ItemType.MOVIE) {
-                creationItem = Movie.getMovieById(ClientAccessor.getInstance().getClient().getIntegratedDB(), downloadInfo.itemId);
+                creationItem = Movie.getMovieById(client.getIntegratedDB(), downloadInfo.itemId);
             } else {
-                creationItem = Chapter.getChapterById(ClientAccessor.getInstance().getClient().getIntegratedDB(), downloadInfo.itemId);
+                creationItem = Chapter.getChapterById(client.getIntegratedDB(), downloadInfo.itemId);
             }
             containerTitle = creationItem != null ? creationItem.getTitle() : null;
             containerType = downloadInfo.containerType;
@@ -315,7 +316,7 @@ public class TransferStatsProperties implements TimerAction {
 
     public synchronized void addDownload(DownloadInfo downloadInfo, DownloadManager downloadManager) {
         if (downloadInfo.type != DownloadInfo.Type.IMAGE) {
-            DownloadPropertyInfo downloadPropertyInfo = new DownloadPropertyInfo(downloadInfo, downloadManager);
+            DownloadPropertyInfo downloadPropertyInfo = new DownloadPropertyInfo(downloadInfo, downloadManager, client);
             observedDownloads.add(downloadPropertyInfo);
         }
     }

@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleStringProperty;
 /**
  * Collection of properties related to the connection state
  */
-public class ConnectionStateProperties {
+public class ConnectionStateProperties extends GenericStateProperties {
 
     public enum AggregatedConnectionStatus {
         DISCONNECTED,

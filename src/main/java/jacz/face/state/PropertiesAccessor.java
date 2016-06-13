@@ -1,5 +1,7 @@
 package jacz.face.state;
 
+import jacz.peerengineclient.PeerEngineClient;
+
 /**
  * Created by alberto on 6/7/16.
  */
@@ -25,6 +27,13 @@ public class PropertiesAccessor {
         peersStateProperties = new PeersStateProperties();
         // todo
         transferStatsProperties = new TransferStatsProperties(null);
+    }
+
+    public void setup(PeerEngineClient client) {
+        generalStateProperties.setClient(client);
+        connectionStateProperties.setClient(client);
+        peersStateProperties.setClient(client);
+        transferStatsProperties.setClient(client);
     }
 
     public GeneralStateProperties getGeneralStateProperties() {
