@@ -3,7 +3,6 @@ package jacz.face.state;
 import jacz.face.messages.Messages;
 import jacz.face.util.Util;
 import jacz.peerengineservice.client.connection.ConnectionState;
-import jacz.peerengineservice.client.connection.State;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;

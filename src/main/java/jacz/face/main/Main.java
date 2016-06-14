@@ -4,6 +4,8 @@ import jacz.face.controllers.CreateConfigController;
 import jacz.face.controllers.GenericController;
 import jacz.face.controllers.MainController;
 import jacz.face.state.PropertiesAccessor;
+import jacz.util.concurrency.ThreadUtil;
+import jacz.util.concurrency.task_executor.ThreadExecutor;
 import jacz.util.lists.tuple.Duple;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -84,6 +86,11 @@ public class Main extends Application {
         super.stop();
         System.out.println("END");
         mainController.element1.stop();
+        System.out.println("main controller stopped. Stopping properties...");
+        PropertiesAccessor.getInstance().stop();
+        System.out.println("Properties stopped");
+
+        System.out.println(ThreadExecutor.getRegisteredClients());
     }
 
     public static void main(String[] args) {

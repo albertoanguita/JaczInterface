@@ -26,7 +26,7 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <TableView fx:id="peersTableView" maxWidth="10000.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+                  <TableView fx:id="downloadsTableView" maxWidth="10000.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
                </children>
             </GridPane>
             <HBox alignment="CENTER_LEFT" minHeight="-Infinity" prefHeight="40.0" prefWidth="200.0">

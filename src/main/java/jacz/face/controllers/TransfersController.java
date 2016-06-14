@@ -1,17 +1,15 @@
 package jacz.face.controllers;
 
-import jacz.face.state.PeersStateProperties;
+import jacz.database.DatabaseMediator;
+import jacz.face.state.PropertiesAccessor;
 import jacz.face.state.TransferStatsProperties;
+import jacz.peerengineclient.DownloadInfo;
 import jacz.peerengineservice.util.datatransfer.master.DownloadState;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.util.Callback;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -27,6 +25,8 @@ public class TransfersController extends MainController {
 
     private static final String UNKNOWN_FILE_SIZE = "?";
 
+    private static final String UNKNOWN_PERCENTAGE = "-";
+
     private static final String UNKNOWN_ETA = "?";
 
     @FXML
@@ -36,6 +36,9 @@ public class TransfersController extends MainController {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // todo rest of bindings
+
+
+        downloadsTableView.setItems(PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedDownloads());
 
         // downloads table
         // title column
@@ -62,7 +65,7 @@ public class TransfersController extends MainController {
         });
         // downloaded size column
         TableColumn<TransferStatsProperties.DownloadPropertyInfo, String> downloadedSizeColumn = new TableColumn<>("downloaded size");
-        fileSizeColumn.setCellValueFactory(p -> {
+        downloadedSizeColumn.setCellValueFactory(p -> {
             StringProperty sp = new SimpleStringProperty();
             sp.bind(new StringBinding() {
                 {
@@ -78,7 +81,7 @@ public class TransfersController extends MainController {
         });
         // percentage column
         TableColumn<TransferStatsProperties.DownloadPropertyInfo, String> percentageColumn = new TableColumn<>("%");
-        fileSizeColumn.setCellValueFactory(p -> {
+        percentageColumn.setCellValueFactory(p -> {
             StringProperty sp = new SimpleStringProperty();
             sp.bind(new StringBinding() {
                 {
@@ -87,14 +90,15 @@ public class TransfersController extends MainController {
 
                 @Override
                 protected String computeValue() {
-                    return Long.toString(p.getValue().getPerTenThousandDownloaded() / 100) + "." + Long.toString(p.getValue().getPerTenThousandDownloaded() % 100);
+                    Integer perTenThousand = p.getValue().getPerTenThousandDownloaded();
+                    return perTenThousand != null ? Long.toString(perTenThousand / 100) + "." + Long.toString(perTenThousand % 100) : UNKNOWN_PERCENTAGE;
                 }
             });
             return sp;
         });
         // speed column
         TableColumn<TransferStatsProperties.DownloadPropertyInfo, String> speedColumn = new TableColumn<>("speed");
-        fileSizeColumn.setCellValueFactory(p -> {
+        speedColumn.setCellValueFactory(p -> {
             StringProperty sp = new SimpleStringProperty();
             sp.bind(new StringBinding() {
                 {
@@ -110,7 +114,7 @@ public class TransfersController extends MainController {
         });
         // eta column
         TableColumn<TransferStatsProperties.DownloadPropertyInfo, String> etaColumn = new TableColumn<>("eta");
-        fileSizeColumn.setCellValueFactory(p -> {
+        etaColumn.setCellValueFactory(p -> {
             StringProperty sp = new SimpleStringProperty();
             sp.bind(new StringBinding() {
                 {
@@ -158,19 +162,20 @@ public class TransfersController extends MainController {
             final MenuItem cancelMenuItem = new MenuItem("Cancel");
             cancelMenuItem.setOnAction(event -> cancel(row.getItem()));
 
-            switch (row.getItem().downloadStateProperty().getValue()) {
-
-                case RUNNING:
-                    contextMenu.getItems().addAll(pauseMenuItem, stopMenuItem, cancelMenuItem);
-                    break;
-                case PAUSED:
-                    contextMenu.getItems().addAll(resumeMenuItem, stopMenuItem, cancelMenuItem);
-                    break;
-                case STOPPED:
-                    contextMenu.getItems().addAll(resumeMenuItem, cancelMenuItem);
-                    break;
-            }
-            //contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
+//            TransferStatsProperties.DownloadPropertyInfo item = row.getItem();
+//            switch (row.getItem().downloadStateProperty().getValue()) {
+//
+//                case RUNNING:
+//                    contextMenu.getItems().addAll(pauseMenuItem, stopMenuItem, cancelMenuItem);
+//                    break;
+//                case PAUSED:
+//                    contextMenu.getItems().addAll(resumeMenuItem, stopMenuItem, cancelMenuItem);
+//                    break;
+//                case STOPPED:
+//                    contextMenu.getItems().addAll(resumeMenuItem, cancelMenuItem);
+//                    break;
+//            }
+            contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
             // Set context menu on row, but use a binding to make it only show for non-empty rows:
 //            row.contextMenuProperty().bind(
 //                    Bindings.when(row.emptyProperty())
@@ -178,8 +183,19 @@ public class TransfersController extends MainController {
 //                            .otherwise(contextMenu)
 //            );
             row.setContextMenu(contextMenu);
-            return row ;
+            return row;
         });
+
+        try {
+            System.out.println("download files!");
+            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 1);
+//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 2);
+//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 3);
+//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 4);
+//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 5);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void resume(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {

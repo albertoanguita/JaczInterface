@@ -21,7 +21,7 @@ public class GeneralStateProperties extends GenericStateProperties {
         updateOwnNick(client.getOwnNick());
     }
 
-    private void updateOwnNick(String ownNick) {
+    public void updateOwnNick(String ownNick) {
         Util.setLater(ownNickProperty, ownNick);
     }
 

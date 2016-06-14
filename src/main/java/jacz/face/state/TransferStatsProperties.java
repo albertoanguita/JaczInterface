@@ -1,10 +1,6 @@
 package jacz.face.state;
 
-import jacz.database.Chapter;
-import jacz.database.CreationItem;
 import jacz.database.DatabaseMediator;
-import jacz.database.Movie;
-import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.Util;
 import jacz.peerengineclient.DownloadInfo;
 import jacz.peerengineclient.PeerEngineClient;
@@ -126,9 +122,9 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         private final ObjectProperty<DownloadState> downloadState;
 
-        private final LongProperty fileSize;
+        private final ObjectProperty<Long> fileSize;
 
-        private final IntegerProperty perTenThousandDownloaded;
+        private final ObjectProperty<Integer> perTenThousandDownloaded;
 
         private final FloatProperty priority;
 
@@ -154,24 +150,27 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         public DownloadPropertyInfo(DownloadInfo downloadInfo, DownloadManager downloadManager, PeerEngineClient client) {
             super(downloadManager.getId(), downloadInfo.fileHash, downloadInfo.fileName, downloadManager.getStatistics().getCreationDate(), downloadManager.getStatistics().getDownloadedSizeThisResource());
-            CreationItem creationItem;
-            if (downloadInfo.containerType == DatabaseMediator.ItemType.MOVIE) {
-                creationItem = Movie.getMovieById(client.getDatabases().getIntegratedDB(), downloadInfo.itemId);
-            } else {
-                creationItem = Chapter.getChapterById(client.getDatabases().getIntegratedDB(), downloadInfo.itemId);
-            }
             this.downloadManager = downloadManager;
-            containerTitle = creationItem != null ? creationItem.getTitle() : null;
+            containerTitle = buildTitle(downloadInfo.title, downloadInfo.containerType);
             containerType = downloadInfo.containerType;
             containerId = downloadInfo.containerId;
             superContainerId = downloadInfo.superContainerId;
             itemId = downloadInfo.itemId;
             downloadState = new SimpleObjectProperty<>(downloadManager.getState());
-            fileSize = new SimpleLongProperty(downloadManager.getLength());
-            perTenThousandDownloaded = new SimpleIntegerProperty(calculatePerTenThousand(downloadManager.getStatistics().getDownloadedSizeThisResource(), downloadManager.getLength()));
+            fileSize = new SimpleObjectProperty<>(downloadManager.getLength());
+            perTenThousandDownloaded = new SimpleObjectProperty<>(calculatePerTenThousand(downloadManager.getStatistics().getDownloadedSizeThisResource(), downloadManager.getLength()));
             priority = new SimpleFloatProperty(downloadManager.getPriority());
             streamingNeed = new SimpleDoubleProperty(downloadManager.getStreamingNeed());
             providersCount = new SimpleIntegerProperty(downloadManager.getStatistics().getProviders().size());
+        }
+
+        private String buildTitle(DownloadInfo.Title title, DatabaseMediator.ItemType containerType) {
+            return title.title;
+//            if (containerType == DatabaseMediator.ItemType.MOVIE) {
+//                return title.title;
+//            } else {
+//                return title.chapterTitle;
+//            }
         }
 
         private Integer calculatePerTenThousand(long downloadedSize, Long fileSize) {
@@ -210,15 +209,15 @@ public class TransferStatsProperties extends GenericStateProperties implements T
             return fileSize.get();
         }
 
-        public LongProperty fileSizeProperty() {
+        public ObjectProperty<Long> fileSizeProperty() {
             return fileSize;
         }
 
-        public int getPerTenThousandDownloaded() {
+        public Integer getPerTenThousandDownloaded() {
             return perTenThousandDownloaded.get();
         }
 
-        public IntegerProperty perTenThousandDownloadedProperty() {
+        public ObjectProperty<Integer> perTenThousandDownloadedProperty() {
             return perTenThousandDownloaded;
         }
 
@@ -242,9 +241,9 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         }
     }
 
-    private final TransferStatistics transferStatistics;
+    private TransferStatistics transferStatistics;
 
-    private final Timer checkSpeedTimer;
+    private Timer checkSpeedTimer;
 
     private final LongProperty totalUploadedBytes;
 
@@ -259,11 +258,10 @@ public class TransferStatsProperties extends GenericStateProperties implements T
     private final ObservableList<UploadPropertyInfo> observedUploads;
 
 
-    public TransferStatsProperties(TransferStatistics transferStatistics) {
-        this.transferStatistics = transferStatistics;
-        checkSpeedTimer = new Timer(TransferStatistics.SPEED_MONITOR_FREQUENCY, this);
-        totalUploadedBytes = new SimpleLongProperty(transferStatistics.getUploadedBytes());
-        totalDownloadedBytes = new SimpleLongProperty(transferStatistics.getDownloadedBytes());
+    public TransferStatsProperties() {
+        checkSpeedTimer = null;
+        totalUploadedBytes = new SimpleLongProperty(0L);
+        totalDownloadedBytes = new SimpleLongProperty(0L);
         currentUploadSpeed = new SimpleDoubleProperty(0d);
         currentDownloadSpeed = new SimpleDoubleProperty(0d);
 
@@ -291,6 +289,14 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         });
     }
 
+    @Override
+    public void setClient(PeerEngineClient client) {
+        super.setClient(client);
+        this.transferStatistics = client.getTransferStatistics();
+        checkSpeedTimer = new Timer(TransferStatistics.SPEED_MONITOR_FREQUENCY, this);
+        updateProperties();
+    }
+
     public LongProperty totalUploadedBytesProperty() {
         return totalUploadedBytes;
     }
@@ -307,9 +313,22 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         return currentDownloadSpeed;
     }
 
+    public ObservableList<DownloadPropertyInfo> getObservedDownloads() {
+        return observedDownloads;
+    }
+
+    public ObservableList<UploadPropertyInfo> getObservedUploads() {
+        return observedUploads;
+    }
+
     @Override
     public Long wakeUp(Timer timer) {
         // update properties values
+        updateProperties();
+        return null;
+    }
+
+    private void updateProperties() {
         Util.setLater(totalUploadedBytesProperty(), transferStatistics.getUploadedBytes());
         Util.setLater(totalDownloadedBytesProperty(), transferStatistics.getDownloadedBytes());
         Double[] uploadSpeedRegistry = transferStatistics.getUploadSpeedRegistry();
@@ -320,7 +339,6 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         if (downloadSpeedRegistry.length > 0) {
             Util.setLater(currentDownloadSpeedProperty(), downloadSpeedRegistry[0]);
         }
-        return null;
     }
 
     public synchronized void addInitialStoppedDownloads(Collection<DownloadManager> initialStoppedDownloads) {
@@ -331,8 +349,10 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
     public synchronized void addDownload(DownloadInfo downloadInfo, DownloadManager downloadManager) {
         if (downloadInfo.type != DownloadInfo.Type.IMAGE) {
+            System.out.println("Adding download to observed downloads...");
             DownloadPropertyInfo downloadPropertyInfo = new DownloadPropertyInfo(downloadInfo, downloadManager, client);
             observedDownloads.add(downloadPropertyInfo);
+            System.out.println("Download added to observed downloads");
         }
     }
 
@@ -363,6 +383,8 @@ public class TransferStatsProperties extends GenericStateProperties implements T
     }
 
     public void stop() {
-        checkSpeedTimer.kill();
+        if (checkSpeedTimer != null) {
+            checkSpeedTimer.kill();
+        }
     }
 }

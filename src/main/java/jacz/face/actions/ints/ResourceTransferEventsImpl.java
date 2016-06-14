@@ -13,6 +13,10 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
 
     private final TransferStatsProperties transferStatsProperties;
 
+    public ResourceTransferEventsImpl(TransferStatsProperties transferStatsProperties) {
+        this.transferStatsProperties = transferStatsProperties;
+    }
+
     @Override
     public void addLocalResourceStore(String name) {
 

@@ -168,7 +168,7 @@ public class MainController extends GenericController {
                 new GeneralEventsImpl(PropertiesAccessor.getInstance().getGeneralStateProperties()),
                 new ConnectionEventsImpl(connectionToServerStatus, PropertiesAccessor.getInstance().getConnectionStateProperties()),
                 new PeersEventsImpl(PropertiesAccessor.getInstance().getPeersStateProperties()),
-                new ResourceTransferEventsImpl(),
+                new ResourceTransferEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties()),
                 new TempFileManagerEventsImpl(),
                 new DatabaseSynchEventsImpl(),
                 new DownloadEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties()),
@@ -178,7 +178,8 @@ public class MainController extends GenericController {
         ClientAccessor.setup(client);
         PropertiesAccessor.getInstance().setup(client);
 
-        setupLocal(client.getDatabases().getLocalDB(), client);
+        //setupLocal(client.getDatabases().getLocalDB(), client);
+        //removeLocal(client.getDatabases().getLocalDB(), client);
 
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP20"));
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP21"));
@@ -189,13 +190,31 @@ public class MainController extends GenericController {
     }
 
     private static void setupLocal(String db, PeerEngineClient peerEngineClient) {
+        // stored as id=2
         Movie movie = new Movie(db, "Alien");
-        VideoFile videoFile = new VideoFile(db, "abcdef");
-        movie.addVideoFile(videoFile);
+        VideoFile videoFile1 = new VideoFile(db, "hash1");
+        VideoFile videoFile2 = new VideoFile(db, "hash2");
+        VideoFile videoFile3 = new VideoFile(db, "hash3");
+        VideoFile videoFile4 = new VideoFile(db, "hash4");
+        VideoFile videoFile5 = new VideoFile(db, "hash5");
+        movie.addVideoFile(videoFile1);
+        movie.addVideoFile(videoFile2);
+        movie.addVideoFile(videoFile3);
+        movie.addVideoFile(videoFile4);
+        movie.addVideoFile(videoFile5);
 
+        peerEngineClient.localItemModified(videoFile1);
+        peerEngineClient.localItemModified(videoFile2);
+        peerEngineClient.localItemModified(videoFile3);
+        peerEngineClient.localItemModified(videoFile4);
+        peerEngineClient.localItemModified(videoFile5);
         peerEngineClient.localItemModified(movie);
     }
 
+    private static void removeLocal(String db, PeerEngineClient peerEngineClient) {
+        Movie movie = Movie.getMovieById(db, 1);
+        peerEngineClient.removeLocalItem(movie);
+    }
 
 
     public void connectAction() {
