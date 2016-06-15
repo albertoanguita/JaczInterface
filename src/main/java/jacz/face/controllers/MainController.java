@@ -16,13 +16,15 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Label;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainController extends GenericController {
@@ -35,6 +37,9 @@ public class MainController extends GenericController {
 
     @FXML
     private Label connectedLabel;
+
+    @FXML
+    private Button settingsButton;
 
     @FXML
     private AnchorPane viewContainer;
@@ -247,6 +252,10 @@ public class MainController extends GenericController {
         replaceViewContainerContent("/view/peers_view.fxml");
     }
 
+    public void switchToSettingsView() throws IOException {
+        replaceViewContainerContent("/view/settings.fxml");
+    }
+
     private void replaceViewContainerContent(String fxml) throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader();
@@ -267,6 +276,41 @@ public class MainController extends GenericController {
         viewContainer.getChildren().clear();
         viewContainer.getChildren().addAll(page);
         //return (Initializable) loader.getController();
+    }
+
+    public void openSettings() {
+        System.out.println("open settings");
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("/view/settings.fxml").openStream());
+            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
+            SettingsController settingsController = fxmlLoader.getController();
+            settingsController.setMain(main);
+
+            Dialog<SettingsController.SettingsValues> settingsDialog = new Dialog<>();
+            settingsDialog.setTitle("settings");
+            settingsDialog.getDialogPane().setContent(settingsPane);
+
+            // Set the button types.
+            settingsDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+            // Convert the result to a settings value when the ok button is clicked.
+            settingsDialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK) {
+                    return new SettingsController.SettingsValues();
+                }
+                return null;
+            });
+
+            Optional<SettingsController.SettingsValues> result = settingsDialog.showAndWait();
+
+            result.ifPresent(newSettings -> {
+                System.out.println(newSettings.toString());
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void stop() {

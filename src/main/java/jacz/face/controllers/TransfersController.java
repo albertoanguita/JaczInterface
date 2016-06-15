@@ -128,6 +128,23 @@ public class TransfersController extends MainController {
             });
             return sp;
         });
+        // providers column
+        TableColumn<TransferStatsProperties.DownloadPropertyInfo, String> providersColumn = new TableColumn<>("providers");
+        providersColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().fileSizeProperty(), p.getValue().providersCountProperty());
+                }
+
+                @Override
+                protected String computeValue() {
+                    return Integer.toString(p.getValue().getProvidersCount());
+                }
+            });
+            return sp;
+        });
+
 
 
         // action column
@@ -148,7 +165,7 @@ public class TransfersController extends MainController {
 //        });
 
         //noinspection unchecked
-        downloadsTableView.getColumns().setAll(titleColumn, fileNameColumn, fileSizeColumn, downloadedSizeColumn, percentageColumn, speedColumn, etaColumn);
+        downloadsTableView.getColumns().setAll(titleColumn, fileNameColumn, fileSizeColumn, downloadedSizeColumn, percentageColumn, speedColumn, etaColumn, providersColumn);
 
         downloadsTableView.setRowFactory(tableView -> {
             final TableRow<TransferStatsProperties.DownloadPropertyInfo> row = new TableRow<>();

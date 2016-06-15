@@ -7,6 +7,7 @@ import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineservice.util.datatransfer.TransferStatistics;
 import jacz.peerengineservice.util.datatransfer.master.DownloadManager;
 import jacz.peerengineservice.util.datatransfer.master.DownloadState;
+import jacz.peerengineservice.util.datatransfer.slave.UploadManager;
 import jacz.util.concurrency.timer.Timer;
 import jacz.util.concurrency.timer.TimerAction;
 import jacz.util.numeric.NumericUtil;
@@ -18,6 +19,8 @@ import javafx.util.Callback;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Stores the latest history of recorded statistics
@@ -86,6 +89,11 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         public DoubleProperty speedProperty() {
             return speed;
+        }
+
+        protected void update(long newTransferredSize, double newSpeed) {
+            Util.setLater(transferredSize, newTransferredSize);
+            Util.setLater(speed, newSpeed);
         }
 
         @Override
@@ -229,8 +237,22 @@ public class TransferStatsProperties extends GenericStateProperties implements T
             return streamingNeed;
         }
 
+        public int getProvidersCount() {
+            return providersCount.get();
+        }
+
         public IntegerProperty providersCountProperty() {
             return providersCount;
+        }
+
+        protected void update(long newTransferredSize, double newSpeed, DownloadState newDownloadState, Long newLength, float newPriority, double newStreamingNeed, int newProvidersCount) {
+            super.update(newTransferredSize, newSpeed);
+            Util.setLater(downloadState, newDownloadState);
+            Util.setLater(fileSize, newLength);
+            Util.setLater(perTenThousandDownloaded, calculatePerTenThousand(getTransferredSize(), getFileSize()));
+            Util.setLater(priority, newPriority);
+            Util.setLater(streamingNeed, newStreamingNeed);
+            Util.setLater(providersCount, newProvidersCount);
         }
     }
 
@@ -357,29 +379,64 @@ public class TransferStatsProperties extends GenericStateProperties implements T
     }
 
     public synchronized void updateDownloadState(DownloadManager downloadManager) {
-        int index = getDownloadPropertyInfoIndex(downloadManager.getId());
+        int index = getTransferPropertyInfoIndex(downloadManager.getId(), observedDownloads);
         if (index >= 0) {
             DownloadPropertyInfo downloadPropertyInfo = observedDownloads.get(index);
-            Util.setLater(downloadPropertyInfo.transferredSizeProperty(), downloadManager.getStatistics().getDownloadedSizeThisResource());
-            Util.setLater(downloadPropertyInfo.speedProperty(), downloadManager.getStatistics().getSpeed());
-            Util.setLater(downloadPropertyInfo.downloadStateProperty(), downloadManager.getState());
-            Util.setLater(downloadPropertyInfo.fileSizeProperty(), downloadManager.getLength());
-            Util.setLater(downloadPropertyInfo.priorityProperty(), downloadManager.getPriority());
-            Util.setLater(downloadPropertyInfo.streamingNeedProperty(), downloadManager.getStreamingNeed());
-            Util.setLater(downloadPropertyInfo.providersCountProperty(), downloadManager.getStatistics().getProviders().size());
+            downloadPropertyInfo.update(
+                    downloadManager.getStatistics().getDownloadedSizeThisResource(),
+                    downloadManager.getStatistics().getSpeed(),
+                    downloadManager.getState(),
+                    downloadManager.getLength(),
+                    downloadManager.getPriority(),
+                    downloadManager.getStreamingNeed(),
+                    downloadManager.getStatistics().getProviders().size());
+//            Util.setLater(downloadPropertyInfo.transferredSizeProperty(), downloadManager.getStatistics().getDownloadedSizeThisResource());
+//            Util.setLater(downloadPropertyInfo.speedProperty(), downloadManager.getStatistics().getSpeed());
+//            Util.setLater(downloadPropertyInfo.downloadStateProperty(), downloadManager.getState());
+//            Util.setLater(downloadPropertyInfo.fileSizeProperty(), downloadManager.getLength());
+//            Util.setLater(downloadPropertyInfo.priorityProperty(), downloadManager.getPriority());
+//            Util.setLater(downloadPropertyInfo.streamingNeedProperty(), downloadManager.getStreamingNeed());
+//            Util.setLater(downloadPropertyInfo.providersCountProperty(), downloadManager.getStatistics().getProviders().size());
         }
     }
 
     public synchronized void removeDownload(DownloadManager downloadManager) {
-        int index = getDownloadPropertyInfoIndex(downloadManager.getId());
+        int index = getTransferPropertyInfoIndex(downloadManager.getId(), observedDownloads);
         if (index >= 0) {
             observedDownloads.remove(index);
         }
     }
 
-    private int getDownloadPropertyInfoIndex(String transferId) throws IndexOutOfBoundsException {
-        DownloadPropertyInfo downloadPropertyInfo = new DownloadPropertyInfo(transferId);
-        return observedDownloads.indexOf(downloadPropertyInfo);
+    public synchronized void updateUploads(Collection<UploadManager> activeUploads) {
+        Set<String> activeUploadsToRemove = observedUploads.stream().map(u -> u.transferId).collect(Collectors.toSet());
+        activeUploads.forEach(uploadManager -> {
+            activeUploadsToRemove.remove(uploadManager.getId());
+            updateUploadState(uploadManager);
+        });
+        activeUploadsToRemove.forEach(uploadToRemove -> {
+            int index = getTransferPropertyInfoIndex(uploadToRemove, observedUploads);
+            observedUploads.remove(index);
+        });
+    }
+
+    private void updateUploadState(UploadManager uploadManager) {
+        int index = getTransferPropertyInfoIndex(uploadManager.getId(), observedUploads);
+        if (index >= 0) {
+            // upload already exists
+            UploadPropertyInfo uploadPropertyInfo = observedUploads.get(index);
+            uploadPropertyInfo.update(
+                    uploadManager.getStatistics().getUploadedSizeThisResource(),
+                    uploadManager.getStatistics().getSpeed());
+        } else {
+            // new upload
+            UploadPropertyInfo uploadPropertyInfo = new UploadPropertyInfo(uploadManager.getId());
+            observedUploads.add(uploadPropertyInfo);
+        }
+    }
+
+    private int getTransferPropertyInfoIndex(String transferId, ObservableList<? extends TransferPropertyInfo> list) throws IndexOutOfBoundsException {
+        TransferPropertyInfo transferPropertyInfo = new TransferPropertyInfo(transferId);
+        return list.indexOf(transferPropertyInfo);
     }
 
     public void stop() {

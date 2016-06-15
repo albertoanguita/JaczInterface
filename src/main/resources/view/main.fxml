@@ -26,7 +26,7 @@
             <Label text="Status:" />
             <Label fx:id="connectedLabel" minWidth="150.0" text="disconnected" />
             <ToggleButton disable="true" mnemonicParsing="false" selected="true" text="Show remote" />
-          <Button disable="true" mnemonicParsing="false" text="Settings" />
+          <Button fx:id="settingsButton" mnemonicParsing="false" onAction="#switchToSettingsView" text="Settings" />
         </items>
          <BorderPane.margin>
             <Insets />
@@ -66,7 +66,7 @@
             <Separator prefHeight="0.0" prefWidth="640.0" />
             <AnchorPane maxHeight="30.0" minHeight="30.0" prefHeight="30.0" VBox.vgrow="NEVER">
                <children>
-                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="0.0">
+                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Label text="UP:" />
                         <Label text="0">
@@ -88,7 +88,7 @@
                         <Label text="KB/s" />
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
+                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Label text="FAVORITES:" />
                         <Label fx:id="connectedFavoritePeersLabel" text="0">

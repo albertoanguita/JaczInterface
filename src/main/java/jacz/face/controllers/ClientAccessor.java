@@ -4,7 +4,7 @@ import jacz.face.state.PropertiesAccessor;
 import jacz.peerengineclient.PeerEngineClient;
 
 /**
- * Created by alberto on 6/7/16.
+ * Class that provides a singleton for accessing the peer engine client
  */
 public class ClientAccessor {
 
