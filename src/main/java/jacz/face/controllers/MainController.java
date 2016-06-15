@@ -16,8 +16,10 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -252,10 +254,6 @@ public class MainController extends GenericController {
         replaceViewContainerContent("/view/peers_view.fxml");
     }
 
-    public void switchToSettingsView() throws IOException {
-        replaceViewContainerContent("/view/settings.fxml");
-    }
-
     private void replaceViewContainerContent(String fxml) throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader();
@@ -285,7 +283,7 @@ public class MainController extends GenericController {
             FXMLLoader fxmlLoader = new FXMLLoader();
             AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("/view/settings.fxml").openStream());
             //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
-            SettingsController settingsController = fxmlLoader.getController();
+            final SettingsController settingsController = fxmlLoader.getController();
             settingsController.setMain(main);
 
             Dialog<SettingsController.SettingsValues> settingsDialog = new Dialog<>();
@@ -298,15 +296,25 @@ public class MainController extends GenericController {
             // Convert the result to a settings value when the ok button is clicked.
             settingsDialog.setResultConverter(dialogButton -> {
                 if (dialogButton == ButtonType.OK) {
-                    return new SettingsController.SettingsValues();
+                    return settingsController.buildSettingsValues();
+                } else {
+                    return null;
                 }
-                return null;
             });
 
             Optional<SettingsController.SettingsValues> result = settingsDialog.showAndWait();
 
             result.ifPresent(newSettings -> {
                 System.out.println(newSettings.toString());
+                client.setLocalPort(newSettings.localPort);
+                client.setExternalPort(newSettings.externalPort);
+                client.setMaxDownloadSpeed(newSettings.maxDownloadSpeed);
+                client.setMaxUploadSpeed(newSettings.maxUploadSpeed);
+                client.setWishForRegularsConnections(newSettings.useRegularConnections);
+                client.setMaxRegularConnections(newSettings.maxRegularConnections);
+                client.setMaxRegularConnectionsForAdditionalCountries(newSettings.maxRegularConnectionsForAdditionalCountries);
+                client.setMainCountry(newSettings.mainCountry);
+                client.setAdditionalCountries(newSettings.additionalCountries);
             });
         } catch (IOException e) {
             e.printStackTrace();
