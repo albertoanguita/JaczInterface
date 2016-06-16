@@ -3,12 +3,15 @@ package jacz.face.state;
 import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.*;
+import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
+import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.util.Callback;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -61,15 +64,15 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
 
         public MediaItem(Movie movie) {
-            this(movie, DatabaseMediator.ItemType.MOVIE, getImagePath(movie), movie.getMinutes());
+            this(movie, DatabaseMediator.ItemType.MOVIE, buildImagePath(movie), movie.getMinutes());
         }
 
         public MediaItem(TVSeries tvSeries) {
-            this(tvSeries, DatabaseMediator.ItemType.TV_SERIES, getImagePath(tvSeries), null);
+            this(tvSeries, DatabaseMediator.ItemType.TV_SERIES, buildImagePath(tvSeries), null);
         }
 
         public MediaItem(Chapter chapter) {
-            this(chapter, DatabaseMediator.ItemType.CHAPTER, getImagePath(chapter), chapter.getMinutes());
+            this(chapter, DatabaseMediator.ItemType.CHAPTER, buildImagePath(chapter), chapter.getMinutes());
         }
 
         public MediaItem(DatabaseMediator.ItemType type, Integer id) {
@@ -86,28 +89,28 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.minutes = null;
         }
 
-
-        private static String getImagePath(ProducedCreationItem producedCreationItem) {
-            String hash = producedCreationItem.getImageHash() != null ? producedCreationItem.getImageHash().getHash() : null;
-            if (hash != null) {
-                return "";
-            } else {
-                return null;
-            }
+        protected void update(CreationItem creationItem, String imagePath, Integer minutes) {
+            Util.setLater(this.title, creationItem.getTitle());
+            Util.setLater(this.originalTitle, creationItem.getOriginalTitle());
+            Util.setLater(this.imagePath, imagePath);
+            Util.setLater(this.year, creationItem.getYear());
+            Util.setLater(this.countries, creationItem.getCountries());
+            Util.setLater(this.creators, creationItem.getCreators());
+            Util.setLater(this.actors, creationItem.getActors());
+            Util.setLater(this.language, creationItem.getLanguage());
+            Util.setLater(this.minutes, minutes);
         }
 
-        private static String getImagePath(Chapter chapter) {
-            List<TVSeries> tvSeriesList = chapter.getTVSeries();
-            if (!tvSeriesList.isEmpty()) {
-                return getImagePath(tvSeriesList.get(0));
-            } else {
-                return null;
-            }
+        protected void update(Movie movie) {
+            update(movie, buildImagePath(movie), movie.getMinutes());
         }
 
-        protected void update(String title) {
-            // todo
-            Util.setLater(this.title, title);
+        protected void update(TVSeries tvSeries) {
+            update(tvSeries, buildImagePath(tvSeries), null);
+        }
+
+        protected void update(Chapter chapter) {
+            update(chapter, buildImagePath(chapter), chapter.getMinutes());
         }
 
         public DatabaseMediator.ItemType getType() {
@@ -132,6 +135,14 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public StringProperty originalTitleProperty() {
             return originalTitle;
+        }
+
+        public String getImagePath() {
+            return imagePath.get();
+        }
+
+        public StringProperty imagePathProperty() {
+            return imagePath;
         }
 
         public Integer getYear() {
@@ -227,7 +238,21 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
     public MediaDatabaseProperties() {
         this.integratedDB = null;
-        itemList = FXCollections.observableArrayList();
+        itemList = FXCollections.observableArrayList(new Callback<MediaItem, Observable[]>() {
+            @Override
+            public Observable[] call(MediaItem p) {
+                return new Observable[]{
+                        p.titleProperty(),
+                        p.originalTitleProperty(),
+                        p.imagePathProperty(),
+                        p.yearProperty(),
+                        p.countriesProperty(),
+                        p.creatorsProperty(),
+                        p.actorsProperty(),
+                        p.languageProperty(),
+                        p.minutesProperty()};
+            }
+        });
         moviesList = new FilteredList<>(itemList, moviesFilter);
 //        movieList = FXCollections.observableArrayList();
 //        tvSeriesList = FXCollections.observableArrayList();
@@ -332,7 +357,26 @@ public class MediaDatabaseProperties extends GenericStateProperties {
     public void updateMediaItem(DatabaseMediator.ItemType type, Integer id, boolean hasNewMediaContent) {
         int index = findMediaItem(type, id);
         if (index >= 0) {
-            itemList.get(index).update("");
+            switch (type) {
+                case MOVIE:
+                    Movie movie = Movie.getMovieById(integratedDB, id);
+                    if (movie != null) {
+                        itemList.get(index).update(movie);
+                    }
+                    break;
+                case TV_SERIES:
+                    TVSeries tvSeries = TVSeries.getTVSeriesById(integratedDB, id);
+                    if (tvSeries != null) {
+                        itemList.get(index).update(tvSeries);
+                    }
+                    break;
+                case CHAPTER:
+                    Chapter chapter = Chapter.getChapterById(integratedDB, id);
+                    if (chapter != null) {
+                        itemList.get(index).update(chapter);
+                    }
+                    break;
+            }
         }
     }
 
@@ -346,4 +390,24 @@ public class MediaDatabaseProperties extends GenericStateProperties {
     private int findMediaItem(DatabaseMediator.ItemType type, Integer id) {
         return itemList.indexOf(new MediaItem(type, id));
     }
+
+    public static String buildImagePath(ProducedCreationItem producedCreationItem) {
+        String hash = producedCreationItem.getImageHash() != null ? producedCreationItem.getImageHash().getHash() : null;
+        if (hash != null) {
+            return ClientAccessor.getInstance().getClient().getFile(hash);
+        } else {
+            return null;
+        }
+    }
+
+    public static String buildImagePath(Chapter chapter) {
+        List<TVSeries> tvSeriesList = chapter.getTVSeries();
+        if (!tvSeriesList.isEmpty()) {
+            return buildImagePath(tvSeriesList.get(0));
+        } else {
+            return null;
+        }
+    }
+
+
 }

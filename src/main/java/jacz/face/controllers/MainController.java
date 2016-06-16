@@ -2,6 +2,7 @@ package jacz.face.controllers;
 
 import jacz.database.Movie;
 import jacz.database.VideoFile;
+import jacz.database.util.ImageHash;
 import jacz.face.actions.ints.*;
 import jacz.face.messages.Messages;
 import jacz.face.state.ConnectionToServerStatus;
@@ -188,6 +189,7 @@ public class MainController extends GenericController {
 
         //setupLocal(client.getDatabases().getLocalDB(), client);
         //removeLocal(client.getDatabases().getLocalDB(), client);
+        //loadLocal(client.getDatabases().getLocalDB(), client);
 
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP20"));
 //        client.addFavoritePeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP21"));
@@ -199,24 +201,37 @@ public class MainController extends GenericController {
 
     private static void setupLocal(String db, PeerEngineClient peerEngineClient) {
         // stored as id=2
-        Movie movie = new Movie(db, "Alien");
-        VideoFile videoFile1 = new VideoFile(db, "hash1");
-        VideoFile videoFile2 = new VideoFile(db, "hash2");
-        VideoFile videoFile3 = new VideoFile(db, "hash3");
-        VideoFile videoFile4 = new VideoFile(db, "hash4");
-        VideoFile videoFile5 = new VideoFile(db, "hash5");
-        movie.addVideoFile(videoFile1);
-        movie.addVideoFile(videoFile2);
-        movie.addVideoFile(videoFile3);
-        movie.addVideoFile(videoFile4);
-        movie.addVideoFile(videoFile5);
-
-        peerEngineClient.localItemModified(videoFile1);
-        peerEngineClient.localItemModified(videoFile2);
-        peerEngineClient.localItemModified(videoFile3);
-        peerEngineClient.localItemModified(videoFile4);
-        peerEngineClient.localItemModified(videoFile5);
+        Movie movie = new Movie(db, "Alien1");
+//        VideoFile videoFile1 = new VideoFile(db, "hash1");
+//        VideoFile videoFile2 = new VideoFile(db, "hash2");
+//        VideoFile videoFile3 = new VideoFile(db, "hash3");
+//        VideoFile videoFile4 = new VideoFile(db, "hash4");
+//        VideoFile videoFile5 = new VideoFile(db, "hash5");
+//        movie.addVideoFile(videoFile1);
+//        movie.addVideoFile(videoFile2);
+//        movie.addVideoFile(videoFile3);
+//        movie.addVideoFile(videoFile4);
+//        movie.addVideoFile(videoFile5);
+//
+//        peerEngineClient.localItemModified(videoFile1);
+//        peerEngineClient.localItemModified(videoFile2);
+//        peerEngineClient.localItemModified(videoFile3);
+//        peerEngineClient.localItemModified(videoFile4);
+//        peerEngineClient.localItemModified(videoFile5);
         peerEngineClient.localItemModified(movie);
+    }
+
+    private static void loadLocal(String db, PeerEngineClient peerEngineClient) {
+        Movie movie = Movie.getMovies(db).get(0);
+        movie.setYear(1998);
+        movie.setMinutes(126);
+        movie.setImageHash(new ImageHash("88F0CCC8C682073560DA382B77BB85C3", "jpg"));
+        peerEngineClient.localItemModified(movie);
+        try {
+            peerEngineClient.addLocalImageFile("./alien.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void removeLocal(String db, PeerEngineClient peerEngineClient) {
