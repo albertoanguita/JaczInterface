@@ -141,8 +141,6 @@ public class PeersController extends MainController {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // todo rest of bindings
-
         nickLabel.textProperty().bind(PropertiesAccessor.getInstance().getGeneralStateProperties().ownNickPropertyProperty());
         idLabel.setText(ClientAccessor.getInstance().getClient().getOwnPeerId().toString());
         copyIdToClipboardButton.setGraphic(new Glyph("FontAwesome", "CLIPBOARD"));

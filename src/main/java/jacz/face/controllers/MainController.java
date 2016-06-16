@@ -113,7 +113,7 @@ public class MainController extends GenericController {
             protected boolean computeValue() {
                 switch (PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty().get()) {
                     case CONNECTED:
-                        Util.setLater(connectSwitch.selectedProperty(), false);
+                        //Util.setLater(connectSwitch.selectedProperty(), false);
                         return true;
                     default:
                         return false;
@@ -121,6 +121,7 @@ public class MainController extends GenericController {
             }
         });
         PropertiesAccessor.getInstance().getConnectionStateProperties().isWishForConnectionProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("change in iswish...: " + newValue);
             Util.setLater(connectSwitch.selectedProperty(), newValue);
         });
 
@@ -179,7 +180,7 @@ public class MainController extends GenericController {
                 new TempFileManagerEventsImpl(),
                 new DatabaseSynchEventsImpl(),
                 new DownloadEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties()),
-                new IntegrationEventsImpl(),
+                new IntegrationEventsImpl(PropertiesAccessor.getInstance().getMediaDatabaseProperties()),
                 new ErrorEventsImpl());
         client = duple.element1;
         ClientAccessor.setup(client);
@@ -224,11 +225,11 @@ public class MainController extends GenericController {
     }
 
 
-    public void connectAction() {
-        //client.connect();
-        //ThreadUtil.safeSleep(3000);
-        Util.setLater(connectSwitch.selectedProperty(), false);
-    }
+//    public void connectAction() {
+//        //client.connect();
+//        //ThreadUtil.safeSleep(3000);
+//        Util.setLater(connectSwitch.selectedProperty(), false);
+//    }
 
     public void setText(final String str) {
         //Platform.runLater(() -> label.setText(str));

@@ -1,6 +1,7 @@
 package jacz.face.actions.ints;
 
 import jacz.database.DatabaseMediator;
+import jacz.face.state.MediaDatabaseProperties;
 import jacz.peerengineclient.databases.integration.IntegrationEvents;
 
 /**
@@ -8,23 +9,27 @@ import jacz.peerengineclient.databases.integration.IntegrationEvents;
  */
 public class IntegrationEventsImpl implements IntegrationEvents {
 
+    private final MediaDatabaseProperties mediaDatabaseProperties;
+
+    public IntegrationEventsImpl(MediaDatabaseProperties mediaDatabaseProperties) {
+        this.mediaDatabaseProperties = mediaDatabaseProperties;
+    }
+
     @Override
     public void newIntegratedItem(DatabaseMediator.ItemType type, Integer id) {
         System.out.println("New integrated item. Type: " + type + ", id: " + id);
+        mediaDatabaseProperties.newMediaItem(type, id);
     }
 
     @Override
-    public void integratedItemHasNewMediaContent(DatabaseMediator.ItemType type, Integer id) {
-        System.out.println("Integrated item has new media content. Type: " + type + ", id: " + id);
-    }
-
-    @Override
-    public void integratedItemHasBeenModified(DatabaseMediator.ItemType type, Integer id) {
+    public void integratedItemHasBeenModified(DatabaseMediator.ItemType type, Integer id, boolean hasNewMediaContent) {
         System.out.println("Integrated item has been modified. Type: " + type + ", id: " + id);
+        mediaDatabaseProperties.updateMediaItem(type, id, hasNewMediaContent);
     }
 
     @Override
-    public void integratedItemsRemoved() {
+    public void integratedItemRemoved(DatabaseMediator.ItemType type, Integer id) {
         System.out.println("Integrated items removed");
+        mediaDatabaseProperties.mediaItemRemoved(type, id);
     }
 }

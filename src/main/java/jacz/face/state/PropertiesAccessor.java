@@ -21,6 +21,8 @@ public class PropertiesAccessor {
 
     private TransferStatsProperties transferStatsProperties;
 
+    private MediaDatabaseProperties mediaDatabaseProperties;
+
     public static PropertiesAccessor getInstance() {
         return instance;
     }
@@ -31,6 +33,7 @@ public class PropertiesAccessor {
         connectionStateProperties = new ConnectionStateProperties();
         peersStateProperties = new PeersStateProperties();
         transferStatsProperties = new TransferStatsProperties();
+        mediaDatabaseProperties = new MediaDatabaseProperties();
     }
 
     public void setup(PeerEngineClient client) {
@@ -39,6 +42,7 @@ public class PropertiesAccessor {
             connectionStateProperties.setClient(client);
             peersStateProperties.setClient(client);
             transferStatsProperties.setClient(client);
+            mediaDatabaseProperties.setClient(client);
         }
     }
 
@@ -60,5 +64,9 @@ public class PropertiesAccessor {
 
     public TransferStatsProperties getTransferStatsProperties() {
         return transferStatsProperties;
+    }
+
+    public MediaDatabaseProperties getMediaDatabaseProperties() {
+        return mediaDatabaseProperties;
     }
 }
