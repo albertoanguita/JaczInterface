@@ -46,12 +46,12 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObjectProperty<Integer> minutes;
 
-        private MediaItem(CreationItem creationItem, DatabaseMediator.ItemType type, Integer minutes) {
+        private MediaItem(CreationItem creationItem, DatabaseMediator.ItemType type, String imagePath, Integer minutes) {
             this.type = type;
             this.id = creationItem.getId();
             this.title = new SimpleStringProperty(creationItem.getTitle());
             this.originalTitle = new SimpleStringProperty(creationItem.getOriginalTitle());
-            this.imagePath = new SimpleStringProperty(creationItem.get);
+            this.imagePath = new SimpleStringProperty(imagePath);
             this.year = new SimpleObjectProperty<>(creationItem.getYear());
             this.countries = new SimpleObjectProperty<>(creationItem.getCountries());
             this.creators = new SimpleObjectProperty<>(creationItem.getCreators());
@@ -61,15 +61,15 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
 
         public MediaItem(Movie movie) {
-            this(movie, DatabaseMediator.ItemType.MOVIE, movie.getMinutes());
+            this(movie, DatabaseMediator.ItemType.MOVIE, getImagePath(movie), movie.getMinutes());
         }
 
         public MediaItem(TVSeries tvSeries) {
-            this(tvSeries, DatabaseMediator.ItemType.TV_SERIES, null);
+            this(tvSeries, DatabaseMediator.ItemType.TV_SERIES, getImagePath(tvSeries), null);
         }
 
         public MediaItem(Chapter chapter) {
-            this(chapter, DatabaseMediator.ItemType.CHAPTER, chapter.getMinutes());
+            this(chapter, DatabaseMediator.ItemType.CHAPTER, getImagePath(chapter), chapter.getMinutes());
         }
 
         public MediaItem(DatabaseMediator.ItemType type, Integer id) {
@@ -77,6 +77,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.id = id;
             this.title = null;
             this.originalTitle = null;
+            this.imagePath = null;
             this.year = null;
             this.countries = null;
             this.creators = null;
@@ -85,7 +86,27 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.minutes = null;
         }
 
+
+        private static String getImagePath(ProducedCreationItem producedCreationItem) {
+            String hash = producedCreationItem.getImageHash() != null ? producedCreationItem.getImageHash().getHash() : null;
+            if (hash != null) {
+                return "";
+            } else {
+                return null;
+            }
+        }
+
+        private static String getImagePath(Chapter chapter) {
+            List<TVSeries> tvSeriesList = chapter.getTVSeries();
+            if (!tvSeriesList.isEmpty()) {
+                return getImagePath(tvSeriesList.get(0));
+            } else {
+                return null;
+            }
+        }
+
         protected void update(String title) {
+            // todo
             Util.setLater(this.title, title);
         }
 
@@ -311,7 +332,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
     public void updateMediaItem(DatabaseMediator.ItemType type, Integer id, boolean hasNewMediaContent) {
         int index = findMediaItem(type, id);
         if (index >= 0) {
-            itemList.get(index).update();
+            itemList.get(index).update("");
         }
     }
 
