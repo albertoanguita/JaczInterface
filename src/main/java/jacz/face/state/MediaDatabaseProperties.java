@@ -22,6 +22,8 @@ import java.util.function.Predicate;
  * todo add sortedlist, and filteredlist. Use filteredlist to filter remote content
  *
  * todo add timer that allows marking items with new media content for some time (and for sorting)
+ *
+ * todo add lowercase title to improve title filtering efficiency
  */
 public class MediaDatabaseProperties extends GenericStateProperties {
 
@@ -226,11 +228,15 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
     private static final Predicate<MediaItem> moviesFilter = mediaItem -> mediaItem.getType() == DatabaseMediator.ItemType.MOVIE;
 
+    private static final Predicate<MediaItem> seriesFilter = mediaItem -> mediaItem.getType() == DatabaseMediator.ItemType.TV_SERIES;
+
     private String integratedDB;
 
     private final ObservableList<MediaItem> itemList;
 
-    private final ObservableList<MediaItem> moviesList;
+    private final ObservableList<MediaItem> movieList;
+
+    private final ObservableList<MediaItem> seriesList;
 
 //    private final ObservableList<Movie> movieList;
 //
@@ -253,7 +259,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
                         p.minutesProperty()};
             }
         });
-        moviesList = new FilteredList<>(itemList, moviesFilter);
+        movieList = new FilteredList<>(itemList, moviesFilter);
+        seriesList = new FilteredList<>(itemList, seriesFilter);
 //        movieList = FXCollections.observableArrayList();
 //        tvSeriesList = FXCollections.observableArrayList();
     }
@@ -271,8 +278,12 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         return itemList;
     }
 
-    public ObservableList<MediaItem> getMovies() {
-        return moviesList;
+    public ObservableList<MediaItem> getMovieList() {
+        return movieList;
+    }
+
+    public ObservableList<MediaItem> getSeriesList() {
+        return seriesList;
     }
 
     //    public ObservableList<Movie> getMovieList() {

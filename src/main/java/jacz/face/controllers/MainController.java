@@ -1,9 +1,11 @@
 package jacz.face.controllers;
 
 import jacz.database.Movie;
+import jacz.database.TVSeries;
 import jacz.database.VideoFile;
 import jacz.database.util.ImageHash;
 import jacz.face.actions.ints.*;
+import jacz.face.main.Main;
 import jacz.face.messages.Messages;
 import jacz.face.state.ConnectionToServerStatus;
 import jacz.face.state.PropertiesAccessor;
@@ -187,6 +189,7 @@ public class MainController extends GenericController {
         ClientAccessor.setup(client);
         PropertiesAccessor.getInstance().setup(client);
 
+        //setupSeries(client.getDatabases().getLocalDB(), client);
         //setupLocal(client.getDatabases().getLocalDB(), client);
         //removeLocal(client.getDatabases().getLocalDB(), client);
         //loadLocal(client.getDatabases().getLocalDB(), client);
@@ -200,32 +203,113 @@ public class MainController extends GenericController {
     }
 
     private static void setupLocal(String db, PeerEngineClient peerEngineClient) {
-        // stored as id=2
-        Movie movie = new Movie(db, "Alien1");
-//        VideoFile videoFile1 = new VideoFile(db, "hash1");
-//        VideoFile videoFile2 = new VideoFile(db, "hash2");
-//        VideoFile videoFile3 = new VideoFile(db, "hash3");
-//        VideoFile videoFile4 = new VideoFile(db, "hash4");
-//        VideoFile videoFile5 = new VideoFile(db, "hash5");
-//        movie.addVideoFile(videoFile1);
-//        movie.addVideoFile(videoFile2);
-//        movie.addVideoFile(videoFile3);
-//        movie.addVideoFile(videoFile4);
-//        movie.addVideoFile(videoFile5);
-//
-//        peerEngineClient.localItemModified(videoFile1);
-//        peerEngineClient.localItemModified(videoFile2);
-//        peerEngineClient.localItemModified(videoFile3);
-//        peerEngineClient.localItemModified(videoFile4);
-//        peerEngineClient.localItemModified(videoFile5);
+        // stored as id=1
+        Movie movie = new Movie(db, "Alien");
+        movie.setYear(1998);
+        movie.setMinutes(126);
+        movie.setImageHash(new ImageHash("f37725b46a263b3de9ff25b2061943e1".toUpperCase(), "jpg"));
+        VideoFile videoFile1 = new VideoFile(db, "hash1");
+        VideoFile videoFile2 = new VideoFile(db, "hash2");
+        VideoFile videoFile3 = new VideoFile(db, "hash3");
+        VideoFile videoFile4 = new VideoFile(db, "hash4");
+        VideoFile videoFile5 = new VideoFile(db, "hash5");
+        movie.addVideoFile(videoFile1);
+        movie.addVideoFile(videoFile2);
+        movie.addVideoFile(videoFile3);
+        movie.addVideoFile(videoFile4);
+        movie.addVideoFile(videoFile5);
+
+        peerEngineClient.localItemModified(videoFile1);
+        peerEngineClient.localItemModified(videoFile2);
+        peerEngineClient.localItemModified(videoFile3);
+        peerEngineClient.localItemModified(videoFile4);
+        peerEngineClient.localItemModified(videoFile5);
         peerEngineClient.localItemModified(movie);
+        try {
+            peerEngineClient.addLocalImageFile("./alien.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        movie = new Movie(db, "Cisne negro");
+        movie.setYear(2009);
+        movie.setImageHash(new ImageHash("eedd8704225fb2307f8afec037e6aab3".toUpperCase(), "jpg"));
+        peerEngineClient.localItemModified(movie);
+        try {
+            peerEngineClient.addLocalImageFile("./cisne_negro.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        movie = new Movie(db, "Gravity");
+        movie.setYear(2011);
+        movie.setImageHash(new ImageHash("5aee69a414abe5886444bdbd7e1dc592".toUpperCase(), "jpg"));
+        peerEngineClient.localItemModified(movie);
+        try {
+            peerEngineClient.addLocalImageFile("./gravity-poster.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        movie = new Movie(db, "Interstellar");
+        movie.setYear(20014);
+        movie.setImageHash(new ImageHash("ee14fd01e0ca1330886d9043b3f44248".toUpperCase(), "jpg"));
+        peerEngineClient.localItemModified(movie);
+        try {
+            peerEngineClient.addLocalImageFile("./interstellar.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        movie = new Movie(db, "Mad max");
+        movie.setYear(20015);
+        movie.setImageHash(new ImageHash("951752219b972cdc9179e920bb6f24e1".toUpperCase(), "jpg"));
+        peerEngineClient.localItemModified(movie);
+        try {
+            peerEngineClient.addLocalImageFile("./mad-max.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        movie = new Movie(db, "Postal");
+        movie.setYear(2002);
+        movie.setImageHash(new ImageHash("5138a57cde050f229fcc38608d795641".toUpperCase(), "jpg"));
+        peerEngineClient.localItemModified(movie);
+        try {
+            peerEngineClient.addLocalImageFile("./postal.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void setupSeries(String db, PeerEngineClient peerEngineClient) {
+        // stored as id=1
+        TVSeries tvSeries = new TVSeries(db, "Breaking bad");
+        tvSeries.setYear(2011);
+        tvSeries.setImageHash(new ImageHash("3bbd87be296c63cfd3e6d3490b9d3d2c".toUpperCase(), "jpg"));
+        peerEngineClient.localItemModified(tvSeries);
+        try {
+            peerEngineClient.addLocalImageFile("./breaking bad.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        tvSeries = new TVSeries(db, "Juego de tronos");
+        tvSeries.setYear(2013);
+        tvSeries.setImageHash(new ImageHash("a5fb7f1fe8102f00c634b292e8b5c8ee".toUpperCase(), "jpg"));
+        peerEngineClient.localItemModified(tvSeries);
+        try {
+            peerEngineClient.addLocalImageFile("./got.jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void loadLocal(String db, PeerEngineClient peerEngineClient) {
         Movie movie = Movie.getMovies(db).get(0);
         movie.setYear(1998);
         movie.setMinutes(126);
-        movie.setImageHash(new ImageHash("88F0CCC8C682073560DA382B77BB85C3", "jpg"));
+        movie.setImageHash(new ImageHash("f37725b46a263b3de9ff25b2061943e1".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(movie);
         try {
             peerEngineClient.addLocalImageFile("./alien.jpg");
@@ -251,14 +335,18 @@ public class MainController extends GenericController {
     }
 
     public void switchToMoviesView() throws IOException {
+        main.setCurrentMediaView(Main.MediaView.MOVIES);
         replaceViewContainerContent("/view/movies_view.fxml");
     }
 
     public void switchToSeriesView() throws IOException {
-        replaceViewContainerContent("/view/series_view.fxml");
+        main.setCurrentMediaView(Main.MediaView.SERIES);
+        replaceViewContainerContent("/view/movies_view.fxml");
+        //replaceViewContainerContent("/view/series_view.fxml");
     }
 
     public void switchToFavoritesView() throws IOException {
+        main.setCurrentMediaView(Main.MediaView.FAVORITES);
         replaceViewContainerContent("/view/favorites_view.fxml");
     }
 

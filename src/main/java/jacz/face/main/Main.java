@@ -4,7 +4,6 @@ import jacz.face.controllers.CreateConfigController;
 import jacz.face.controllers.GenericController;
 import jacz.face.controllers.MainController;
 import jacz.face.state.PropertiesAccessor;
-import jacz.util.concurrency.ThreadUtil;
 import jacz.util.concurrency.task_executor.ThreadExecutor;
 import jacz.util.lists.tuple.Duple;
 import javafx.application.Application;
@@ -17,6 +16,12 @@ import java.io.IOException;
 
 public class Main extends Application {
 
+    public enum MediaView {
+        MOVIES,
+        SERIES,
+        FAVORITES
+    }
+
     private static final String BASE_DIR = "./etc";
 
     private Stage primaryStage;
@@ -25,6 +30,7 @@ public class Main extends Application {
 
     private Duple<CreateConfigController, Parent> createConfigController;
 
+    private MediaView currentMediaView;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -79,7 +85,13 @@ public class Main extends Application {
     }
 
 
+    public MediaView getCurrentMediaView() {
+        return currentMediaView;
+    }
 
+    public void setCurrentMediaView(MediaView currentMediaView) {
+        this.currentMediaView = currentMediaView;
+    }
 
     @Override
     public void stop() throws Exception {
