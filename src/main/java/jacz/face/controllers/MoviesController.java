@@ -1,6 +1,7 @@
 package jacz.face.controllers;
 
 import jacz.database.DatabaseMediator;
+import jacz.database.Movie;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
@@ -9,6 +10,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -21,7 +25,9 @@ import org.controlsfx.control.GridCell;
 import org.controlsfx.control.GridView;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
 
@@ -203,4 +209,46 @@ public class MoviesController extends MainController {
             moviesGridView.setItems(filteredSeries);
         }
     }
+
+
+    public void newMovie() {
+        System.out.println("new movie");
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
+            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
+            final EditMovieController editMovieController = fxmlLoader.getController();
+            editMovieController.setMain(main);
+
+            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
+            newMovieDialog.setTitle("new movie");
+            newMovieDialog.getDialogPane().setContent(newMoviePane);
+
+            // Set the button types.
+            newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+            // Convert the result to a settings value when the ok button is clicked.
+            newMovieDialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK) {
+                    return editMovieController.buildMovieData();
+                } else {
+                    return null;
+                }
+            });
+
+            Optional<EditMovieController.MovieData> result = newMovieDialog.showAndWait();
+
+            result.ifPresent(newMovie -> {
+                System.out.println(newMovie.toString());
+                Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
+                movie.setOriginalTitle(newMovie.originalTitle);
+                movie.setYear(newMovie.year);
+                ClientAccessor.getInstance().getClient().localItemModified(movie);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

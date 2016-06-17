@@ -53,6 +53,10 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
     public void gotoMain() throws IOException {
         mainController.element1.loadConfig(BASE_DIR);
         gotoScene(new Scene(mainController.element2, 1000, 675));

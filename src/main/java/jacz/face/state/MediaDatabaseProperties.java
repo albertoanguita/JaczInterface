@@ -6,6 +6,7 @@ import jacz.database.*;
 import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -354,7 +355,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
     }
 
     private void newMovie(Movie movie) {
-        itemList.add(new MediaItem(movie));
+        Platform.runLater(() -> itemList.add(new MediaItem(movie)));
     }
 
     private void newTVSeries(TVSeries tvSeries) {
