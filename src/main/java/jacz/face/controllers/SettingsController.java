@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * Created by alberto on 6/15/16.
  */
-public class SettingsController extends MainController {
+public class SettingsController extends GenericController {
 
     public static class SettingsValues {
 

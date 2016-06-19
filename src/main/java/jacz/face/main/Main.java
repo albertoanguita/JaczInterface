@@ -3,6 +3,7 @@ package jacz.face.main;
 import jacz.face.controllers.CreateConfigController;
 import jacz.face.controllers.GenericController;
 import jacz.face.controllers.MainController;
+import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.state.PropertiesAccessor;
 import jacz.util.concurrency.task_executor.ThreadExecutor;
 import jacz.util.lists.tuple.Duple;
@@ -30,7 +31,7 @@ public class Main extends Application {
 
     private Duple<CreateConfigController, Parent> createConfigController;
 
-    private MediaView currentMediaView;
+    private NavigationHistory navigationHistory;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -39,6 +40,7 @@ public class Main extends Application {
 
         // build the singleton instance of the properties accessor
         PropertiesAccessor.getInstance();
+
 
         if (!mainController.element1.listAvailableConfigs(BASE_DIR).isEmpty()) {
             // there is a profile available
@@ -60,6 +62,11 @@ public class Main extends Application {
     public void gotoMain() throws IOException {
         mainController.element1.loadConfig(BASE_DIR);
         gotoScene(new Scene(mainController.element2, 1000, 675));
+        displayCurrentNavigationWindow();
+    }
+
+    public void displayCurrentNavigationWindow() throws IOException {
+        mainController.element1.moveToNavigationElement(navigationHistory.getCurrentElement());
     }
 
     public void gotoCreateConfig() {
@@ -76,6 +83,8 @@ public class Main extends Application {
         super.init();
         System.out.println("INIT");
 
+        navigationHistory = new NavigationHistory(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.MOVIES));
+
         // load and store available scenes with their controllers
         mainController = loadController("/view/main.fxml");
         createConfigController = loadController("/view/create_profile.fxml");
@@ -89,12 +98,8 @@ public class Main extends Application {
     }
 
 
-    public MediaView getCurrentMediaView() {
-        return currentMediaView;
-    }
-
-    public void setCurrentMediaView(MediaView currentMediaView) {
-        this.currentMediaView = currentMediaView;
+    public NavigationHistory getNavigationHistory() {
+        return navigationHistory;
     }
 
     @Override

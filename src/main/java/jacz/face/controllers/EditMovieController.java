@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
 /**
  * Created by alberto on 6/17/16.
  */
-public class EditMovieController extends MainController {
+public class EditMovieController extends GenericController {
 
     public static class MovieData {
 

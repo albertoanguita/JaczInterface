@@ -24,7 +24,7 @@ import java.util.*;
 /**
  * Created by alberto on 6/7/16.
  */
-public class PeersController extends MainController {
+public class PeersController extends GenericController {
 
     private static class CountryCell extends TableCell<PeersStateProperties.PeerPropertyInfo, CountryCode> {
 

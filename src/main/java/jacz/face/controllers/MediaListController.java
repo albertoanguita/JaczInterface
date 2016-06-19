@@ -2,6 +2,7 @@ package jacz.face.controllers;
 
 import jacz.database.DatabaseMediator;
 import jacz.database.Movie;
+import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
@@ -34,7 +35,7 @@ import java.util.function.Predicate;
 /**
  * Created by alberto on 6/7/16.
  */
-public class MoviesController extends MainController {
+public class MediaListController extends GenericController {
 
     private static class MediaItemGridCellEventHandler implements EventHandler<MouseEvent> {
 
@@ -201,7 +202,7 @@ public class MoviesController extends MainController {
     @Override
     public void setMain(Main main) {
         super.setMain(main);
-        if (main.getCurrentMediaView() == Main.MediaView.MOVIES) {
+        if (main.getNavigationHistory().getCurrentElement().mediaType == NavigationHistory.MediaType.MOVIES) {
             System.out.println("movies");
             moviesGridView.setItems(filteredMovies);
         } else {

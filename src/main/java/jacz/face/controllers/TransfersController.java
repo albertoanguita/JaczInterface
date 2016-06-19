@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
 /**
  * Created by alberto on 6/7/16.
  */
-public class TransfersController extends MainController {
+public class TransfersController extends GenericController {
 
     private static final String UNKNOWN_ITEM_TITLE = "?";
 

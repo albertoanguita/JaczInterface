@@ -6,7 +6,7 @@ import java.util.ResourceBundle;
 /**
  * Created by alberto on 6/7/16.
  */
-public class FavoritesController extends MainController {
+public class FavoritesController extends GenericController {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

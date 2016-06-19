@@ -5,6 +5,7 @@ import jacz.database.TVSeries;
 import jacz.database.VideoFile;
 import jacz.database.util.ImageHash;
 import jacz.face.actions.ints.*;
+import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
 import jacz.face.messages.Messages;
 import jacz.face.state.ConnectionToServerStatus;
@@ -45,6 +46,12 @@ public class MainController extends GenericController {
 
     @FXML
     private Button settingsButton;
+
+    @FXML
+    private Button backwardsButton;
+
+    @FXML
+    private Button forwardButton;
 
     @FXML
     private AnchorPane viewContainer;
@@ -166,6 +173,40 @@ public class MainController extends GenericController {
                 return Integer.toString(PropertiesAccessor.getInstance().getPeersStateProperties().connectedRegularPeersProperty().get());
             }
         });
+
+
+
+        // move to initial window
+//        NavigationHistory.Element element = main.getNavigationHistory().getCurrentElement();
+//        try {
+//            moveToNavigationElement(element);
+//        } catch (IOException e) {
+//            // todo
+//            e.printStackTrace();
+//        }
+    }
+
+    @Override
+    public void setMain(Main main) {
+        super.setMain(main);
+        backwardsButton.disableProperty().bind(main.getNavigationHistory().canMoveBackwardsProperty().not());
+        forwardButton.disableProperty().bind(main.getNavigationHistory().canMoveForwardProperty().not());
+    }
+
+    public void moveToNavigationElement(NavigationHistory.Element element) throws IOException {
+        switch (element.window) {
+
+            case MEDIA_LIST:
+                //main.setCurrentMediaView(Main.MediaView.MOVIES);
+                replaceViewContainerContent("/view/media_list_view.fxml");
+                break;
+            case TRANSFERS:
+                replaceViewContainerContent("/view/transfers_view.fxml");
+                break;
+            case PEERS:
+                replaceViewContainerContent("/view/peers_view.fxml");
+                break;
+        }
     }
 
     public List<String> listAvailableConfigs(String baseDir) throws IOException {
@@ -324,38 +365,34 @@ public class MainController extends GenericController {
     }
 
 
-//    public void connectAction() {
-//        //client.connect();
-//        //ThreadUtil.safeSleep(3000);
-//        Util.setLater(connectSwitch.selectedProperty(), false);
-//    }
 
     public void setText(final String str) {
         //Platform.runLater(() -> label.setText(str));
     }
 
     public void switchToMoviesView() throws IOException {
-        main.setCurrentMediaView(Main.MediaView.MOVIES);
-        replaceViewContainerContent("/view/movies_view.fxml");
+        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.MOVIES));
+        main.displayCurrentNavigationWindow();
     }
 
     public void switchToSeriesView() throws IOException {
-        main.setCurrentMediaView(Main.MediaView.SERIES);
-        replaceViewContainerContent("/view/movies_view.fxml");
-        //replaceViewContainerContent("/view/series_view.fxml");
+        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.SERIES));
+        main.displayCurrentNavigationWindow();
     }
 
     public void switchToFavoritesView() throws IOException {
-        main.setCurrentMediaView(Main.MediaView.FAVORITES);
-        replaceViewContainerContent("/view/favorites_view.fxml");
+        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.FAVORITES));
+        main.displayCurrentNavigationWindow();
     }
 
     public void switchToTransfersView() throws IOException {
-        replaceViewContainerContent("/view/transfers_view.fxml");
+        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.TRANSFERS, null));
+        main.displayCurrentNavigationWindow();
     }
 
     public void switchToPeersView() throws IOException {
-        replaceViewContainerContent("/view/peers_view.fxml");
+        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.PEERS, null));
+        main.displayCurrentNavigationWindow();
     }
 
     private void replaceViewContainerContent(String fxml) throws IOException {
@@ -430,6 +467,16 @@ public class MainController extends GenericController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void navigateBackwards() throws IOException {
+        main.getNavigationHistory().backwards();
+        main.displayCurrentNavigationWindow();
+    }
+
+    public void navigateForward() throws IOException {
+        main.getNavigationHistory().forward();
+        main.displayCurrentNavigationWindow();
     }
 
     public void stop() {
