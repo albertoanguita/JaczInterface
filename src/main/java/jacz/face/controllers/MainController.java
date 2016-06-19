@@ -377,6 +377,13 @@ public class MainController extends GenericController {
 //        }
         viewContainer.getChildren().clear();
         viewContainer.getChildren().addAll(page);
+
+        AnchorPane.setBottomAnchor(page, 0d);
+        AnchorPane.setRightAnchor(page, 0d);
+        AnchorPane.setTopAnchor(page, 0d);
+        AnchorPane.setLeftAnchor(page, 0d);
+
+
         //return (Initializable) loader.getController();
     }
 

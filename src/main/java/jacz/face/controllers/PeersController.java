@@ -19,8 +19,7 @@ import org.controlsfx.glyphfont.Glyph;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Created by alberto on 6/7/16.
@@ -29,9 +28,11 @@ public class PeersController extends MainController {
 
     private static class CountryCell extends TableCell<PeersStateProperties.PeerPropertyInfo, CountryCode> {
 
-        public CountryCell() {    }
+        public CountryCell() {
+        }
 
-        @Override protected void updateItem(CountryCode item, boolean empty) {
+        @Override
+        protected void updateItem(CountryCode item, boolean empty) {
             // calling super here is very important - don't skip this!
             super.updateItem(item, empty);
 
@@ -54,7 +55,9 @@ public class PeersController extends MainController {
     }
 
 
-    /** A table cell containing a button for adding a new person. */
+    /**
+     * A table cell containing a button for adding a new person.
+     */
     private class ChangeRelationshipCell extends TableCell<PeersStateProperties.PeerPropertyInfo, Boolean> {
         // a button for adding a new person.
         //private PeersStateProperties.PeerPropertyInfo peerPropertyInfo;
@@ -63,7 +66,7 @@ public class PeersController extends MainController {
         final MenuItem blockItem = new MenuItem("Block");
         final MenuItem unblockItem = new MenuItem("Unblock");
         final MenuButton actionButton = new MenuButton("Action");
-        final Button addButton       = new Button("Add");
+        final Button addButton = new Button("Add");
         // pads and centers the add button in the cell.
         final StackPane paddedButton = new StackPane();
         // records the y pos of the last button press so that the add person dialog can be shown next to the cell.
@@ -78,7 +81,8 @@ public class PeersController extends MainController {
             actionButton.getItems().addAll(setFavoriteItem, removeFavoriteItem, blockItem, unblockItem);
 
             addButton.setOnMousePressed(new EventHandler<MouseEvent>() {
-                @Override public void handle(MouseEvent mouseEvent) {
+                @Override
+                public void handle(MouseEvent mouseEvent) {
                     buttonY.set(mouseEvent.getScreenY());
                 }
             });
@@ -107,8 +111,11 @@ public class PeersController extends MainController {
             });
         }
 
-        /** places an add button in the row only if the row is not empty. */
-        @Override protected void updateItem(Boolean item, boolean empty) {
+        /**
+         * places an add button in the row only if the row is not empty.
+         */
+        @Override
+        protected void updateItem(Boolean item, boolean empty) {
             super.updateItem(item, empty);
             if (!empty) {
                 setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -119,7 +126,7 @@ public class PeersController extends MainController {
         }
     }
 
-        private static final String UNKNOWN_VALUE = "?";
+    private static final String UNKNOWN_VALUE = "?";
 
     @FXML
     private Label nickLabel;
@@ -159,6 +166,7 @@ public class PeersController extends MainController {
                 {
                     super.bind(p.getValue().relationProperty());
                 }
+
                 @Override
                 protected String computeValue() {
                     return p.getValue().getRelation().toString();
@@ -174,6 +182,7 @@ public class PeersController extends MainController {
                 {
                     super.bind(p.getValue().nickProperty());
                 }
+
                 @Override
                 protected String computeValue() {
                     return p.getValue().getNick() == null ? UNKNOWN_VALUE : p.getValue().getNick();
@@ -192,6 +201,7 @@ public class PeersController extends MainController {
                 {
                     super.bind(p.getValue().countryProperty());
                 }
+
                 @Override
                 protected String computeValue() {
                     return p.getValue().getCountry() == null ? UNKNOWN_VALUE : p.getValue().getCountry().getName();
@@ -207,6 +217,7 @@ public class PeersController extends MainController {
                 {
                     super.bind(p.getValue().affinityProperty());
                 }
+
                 @Override
                 protected String computeValue() {
                     return Integer.toString(p.getValue().getAffinity());
@@ -216,6 +227,7 @@ public class PeersController extends MainController {
         });
 
         // action example
+        // todo this column is no longer used. We keep the code as example of how to add a button to a cell in a table view
         TableColumn<PeersStateProperties.PeerPropertyInfo, Boolean> actionCol = new TableColumn<>("Action");
         actionCol.setSortable(false);
         // define a simple boolean cell value for the action column so that the column will only be shown for non-empty rows.
@@ -244,8 +256,62 @@ public class PeersController extends MainController {
                         });
         peersTableView.setItems(sortedPeers);
         //noinspection unchecked
-        peersTableView.getColumns().setAll(relationColumn, nickColumn, idColumn, countryColumn, affinityColumn, actionCol);
+        peersTableView.getColumns().setAll(relationColumn, nickColumn, idColumn, countryColumn, affinityColumn);
+
+
+        peersTableView.setRowFactory(tableView -> {
+            final TableRow<PeersStateProperties.PeerPropertyInfo> row = new TableRow<>();
+            row.itemProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    final ContextMenu contextMenu = new ContextMenu();
+                    contextMenu.getItems().addAll(getContextMenuItems(newValue));
+                    row.setContextMenu(contextMenu);
+                    newValue.relationProperty().addListener((observable1, oldValue1, newValue2) -> {
+                        row.getContextMenu().getItems().clear();
+                        row.getContextMenu().getItems().addAll(getContextMenuItems(newValue));
+                    });
+                }
+            });
+            return row;
+        });
+
+
         //peersTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    }
+
+
+
+    private static Collection<MenuItem> getContextMenuItems(PeersStateProperties.PeerPropertyInfo peerPropertyInfo) {
+        final MenuItem setFavoriteItem = new MenuItem("Set as favorite");
+        final MenuItem removeFavoriteItem = new MenuItem("Remove as favorite");
+        final MenuItem blockItem = new MenuItem("Block");
+        final MenuItem unblockItem = new MenuItem("Unblock");
+        List<MenuItem> menuItems = new ArrayList<>();
+        setFavoriteItem.setOnAction(actionEvent -> {
+            ClientAccessor.getInstance().getClient().addFavoritePeer(peerPropertyInfo.getPeerId());
+        });
+        removeFavoriteItem.setOnAction(actionEvent -> {
+            ClientAccessor.getInstance().getClient().removeFavoritePeer(peerPropertyInfo.getPeerId());
+        });
+        blockItem.setOnAction(actionEvent -> {
+            ClientAccessor.getInstance().getClient().addBlockedPeer(peerPropertyInfo.getPeerId());
+        });
+        unblockItem.setOnAction(actionEvent -> {
+            ClientAccessor.getInstance().getClient().removeBlockedPeer(peerPropertyInfo.getPeerId());
+        });
+        if (!peerPropertyInfo.getRelation().isFavorite()) {
+            menuItems.add(setFavoriteItem);
+        }
+        if (peerPropertyInfo.getRelation().isFavorite()) {
+            menuItems.add(removeFavoriteItem);
+        }
+        if (!peerPropertyInfo.getRelation().isBlocked()) {
+            menuItems.add(blockItem);
+        }
+        if (peerPropertyInfo.getRelation().isBlocked()) {
+            menuItems.add(unblockItem);
+        }
+        return menuItems;
     }
 
     public void changeOwnNick() {
