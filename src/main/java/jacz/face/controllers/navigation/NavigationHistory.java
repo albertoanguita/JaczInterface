@@ -14,6 +14,7 @@ public class NavigationHistory {
 
     public enum Window {
         MEDIA_LIST,
+        ITEM_DETAIL,
         TRANSFERS,
         PEERS,
     }
@@ -31,9 +32,28 @@ public class NavigationHistory {
 
         public final MediaType mediaType;
 
-        public Element(Window window, MediaType mediaType) {
+        public final Integer itemId;
+
+        private Element(Window window, MediaType mediaType, Integer itemId) {
             this.window = window;
             this.mediaType = mediaType;
+            this.itemId = itemId;
+        }
+
+        public static Element mediaList(MediaType mediaType) {
+            return new Element(Window.MEDIA_LIST, mediaType, null);
+        }
+
+        public static Element itemDetail(MediaType mediaType, Integer itemId) {
+            return new Element(Window.ITEM_DETAIL, mediaType, itemId);
+        }
+
+        public static Element transfers() {
+            return new Element(Window.TRANSFERS, null, null);
+        }
+
+        public static Element peers() {
+            return new Element(Window.PEERS, null, null);
         }
     }
 

@@ -200,6 +200,9 @@ public class MainController extends GenericController {
                 //main.setCurrentMediaView(Main.MediaView.MOVIES);
                 replaceViewContainerContent("/view/media_list_view.fxml");
                 break;
+            case ITEM_DETAIL:
+                replaceViewContainerContent("/view/movie_view.fxml");
+                break;
             case TRANSFERS:
                 replaceViewContainerContent("/view/transfers_view.fxml");
                 break;
@@ -371,27 +374,27 @@ public class MainController extends GenericController {
     }
 
     public void switchToMoviesView() throws IOException {
-        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.MOVIES));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.MOVIES));
         main.displayCurrentNavigationWindow();
     }
 
     public void switchToSeriesView() throws IOException {
-        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.SERIES));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.SERIES));
         main.displayCurrentNavigationWindow();
     }
 
     public void switchToFavoritesView() throws IOException {
-        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.FAVORITES));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.FAVORITES));
         main.displayCurrentNavigationWindow();
     }
 
     public void switchToTransfersView() throws IOException {
-        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.TRANSFERS, null));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.transfers());
         main.displayCurrentNavigationWindow();
     }
 
     public void switchToPeersView() throws IOException {
-        main.getNavigationHistory().navigate(new NavigationHistory.Element(NavigationHistory.Window.PEERS, null));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.peers());
         main.displayCurrentNavigationWindow();
     }
 

@@ -83,7 +83,7 @@ public class Main extends Application {
         super.init();
         System.out.println("INIT");
 
-        navigationHistory = new NavigationHistory(new NavigationHistory.Element(NavigationHistory.Window.MEDIA_LIST, NavigationHistory.MediaType.MOVIES));
+        navigationHistory = new NavigationHistory(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.MOVIES));
 
         // load and store available scenes with their controllers
         mainController = loadController("/view/main.fxml");

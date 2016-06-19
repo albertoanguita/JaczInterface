@@ -56,8 +56,10 @@ public class MediaListController extends GenericController {
 
     private static class MediaItemGridCell extends GridCell<MediaDatabaseProperties.MediaItem> {
         private AnchorPane rootPane;
+        private final Main main;
 
-        public MediaItemGridCell() {
+        public MediaItemGridCell(Main main) {
+            this.main = main;
             Pane imagePane = new Pane();
             imagePane.setPrefWidth(140);
             imagePane.setPrefHeight(180);
@@ -82,9 +84,15 @@ public class MediaListController extends GenericController {
             rootPane.setPrefWidth(150);
             rootPane.setPrefHeight(200);
 
-            setOnMouseClicked(event -> {
-                System.out.println("click on cell " + this.getItem().getTitle());
-            });
+//            setOnMouseClicked(event -> {
+//                System.out.println("click on cell " + this.getItem().getTitle());
+//                main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(NavigationHistory.MediaType.MOVIES, itemId));
+//                try {
+//                    main.displayCurrentNavigationWindow();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            });
 
 //            setOnMouseClicked(new MediaItemGridCellEventHandler(this.getItem().getType(), this.getItem().getId()));
         }
@@ -119,6 +127,17 @@ public class MediaListController extends GenericController {
                     year.setText("?");
                 }
                 this.setGraphic(rootPane);
+
+                setOnMouseClicked(event -> {
+                    System.out.println("click on cell " + this.getItem().getTitle());
+                    main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(NavigationHistory.MediaType.MOVIES, item.getId()));
+                    try {
+                        main.displayCurrentNavigationWindow();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
                 //this.setText(item.getTitle());
             }
         }
@@ -159,7 +178,7 @@ public class MediaListController extends GenericController {
         moviesGridView = new GridView<>();
         filteredMovies = new FilteredList<>(PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMovieList());
         filteredSeries = new FilteredList<>(PropertiesAccessor.getInstance().getMediaDatabaseProperties().getSeriesList());
-        moviesGridView.setCellFactory(mediaItem -> new MediaItemGridCell());
+        moviesGridView.setCellFactory(mediaItem -> new MediaItemGridCell(main));
         //final ObservableList<Color> list = FXCollections.observableArrayList();
 
 
