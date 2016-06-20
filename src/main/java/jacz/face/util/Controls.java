@@ -1,17 +1,17 @@
 package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.database.util.GenreCode;
 import jacz.util.lists.tuple.Duple;
 import javafx.collections.FXCollections;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * todo replace with list views that can be sorted with drag and drop (there are examples on the net)
@@ -35,34 +35,8 @@ public class Controls {
         pane.getChildren().add(addCountry);
     }
 
-    private static Label getCountryLabel(Pane pane, List<CountryCode> countries, int index, CountryCode country) {
-        Button closeButton = new Button("X");
-        closeButton.setOnAction(event -> {
-            pane.getChildren().clear();
-            countries.remove(index);
-            countryListPane(pane, countries);
-        });
-
-        // In real life, use an external style sheet rather than inline styles:
-        // I did it this way for brevity
-        //closeButton.setStyle("-fx-font-size: 6pt; -fx-text-fill:red;");
-
-        Label label = new Label(country.getName());
-        label.setGraphic(closeButton);
-        label.setContentDisplay(ContentDisplay.RIGHT);
-        label.setMinWidth(label.getWidth());
-        label.setMinHeight(label.getHeight());
-        return label;
-    }
-
     public static List<CountryCode> getSelectedCountries(Pane pane) {
-        List<CountryCode> countries = new ArrayList<>();
-        pane.getChildren().stream()
-                .filter(node -> node instanceof Label)
-                .map(node -> (Label) node)
-                .forEach(label -> countries.add(Util.getCountryFromName(label.getText()))
-                );
-        return countries;
+        return getSelectedItems(pane, Util::getCountryFromName);
     }
 
     public static void stringListPane(Pane pane, List<String> stringList) {
@@ -85,13 +59,38 @@ public class Controls {
         pane.getChildren().add(newValueTextField);
     }
 
+
+    public static List<String> getSelectedStringValues(Pane pane) {
+        return getSelectedItems(pane, s -> s);
+    }
+
+    public static void genreListPane(Pane pane, List<GenreCode> genres) {
+        for (int i = 0; i < genres.size(); i++) {
+            GenreCode genre = genres.get(i);
+            //pane.getChildren().add(getCountryLabel(pane, initialCountries, i, country));
+            pane.getChildren().add(getListLabel(pane, genres, i, genre.toString(), paneListDuple -> genreListPane(paneListDuple.element1, paneListDuple.element2)));
+        }
+        ChoiceBox<String> addGenre = new ChoiceBox<>(FXCollections.observableList(Util.getCountriesNames()));
+        addGenre.setPrefWidth(50d);
+        addGenre.valueProperty().addListener((observable, oldValue, newValue) -> {
+            GenreCode genreCode = GenreCode.valueOf(newValue);
+            pane.getChildren().clear();
+            genres.add(genreCode);
+            genreListPane(pane, genres);
+        });
+        pane.getChildren().add(addGenre);
+    }
+
+    public static List<GenreCode> getSelectedGenres(Pane pane) {
+        return getSelectedItems(pane, GenreCode::valueOf);
+    }
+
     private static <E> Label getListLabel(Pane pane, List<E> list, int index, String value, Consumer<Duple<Pane, List<E>>> updatePane) {
         Button closeButton = new Button("X");
         closeButton.setOnAction(event -> {
             pane.getChildren().clear();
             list.remove(index);
             updatePane.accept(new Duple<>(pane, list));
-            //countryListPane(pane, countries);
         });
 
         // In real life, use an external style sheet rather than inline styles:
@@ -106,14 +105,12 @@ public class Controls {
         return label;
     }
 
-    public static List<String> getSelectedStringValues(Pane pane) {
-        List<String> list = new ArrayList<>();
-        pane.getChildren().stream()
+    public static <E> List<E> getSelectedItems(Pane pane, Function<String, E> mapper) {
+        return pane.getChildren().stream()
                 .filter(node -> node instanceof Label)
-                .map(node -> (Label) node)
-                .forEach(label -> list.add(label.getText())
-                );
-        return list;
+                .map(node -> ((Label) node).getText())
+                .map(mapper::apply)
+                .collect(Collectors.toList());
     }
 
 }

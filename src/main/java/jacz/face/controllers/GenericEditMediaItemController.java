@@ -94,7 +94,6 @@ public class GenericEditMediaItemController extends GenericController {
             Controls.stringListPane(creatorsFlowPane, new ArrayList<>());
             Controls.stringListPane(actorsFlowPane, new ArrayList<>());
         }
-
     }
 
     public MediaItemData buildMediaItemData() {
