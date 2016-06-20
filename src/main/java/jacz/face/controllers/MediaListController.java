@@ -6,8 +6,7 @@ import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import jacz.face.util.MediaItemType;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -98,10 +97,9 @@ public class MediaListController extends GenericController {
         }
 
 
-
         protected void updateItem(MediaDatabaseProperties.MediaItem item, boolean empty) {
             super.updateItem(item, empty);
-            if(empty) {
+            if (empty) {
                 this.setGraphic(null);
             } else {
                 VBox vBoxPane = (VBox) rootPane.getChildren().get(0);
@@ -130,7 +128,7 @@ public class MediaListController extends GenericController {
 
                 setOnMouseClicked(event -> {
                     System.out.println("click on cell " + this.getItem().getTitle());
-                    main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(NavigationHistory.MediaType.MOVIES, item.getId()));
+                    main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.MOVIE, item.getId()));
                     try {
                         main.displayCurrentNavigationWindow();
                     } catch (IOException e) {
@@ -221,7 +219,7 @@ public class MediaListController extends GenericController {
     @Override
     public void setMain(Main main) {
         super.setMain(main);
-        if (main.getNavigationHistory().getCurrentElement().mediaType == NavigationHistory.MediaType.MOVIES) {
+        if (main.getNavigationHistory().getCurrentElement().mediaItemType == MediaItemType.MOVIE) {
             System.out.println("movies");
             moviesGridView.setItems(filteredMovies);
         } else {
@@ -234,41 +232,16 @@ public class MediaListController extends GenericController {
     public void newMovie() {
         System.out.println("new movie");
 
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader();
-            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
-            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
-            final EditMovieController editMovieController = fxmlLoader.getController();
-            editMovieController.setMain(main);
 
-            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
-            newMovieDialog.setTitle("new movie");
-            newMovieDialog.getDialogPane().setContent(newMoviePane);
+        Optional<EditMovieController.MovieData> result = main.editMovie(NavigationHistory.DialogIntention.NEW);
 
-            // Set the button types.
-            newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        System.out.println("new movie completed");
 
-            // Convert the result to a settings value when the ok button is clicked.
-            newMovieDialog.setResultConverter(dialogButton -> {
-                if (dialogButton == ButtonType.OK) {
-                    return editMovieController.buildMovieData();
-                } else {
-                    return null;
-                }
-            });
-
-            Optional<EditMovieController.MovieData> result = newMovieDialog.showAndWait();
-
-            result.ifPresent(newMovie -> {
-                System.out.println(newMovie.toString());
-                Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
-                movie.setOriginalTitle(newMovie.originalTitle);
-                movie.setYear(newMovie.year);
-                ClientAccessor.getInstance().getClient().localItemModified(movie);
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        result.ifPresent(newMovie -> {
+            System.out.println("creating new movie: " + newMovie.toString());
+            Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
+            EditMovieController.changeMovie(movie, newMovie);
+        });
     }
 
 }

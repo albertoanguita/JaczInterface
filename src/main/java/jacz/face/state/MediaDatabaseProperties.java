@@ -3,7 +3,9 @@ package jacz.face.state;
 import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.*;
+import jacz.database.util.GenreCode;
 import jacz.face.controllers.ClientAccessor;
+import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import javafx.application.Platform;
@@ -29,8 +31,9 @@ import java.util.function.Predicate;
 public class MediaDatabaseProperties extends GenericStateProperties {
 
     public static class MediaItem {
+        // todo companies, genres
 
-        private final DatabaseMediator.ItemType type;
+        private final MediaItemType type;
 
         private final Integer id;
 
@@ -48,11 +51,15 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObjectProperty<List<String>> actors;
 
+        private final ObjectProperty<List<String>> productionCompanies;
+
+        private final ObjectProperty<List<GenreCode>> genres;
+
         private final ObjectProperty<LanguageCode> language;
 
         private final ObjectProperty<Integer> minutes;
 
-        private MediaItem(CreationItem creationItem, DatabaseMediator.ItemType type, String imagePath, Integer minutes) {
+        private MediaItem(CreationItem creationItem, MediaItemType type, String imagePath, List<String> productionCompanies, List<GenreCode> genres, Integer minutes) {
             this.type = type;
             this.id = creationItem.getId();
             this.title = new SimpleStringProperty(creationItem.getTitle());
@@ -62,23 +69,30 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.countries = new SimpleObjectProperty<>(creationItem.getCountries());
             this.creators = new SimpleObjectProperty<>(creationItem.getCreators());
             this.actors = new SimpleObjectProperty<>(creationItem.getActors());
+            this.productionCompanies = new SimpleObjectProperty<>(productionCompanies);
+            this.genres = new SimpleObjectProperty<>(genres);
             this.language = new SimpleObjectProperty<>(creationItem.getLanguage());
             this.minutes = new SimpleObjectProperty<>(minutes);
         }
 
+        public MediaItem(ProducedCreationItem producedCreationItem, MediaItemType type, String imagePath, Integer minutes) {
+            this(producedCreationItem, type, imagePath, producedCreationItem.getProductionCompanies(), producedCreationItem.getGenres(), minutes);
+        }
+
         public MediaItem(Movie movie) {
-            this(movie, DatabaseMediator.ItemType.MOVIE, buildImagePath(movie), movie.getMinutes());
+            this(movie, MediaItemType.MOVIE, buildImagePath(movie), movie.getMinutes());
         }
 
         public MediaItem(TVSeries tvSeries) {
-            this(tvSeries, DatabaseMediator.ItemType.TV_SERIES, buildImagePath(tvSeries), null);
+            this(tvSeries, MediaItemType.TV_SERIES, buildImagePath(tvSeries), null);
         }
 
         public MediaItem(Chapter chapter) {
-            this(chapter, DatabaseMediator.ItemType.CHAPTER, buildImagePath(chapter), chapter.getMinutes());
+            // todo season and chapter number???
+            this(chapter, MediaItemType.CHAPTER, buildImagePath(chapter), null, null, chapter.getMinutes());
         }
 
-        public MediaItem(DatabaseMediator.ItemType type, Integer id) {
+        public MediaItem(MediaItemType type, Integer id) {
             this.type = type;
             this.id = id;
             this.title = null;
@@ -88,6 +102,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.countries = null;
             this.creators = null;
             this.actors = null;
+            this.productionCompanies = null;
+            this.genres = null;
             this.language = null;
             this.minutes = null;
         }
@@ -116,7 +132,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             update(chapter, buildImagePath(chapter), chapter.getMinutes());
         }
 
-        public DatabaseMediator.ItemType getType() {
+        public MediaItemType getType() {
             return type;
         }
 
@@ -180,6 +196,22 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return actors;
         }
 
+        public List<String> getProductionCompanies() {
+            return productionCompanies.get();
+        }
+
+        public ObjectProperty<List<String>> productionCompaniesProperty() {
+            return productionCompanies;
+        }
+
+        public List<GenreCode> getGenres() {
+            return genres.get();
+        }
+
+        public ObjectProperty<List<GenreCode>> genresProperty() {
+            return genres;
+        }
+
         public LanguageCode getLanguage() {
             return language.get();
         }
@@ -227,9 +259,9 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 //        }
 //    }
 
-    private static final Predicate<MediaItem> moviesFilter = mediaItem -> mediaItem.getType() == DatabaseMediator.ItemType.MOVIE;
+    private static final Predicate<MediaItem> moviesFilter = mediaItem -> mediaItem.getType() == MediaItemType.MOVIE;
 
-    private static final Predicate<MediaItem> seriesFilter = mediaItem -> mediaItem.getType() == DatabaseMediator.ItemType.TV_SERIES;
+    private static final Predicate<MediaItem> seriesFilter = mediaItem -> mediaItem.getType() == MediaItemType.TV_SERIES;
 
     private String integratedDB;
 
@@ -248,6 +280,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         itemList = FXCollections.observableArrayList(new Callback<MediaItem, Observable[]>() {
             @Override
             public Observable[] call(MediaItem p) {
+                // todo add rest of properties
                 return new Observable[]{
                         p.titleProperty(),
                         p.originalTitleProperty(),
@@ -359,6 +392,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
     }
 
     private void newTVSeries(TVSeries tvSeries) {
+        // todo
         itemList.add(new MediaItem(tvSeries));
     }
 
@@ -366,7 +400,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         itemList.add(new MediaItem(chapter));
     }
 
-    public void updateMediaItem(DatabaseMediator.ItemType type, Integer id, boolean hasNewMediaContent) {
+    public void updateMediaItem(DatabaseMediator.ItemType itemType, Integer id, boolean hasNewMediaContent) {
+        MediaItemType type = MediaItemType.buildType(itemType);
         int index = findMediaItem(type, id);
         if (index >= 0) {
             switch (type) {
@@ -392,14 +427,19 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
     }
 
-    public void mediaItemRemoved(DatabaseMediator.ItemType type, Integer id) {
+    public void mediaItemRemoved(DatabaseMediator.ItemType itemType, Integer id) {
+        MediaItemType type = MediaItemType.buildType(itemType);
         int index = findMediaItem(type, id);
         if (index >= 0) {
             itemList.remove(index);
         }
     }
 
-    private int findMediaItem(DatabaseMediator.ItemType type, Integer id) {
+    public MediaItem getMediaItem(MediaItemType type, Integer id) {
+        return itemList.get(itemList.indexOf(new MediaItem(type, id)));
+    }
+
+    private int findMediaItem(MediaItemType type, Integer id) {
         return itemList.indexOf(new MediaItem(type, id));
     }
 

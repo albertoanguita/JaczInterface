@@ -1,19 +1,23 @@
 package jacz.face.main;
 
-import jacz.face.controllers.CreateConfigController;
-import jacz.face.controllers.GenericController;
-import jacz.face.controllers.MainController;
+import jacz.database.Movie;
+import jacz.face.controllers.*;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.state.PropertiesAccessor;
+import jacz.face.util.MediaItemType;
 import jacz.util.concurrency.task_executor.ThreadExecutor;
 import jacz.util.lists.tuple.Duple;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class Main extends Application {
 
@@ -83,7 +87,7 @@ public class Main extends Application {
         super.init();
         System.out.println("INIT");
 
-        navigationHistory = new NavigationHistory(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.MOVIES));
+        navigationHistory = new NavigationHistory(NavigationHistory.Element.mediaList(MediaItemType.MOVIE));
 
         // load and store available scenes with their controllers
         mainController = loadController("/view/main.fxml");
@@ -116,6 +120,40 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
+
+    }
+
+    public Optional<EditMovieController.MovieData> editMovie(NavigationHistory.DialogIntention dialogIntention) {
+        try {
+            navigationHistory.setCurrentDialogIntention(dialogIntention);
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
+            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
+            final EditMovieController editMovieController = fxmlLoader.getController();
+            editMovieController.setMain(this);
+
+            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
+            newMovieDialog.setTitle("new movie");
+            newMovieDialog.getDialogPane().setContent(newMoviePane);
+
+            // Set the button types.
+            newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+            // Convert the result to a settings value when the ok button is clicked.
+            newMovieDialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK) {
+                    return editMovieController.buildMovieData();
+                } else {
+                    return null;
+                }
+            });
+
+            return newMovieDialog.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
 
     }
 }

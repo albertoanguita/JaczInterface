@@ -1,5 +1,6 @@
 package jacz.face.controllers.navigation;
 
+import jacz.face.util.MediaItemType;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -19,33 +20,31 @@ public class NavigationHistory {
         PEERS,
     }
 
-    public enum MediaType {
-        MOVIES,
-        SERIES,
-        FAVORITES
+    public enum DialogIntention {
+        NEW,
+        EDIT
     }
-
 
     public static class Element {
 
         public final Window window;
 
-        public final MediaType mediaType;
+        public final MediaItemType mediaItemType;
 
         public final Integer itemId;
 
-        private Element(Window window, MediaType mediaType, Integer itemId) {
+        private Element(Window window, MediaItemType mediaItemType, Integer itemId) {
             this.window = window;
-            this.mediaType = mediaType;
+            this.mediaItemType = mediaItemType;
             this.itemId = itemId;
         }
 
-        public static Element mediaList(MediaType mediaType) {
-            return new Element(Window.MEDIA_LIST, mediaType, null);
+        public static Element mediaList(MediaItemType mediaItemType) {
+            return new Element(Window.MEDIA_LIST, mediaItemType, null);
         }
 
-        public static Element itemDetail(MediaType mediaType, Integer itemId) {
-            return new Element(Window.ITEM_DETAIL, mediaType, itemId);
+        public static Element itemDetail(MediaItemType mediaItemType, Integer itemId) {
+            return new Element(Window.ITEM_DETAIL, mediaItemType, itemId);
         }
 
         public static Element transfers() {
@@ -60,6 +59,8 @@ public class NavigationHistory {
     private final List<Element> historyElements;
 
     private final AtomicInteger historyIndex;
+
+    private DialogIntention currentDialogIntention;
 
     private final BooleanProperty canMoveBackwards;
 
@@ -123,5 +124,13 @@ public class NavigationHistory {
         historyIndex.set(historyIndex.get() + shift);
         updateProperties();
         return historyElements.get(historyIndex.get());
+    }
+
+    public DialogIntention getCurrentDialogIntention() {
+        return currentDialogIntention;
+    }
+
+    public void setCurrentDialogIntention(DialogIntention currentDialogIntention) {
+        this.currentDialogIntention = currentDialogIntention;
     }
 }

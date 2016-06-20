@@ -1,6 +1,12 @@
 package jacz.face.controllers;
 
+import com.neovisionaries.i18n.CountryCode;
+import jacz.database.Movie;
+import jacz.database.util.GenreCode;
+import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
+import jacz.face.state.MediaDatabaseProperties;
+import jacz.face.state.PropertiesAccessor;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -10,48 +16,26 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
  * Created by alberto on 6/17/16.
  */
-public class EditMovieController extends GenericController {
+public class EditMovieController extends EditProducedMediaItemController {
 
-    public static class MovieData {
+    public static class MovieData extends ProducedMediaItemData {
 
-        public final String title;
+        public final Integer minutes;
 
-        public final String originalTitle;
-
-        public final Integer year;
-
-        public MovieData(String title, String originalTitle, Integer year) {
-            this.title = title;
-            this.originalTitle = originalTitle;
-            this.year = year;
-        }
-
-        @Override
-        public String toString() {
-            return "MovieData{" +
-                    "title='" + title + '\'' +
-                    ", originalTitle='" + originalTitle + '\'' +
-                    ", year=" + year +
-                    '}';
+        public MovieData(String title, String originalTitle, Integer year, String synopsis, List<CountryCode> countries, List<String> creators, List<String> actors, List<String> companies, List<GenreCode> genres, Integer minutes) {
+            super(title, originalTitle, year, synopsis, countries, creators, actors, companies, genres);
+            this.minutes = minutes;
         }
     }
 
     @FXML
     Pane imagePane;
-
-    @FXML
-    TextField titleTextField;
-
-    @FXML
-    TextField originalTitleTextField;
-
-    @FXML
-    TextField yearTextField;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -61,11 +45,22 @@ public class EditMovieController extends GenericController {
     @Override
     public void setMain(Main main) {
         super.setMain(main);
+
         // todo get user intention from main
+        if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
+            // load the controls data from the edited item
+            MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
+
+            titleTextField.setText(mediaItem.getTitle());
+            titleTextField.setEditable(false);
+            originalTitleTextField.setText(mediaItem.getOriginalTitle());
+            yearTextField.setText(mediaItem.getYear() != null ? mediaItem.getYear().toString() : null);
+        }
     }
 
     public MovieData buildMovieData() {
-        return new MovieData(titleTextField.getText(), originalTitleTextField.getText(), Integer.parseInt(yearTextField.getText()));
+        return null;
+        //return new MovieData(titleTextField.getText(), originalTitleTextField.getText(), Integer.parseInt(yearTextField.getText()));
     }
 
     public void chooseImageFile() {
@@ -86,5 +81,11 @@ public class EditMovieController extends GenericController {
             imagePane.getChildren().addAll(imageView);
         }
 
+    }
+
+    public static void changeMovie(Movie movie, MovieData movieData) {
+        movie.setOriginalTitle(movieData.originalTitle);
+        movie.setYear(movieData.year);
+        ClientAccessor.getInstance().getClient().localItemModified(movie);
     }
 }

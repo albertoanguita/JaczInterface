@@ -10,6 +10,7 @@ import jacz.face.main.Main;
 import jacz.face.messages.Messages;
 import jacz.face.state.ConnectionToServerStatus;
 import jacz.face.state.PropertiesAccessor;
+import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
@@ -374,17 +375,17 @@ public class MainController extends GenericController {
     }
 
     public void switchToMoviesView() throws IOException {
-        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.MOVIES));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(MediaItemType.MOVIE));
         main.displayCurrentNavigationWindow();
     }
 
     public void switchToSeriesView() throws IOException {
-        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.SERIES));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(MediaItemType.TV_SERIES));
         main.displayCurrentNavigationWindow();
     }
 
     public void switchToFavoritesView() throws IOException {
-        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(NavigationHistory.MediaType.FAVORITES));
+        main.getNavigationHistory().navigate(NavigationHistory.Element.mediaList(MediaItemType.FAVORITE));
         main.displayCurrentNavigationWindow();
     }
 
