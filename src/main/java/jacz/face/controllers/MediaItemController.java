@@ -17,7 +17,7 @@ import java.util.function.Function;
 /**
  * Created by alberto on 6/20/16.
  */
-public class GenericMediaItemController extends GenericController {
+public class MediaItemController extends GenericController {
 
     protected MediaDatabaseProperties.MediaItem mediaItem;
 

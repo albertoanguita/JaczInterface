@@ -1,6 +1,6 @@
 package jacz.face.controllers;
 
-import com.neovisionaries.i18n.CountryCode;
+import jacz.database.Movie;
 import jacz.database.util.GenreCode;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
@@ -16,24 +16,30 @@ import java.util.List;
 /**
  * Created by alberto on 6/20/16.
  */
-public class EditProducedMediaItemController extends GenericEditMediaItemController {
+public abstract class EditProducedMediaItemController extends EditMediaItemController {
 
     public static class ProducedMediaItemData extends MediaItemData {
 
-        public final List<String> companies;
+        protected final List<String> companies;
 
-        public final List<GenreCode> genres;
+        protected final List<GenreCode> genres;
 
-        public ProducedMediaItemData(String title, String originalTitle, Integer year, String synopsis, List<CountryCode> countries, List<String> creators, List<String> actors, List<String> companies, List<GenreCode> genres) {
-            super(title, originalTitle, year, synopsis, countries, creators, actors);
+        protected final String imagePath;
+
+        public ProducedMediaItemData(MediaItemData mediaItemData, List<String> companies, List<GenreCode> genres, String imagePath) {
+            super(mediaItemData.title, mediaItemData.originalTitle, mediaItemData.year, mediaItemData.synopsis, mediaItemData.countries, mediaItemData.creators, mediaItemData.actors);
             this.companies = companies;
             this.genres = genres;
+            this.imagePath = imagePath;
         }
     }
 
 
     @FXML
     FlowPane productionCompaniesFlowPane;
+
+    @FXML
+    FlowPane genresFlowPane;
 
 
     @Override
@@ -46,10 +52,21 @@ public class EditProducedMediaItemController extends GenericEditMediaItemControl
             MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
 
             Controls.stringListPane(productionCompaniesFlowPane, mediaItem.getProductionCompanies());
+            Controls.genreListPane(genresFlowPane, mediaItem.getGenres());
         } else {
             Controls.stringListPane(productionCompaniesFlowPane, new ArrayList<>());
+            Controls.genreListPane(genresFlowPane, new ArrayList<>());
         }
-
     }
 
+    public ProducedMediaItemData buildProducedMediaItemData() {
+        return new ProducedMediaItemData(buildMediaItemData(), Controls.getSelectedStringValues(productionCompaniesFlowPane), Controls.getSelectedGenres(genresFlowPane));
+    }
+
+
+    public static void changeMovie(Movie movie, ProducedMediaItemData producedMediaItemData) {
+        EditMediaItemController.changeMovie(movie, producedMediaItemData);
+        movie.setProductionCompanies(producedMediaItemData.companies);
+        movie.setGenres(producedMediaItemData.genres);
+    }
 }

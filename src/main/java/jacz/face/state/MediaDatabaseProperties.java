@@ -45,6 +45,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObjectProperty<Integer> year;
 
+        private final StringProperty synopsis;
+
         private final ObjectProperty<List<CountryCode>> countries;
 
         private final ObjectProperty<List<String>> creators;
@@ -66,6 +68,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.originalTitle = new SimpleStringProperty(creationItem.getOriginalTitle());
             this.imagePath = new SimpleStringProperty(imagePath);
             this.year = new SimpleObjectProperty<>(creationItem.getYear());
+            this.synopsis = new SimpleStringProperty(creationItem.getSynopsis());
             this.countries = new SimpleObjectProperty<>(creationItem.getCountries());
             this.creators = new SimpleObjectProperty<>(creationItem.getCreators());
             this.actors = new SimpleObjectProperty<>(creationItem.getActors());
@@ -99,6 +102,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.originalTitle = null;
             this.imagePath = null;
             this.year = null;
+            this.synopsis = null;
             this.countries = null;
             this.creators = null;
             this.actors = null;
@@ -170,6 +174,14 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public ObjectProperty<Integer> yearProperty() {
             return year;
+        }
+
+        public String getSynopsis() {
+            return synopsis.get();
+        }
+
+        public StringProperty synopsisProperty() {
+            return synopsis;
         }
 
         public List<CountryCode> getCountries() {

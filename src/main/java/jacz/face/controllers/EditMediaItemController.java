@@ -1,12 +1,14 @@
 package jacz.face.controllers;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.database.Movie;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Controls;
 import javafx.fxml.FXML;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -19,23 +21,23 @@ import java.util.ResourceBundle;
 /**
  * Created by alberto on 6/20/16.
  */
-public class GenericEditMediaItemController extends GenericController {
+public abstract class EditMediaItemController extends GenericController {
 
     public static class MediaItemData {
 
         public final String title;
 
-        public final String originalTitle;
+        protected final String originalTitle;
 
-        public final Integer year;
+        protected final Integer year;
 
-        public final String synopsis;
+        protected final String synopsis;
 
-        public final List<CountryCode> countries;
+        protected final List<CountryCode> countries;
 
-        public final List<String> creators;
+        protected final List<String> creators;
 
-        public final List<String> actors;
+        protected final List<String> actors;
 
         public MediaItemData(String title, String originalTitle, Integer year, String synopsis, List<CountryCode> countries, List<String> creators, List<String> actors) {
             this.title = title;
@@ -46,7 +48,6 @@ public class GenericEditMediaItemController extends GenericController {
             this.creators = creators;
             this.actors = actors;
         }
-
     }
 
     @FXML
@@ -57,6 +58,9 @@ public class GenericEditMediaItemController extends GenericController {
 
     @FXML
     TextField yearTextField;
+
+    @FXML
+    TextArea synopsisTextArea;
 
     @FXML
     HBox countriesHBox;
@@ -86,6 +90,7 @@ public class GenericEditMediaItemController extends GenericController {
             titleTextField.setEditable(false);
             originalTitleTextField.setText(mediaItem.getOriginalTitle());
             yearTextField.setText(mediaItem.getYear() != null ? mediaItem.getYear().toString() : null);
+            synopsisTextArea.setText(mediaItem.getSynopsis() != null ? mediaItem.getSynopsis() : null);
             Controls.countryListPane(countriesHBox, mediaItem.getCountries());
             Controls.stringListPane(creatorsFlowPane, mediaItem.getCreators());
             Controls.stringListPane(actorsFlowPane, mediaItem.getActors());
@@ -97,10 +102,23 @@ public class GenericEditMediaItemController extends GenericController {
     }
 
     public MediaItemData buildMediaItemData() {
-        return new MediaItemData(titleTextField.getText(), originalTitleTextField.getText(), parseInt(yearTextField.getText()), null, Controls.getSelectedCountries(countriesHBox), new ArrayList<>(), new ArrayList<>());
+        return new MediaItemData(parseText(titleTextField.getText()), parseText(originalTitleTextField.getText()), parseInt(yearTextField.getText()), parseText(synopsisTextArea.getText()), Controls.getSelectedCountries(countriesHBox), Controls.getSelectedStringValues(creatorsFlowPane), Controls.getSelectedStringValues(actorsFlowPane));
     }
 
     public static Integer parseInt(String text) {
         return text != null ? Integer.parseInt(text) : null;
+    }
+
+    public static String parseText(String text) {
+        return text != null && !text.isEmpty() ? text : null;
+    }
+
+    public static void changeMovie(Movie movie, MediaItemData mediaItemData) {
+        movie.setOriginalTitle(mediaItemData.originalTitle);
+        movie.setYear(mediaItemData.year);
+        movie.setSynopsis(mediaItemData.synopsis);
+        movie.setCountries(mediaItemData.countries);
+        movie.setCreators(mediaItemData.creators);
+        movie.setActors(mediaItemData.actors);
     }
 }

@@ -1,8 +1,6 @@
 package jacz.face.controllers;
 
-import com.neovisionaries.i18n.CountryCode;
 import jacz.database.Movie;
-import jacz.database.util.GenreCode;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
@@ -16,7 +14,6 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -26,16 +23,19 @@ public class EditMovieController extends EditProducedMediaItemController {
 
     public static class MovieData extends ProducedMediaItemData {
 
-        public final Integer minutes;
+        private final Integer minutes;
 
-        public MovieData(String title, String originalTitle, Integer year, String synopsis, List<CountryCode> countries, List<String> creators, List<String> actors, List<String> companies, List<GenreCode> genres, Integer minutes) {
-            super(title, originalTitle, year, synopsis, countries, creators, actors, companies, genres);
+        public MovieData(ProducedMediaItemData producedMediaItemData, Integer minutes) {
+            super(producedMediaItemData, producedMediaItemData.companies, producedMediaItemData.genres, producedMediaItemData.imagePath);
             this.minutes = minutes;
         }
     }
 
     @FXML
     Pane imagePane;
+
+    @FXML
+    private TextField minutesTextField;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -54,13 +54,12 @@ public class EditMovieController extends EditProducedMediaItemController {
             titleTextField.setText(mediaItem.getTitle());
             titleTextField.setEditable(false);
             originalTitleTextField.setText(mediaItem.getOriginalTitle());
-            yearTextField.setText(mediaItem.getYear() != null ? mediaItem.getYear().toString() : null);
+            minutesTextField.setText(mediaItem.getMinutes() != null ? mediaItem.getMinutes().toString() : null);
         }
     }
 
     public MovieData buildMovieData() {
-        return null;
-        //return new MovieData(titleTextField.getText(), originalTitleTextField.getText(), Integer.parseInt(yearTextField.getText()));
+        return new MovieData(buildProducedMediaItemData(), Integer.parseInt(minutesTextField.getText()));
     }
 
     public void chooseImageFile() {
@@ -84,8 +83,8 @@ public class EditMovieController extends EditProducedMediaItemController {
     }
 
     public static void changeMovie(Movie movie, MovieData movieData) {
-        movie.setOriginalTitle(movieData.originalTitle);
-        movie.setYear(movieData.year);
+        EditProducedMediaItemController.changeMovie(movie, movieData);
+        movie.setMinutes(movieData.minutes);
         ClientAccessor.getInstance().getClient().localItemModified(movie);
     }
 }

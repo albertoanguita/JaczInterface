@@ -1,12 +1,8 @@
 package jacz.face.controllers;
 
-import com.neovisionaries.i18n.CountryCode;
 import jacz.database.Movie;
-import jacz.database.util.GenreCode;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
-import jacz.face.state.MediaDatabaseProperties;
-import jacz.face.state.PropertiesAccessor;
 import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -16,16 +12,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 
 import java.io.File;
-import java.net.URL;
-import java.util.List;
 import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.function.Function;
 
 /**
  * Created by Alberto on 19/06/2016.
  */
-public class MovieController extends GenericMediaItemController {
+public class MovieController extends MediaItemController {
 
     @FXML
     private Label durationLabel;
