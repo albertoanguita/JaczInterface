@@ -29,7 +29,7 @@
                      <children>
                         <GridPane layoutX="0.5" layoutY="0.5" vgap="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="120.0" />
                             <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                           </columnConstraints>
                           <rowConstraints>
@@ -59,7 +59,7 @@
                               <FlowPane fx:id="creatorsFlowPane" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.valignment="TOP" />
                               <Label text="Actors" GridPane.rowIndex="6" GridPane.valignment="TOP" />
                               <FlowPane fx:id="actorsFlowPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6" GridPane.valignment="TOP" />
-                              <Label text="Producers" GridPane.rowIndex="7" GridPane.valignment="TOP" />
+                              <Label text="Prod. companies" GridPane.rowIndex="7" GridPane.valignment="TOP" />
                               <FlowPane fx:id="productionCompaniesFlowPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="7" GridPane.valignment="TOP" />
                               <Label text="Genres" GridPane.rowIndex="8" GridPane.valignment="TOP" />
                               <FlowPane fx:id="genresFlowPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="8" GridPane.valignment="TOP" />
