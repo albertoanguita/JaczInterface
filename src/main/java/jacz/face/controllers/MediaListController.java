@@ -1,5 +1,6 @@
 package jacz.face.controllers;
 
+import jacz.database.DatabaseItem;
 import jacz.database.DatabaseMediator;
 import jacz.database.Movie;
 import jacz.face.controllers.navigation.NavigationHistory;
@@ -10,9 +11,6 @@ import jacz.face.util.MediaItemType;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -241,7 +239,17 @@ public class MediaListController extends GenericController {
             System.out.println("creating new movie: " + newMovie.toString());
             Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
             try {
-                EditMovieController.changeMovie(movie, newMovie);
+                DatabaseItem integratedItem = EditMovieController.changeMovie(movie, newMovie);
+                PropertiesAccessor.getInstance().getMediaDatabaseProperties().updateMediaItem(integratedItem, true);
+
+                // todo until we do not exit from here, the item is not added to the list!!
+                //
+                main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.MOVIE, integratedItem.getId()));
+                try {
+                    main.displayCurrentNavigationWindow();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

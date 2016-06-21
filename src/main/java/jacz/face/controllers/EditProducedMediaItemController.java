@@ -86,6 +86,11 @@ public abstract class EditProducedMediaItemController extends EditMediaItemContr
         displayImage(selectedImage);
     }
 
+    public void clearImageFile() {
+        selectedImage = null;
+        displayImage(null);
+    }
+
     private void displayImage(String path) {
         if (path != null) {
             imagePane.setPrefWidth(140);

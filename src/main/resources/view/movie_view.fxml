@@ -52,7 +52,7 @@
                               <Label fx:id="yearLabel" text="yearLabel" GridPane.rowIndex="2" />
                               <Label fx:id="durationLabel" text="durationLabel" GridPane.rowIndex="3" />
                               <Label fx:id="countriesLabel" text="countriesLabel" GridPane.rowIndex="4" />
-                              <Label fx:id="directorsLabel" text="directorsLabel" GridPane.rowIndex="5" />
+                              <Label fx:id="creatorsLabel" text="creatorsLabel" GridPane.rowIndex="5" />
                               <Label fx:id="actorsLabel" text="actorsLabel" GridPane.rowIndex="6" />
                               <Label fx:id="productionCompaniesLabel" text="productionCompaniesLabel" GridPane.rowIndex="7" />
                               <Label fx:id="genresLabel" text="genresLabel" GridPane.rowIndex="8" />

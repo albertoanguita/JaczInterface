@@ -27,6 +27,10 @@ import java.util.ResourceBundle;
  */
 public class CreateConfigController extends GenericController {
 
+    private static final String CUSTOM_STORAGE_VERSION_0_1 = "0.1";
+
+    private static final String CUSTOM_STORAGE_CURRENT_VERSION = CUSTOM_STORAGE_VERSION_0_1;
+
     private static class ByteArrayWrapper {
 
         public final byte[] array;
@@ -56,7 +60,7 @@ public class CreateConfigController extends GenericController {
                 @Override
                 protected Duple<String, PeerId> call()
                         throws IOException {
-                    return SessionManager.createUserConfig("./etc", randomSeed.get().array, nick.get(), country.get());
+                    return SessionManager.createUserConfig("./etc", randomSeed.get().array, nick.get(), country.get(), CUSTOM_STORAGE_CURRENT_VERSION);
                 }
             };
         }

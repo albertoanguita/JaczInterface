@@ -8,9 +8,11 @@ import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
-import javafx.application.Platform;
 import javafx.beans.Observable;
-import javafx.beans.property.*;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -31,7 +33,6 @@ import java.util.function.Predicate;
 public class MediaDatabaseProperties extends GenericStateProperties {
 
     public static class MediaItem {
-        // todo companies, genres
 
         private final MediaItemType type;
 
@@ -112,37 +113,37 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.minutes = null;
         }
 
-        private void update(CreationItem creationItem) {
-            Util.setLater(this.title, creationItem.getTitle());
-            Util.setLater(this.originalTitle, creationItem.getOriginalTitle());
-            Util.setLater(this.year, creationItem.getYear());
-            Util.setLater(this.synopsis, creationItem.getSynopsis());
-            Util.setLater(this.countries, creationItem.getCountries());
-            Util.setLater(this.creators, creationItem.getCreators());
-            Util.setLater(this.actors, creationItem.getActors());
-            Util.setLater(this.productionCompanies, creationItem.getActors());
-            Util.setLater(this.language, creationItem.getLanguage());
+        private void update(CreationItem creationItem, boolean setLater) {
+            Util.setLaterIf(this.title, creationItem.getTitle(), setLater);
+            Util.setLaterIf(this.originalTitle, creationItem.getOriginalTitle(), setLater);
+            Util.setLaterIf(this.year, creationItem.getYear(), setLater);
+            Util.setLaterIf(this.synopsis, creationItem.getSynopsis(), setLater);
+            Util.setLaterIf(this.countries, creationItem.getCountries(), setLater);
+            Util.setLaterIf(this.creators, creationItem.getCreators(), setLater);
+            Util.setLaterIf(this.actors, creationItem.getActors(), setLater);
+            Util.setLaterIf(this.productionCompanies, creationItem.getActors(), setLater);
+            Util.setLaterIf(this.language, creationItem.getLanguage(), setLater);
         }
 
-        public void update(ProducedCreationItem producedCreationItem) {
-            update((CreationItem) producedCreationItem);
-            Util.setLater(this.imagePath, buildImagePath(producedCreationItem));
-            Util.setLater(this.productionCompanies, producedCreationItem.getProductionCompanies());
+        public void update(ProducedCreationItem producedCreationItem, boolean setLater) {
+            update((CreationItem) producedCreationItem, setLater);
+            Util.setLaterIf(this.imagePath, buildImagePath(producedCreationItem), setLater);
+            Util.setLaterIf(this.productionCompanies, producedCreationItem.getProductionCompanies(), setLater);
         }
 
-        public void update(Movie movie) {
-            update((ProducedCreationItem) movie);
-            Util.setLater(this.minutes, movie.getMinutes());
+        public void update(Movie movie, boolean setLater) {
+            update((ProducedCreationItem) movie, setLater);
+            Util.setLaterIf(this.minutes, movie.getMinutes(), setLater);
         }
 
-        protected void update(TVSeries tvSeries) {
-            update((ProducedCreationItem) tvSeries);
+        protected void update(TVSeries tvSeries, boolean setLater) {
+            update((ProducedCreationItem) tvSeries, setLater);
         }
 
-        protected void update(Chapter chapter) {
-            update((CreationItem) chapter);
-            Util.setLater(this.imagePath, buildImagePath(chapter));
-            Util.setLater(this.minutes, chapter.getMinutes());
+        protected void update(Chapter chapter, boolean setLater) {
+            update((CreationItem) chapter, setLater);
+            Util.setLaterIf(this.imagePath, buildImagePath(chapter), setLater);
+            Util.setLaterIf(this.minutes, chapter.getMinutes(), setLater);
         }
 
         public MediaItemType getType() {
@@ -266,19 +267,6 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
     }
 
-//    public static class Movie extends MediaItem {
-//
-//        public Movie(jacz.database.Movie movie) {
-//            super(DatabaseMediator.ItemType.MOVIE, id, title);
-//        }
-//    }
-//
-//    public static class TVSeries extends MediaItem {
-//
-//        public TVSeries(Integer id, String title) {
-//            super(DatabaseMediator.ItemType.TV_SERIES, id, title);
-//        }
-//    }
 
     private static final Predicate<MediaItem> moviesFilter = mediaItem -> mediaItem.getType() == MediaItemType.MOVIE;
 
@@ -291,10 +279,6 @@ public class MediaDatabaseProperties extends GenericStateProperties {
     private final ObservableList<MediaItem> movieList;
 
     private final ObservableList<MediaItem> seriesList;
-
-//    private final ObservableList<Movie> movieList;
-//
-//    private final ObservableList<TVSeries> tvSeriesList;
 
     public MediaDatabaseProperties() {
         this.integratedDB = null;
@@ -318,17 +302,15 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         });
         movieList = new FilteredList<>(itemList, moviesFilter);
         seriesList = new FilteredList<>(itemList, seriesFilter);
-//        movieList = FXCollections.observableArrayList();
-//        tvSeriesList = FXCollections.observableArrayList();
     }
 
     @Override
     public void setClient(PeerEngineClient client) {
         super.setClient(client);
         integratedDB = client.getDatabases().getIntegratedDB();
-        Movie.getMovies(integratedDB).stream().forEach(this::newMovie);
-        TVSeries.getTVSeries(integratedDB).stream().forEach(this::newTVSeries);
-        Chapter.getChapters(integratedDB).stream().forEach(this::newChapter);
+        Movie.getMovies(integratedDB).stream().forEach(movie -> newMovie(movie, true));
+        TVSeries.getTVSeries(integratedDB).stream().forEach(tvSeries -> newTVSeries(tvSeries, true));
+        Chapter.getChapters(integratedDB).stream().forEach(chapter -> newChapter(chapter, true));
     }
 
     public ObservableList<MediaItem> getItemList() {
@@ -343,118 +325,71 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         return seriesList;
     }
 
-    //    public ObservableList<Movie> getMovieList() {
-//        return movieList;
-//    }
-//
-//    public ObservableList<TVSeries> getTVSeriesList() {
-//        return tvSeriesList;
-//    }
-//
-//    public void addNewMovie(Integer id) {
-//        movieList.add(getMovie(id));
-//    }
-//
-//    public void updateMovie(Integer id) {
-//        Movie movie = getMovie(id);
-//        movieList.set(movieList.indexOf(movie), movie);
-//    }
-//
-//    public void updateMovieWithNewMediaContent(Integer id) {
-//        updateMovie(id);
-//    }
-//
-//    public void addNewTVSeries(Integer id) {
-//        tvSeriesList.add(getTVSeries(id));
-//    }
-//
-//    public void updateTVSeries(Integer id) {
-//        TVSeries tvSeries = getTVSeries(id);
-//        tvSeriesList.set(tvSeriesList.indexOf(tvSeries), tvSeries);
-//    }
-//
-//    public void updateTVSeriesWithNewMediaContent(Integer id) {
-//        updateTVSeries(id);
-//    }
-//
-//    private Movie getMovie(Integer id) {
-//        jacz.database.Movie databaseMovie = (jacz.database.Movie) DatabaseMediator.getItem(integratedDB, DatabaseMediator.ItemType.MOVIE, id);
-//        return new Movie(id, databaseMovie.getTitle());
-//    }
-//
-//    private TVSeries getTVSeries(Integer id) {
-//        jacz.database.TVSeries databaseTVSeries = (jacz.database.TVSeries) DatabaseMediator.getItem(integratedDB, DatabaseMediator.ItemType.TV_SERIES, id);
-//        return new TVSeries(id, databaseTVSeries.getTitle());
-//    }
-
-    public void newMediaItem(DatabaseMediator.ItemType type, Integer id) {
+    public synchronized void updateMediaItem(DatabaseMediator.ItemType type, Integer id, boolean inJavaFXThread) {
         switch (type) {
             case MOVIE:
                 Movie movie = Movie.getMovieById(integratedDB, id);
-                if (movie != null) {
-                    newMovie(movie);
-                }
+                updateMediaItem(movie, inJavaFXThread);
                 break;
             case TV_SERIES:
                 TVSeries tvSeries = TVSeries.getTVSeriesById(integratedDB, id);
-                if (tvSeries != null) {
-                    newTVSeries(tvSeries);
-                }
+                updateMediaItem(tvSeries, inJavaFXThread);
                 break;
             case CHAPTER:
                 Chapter chapter = Chapter.getChapterById(integratedDB, id);
-                if (chapter != null) {
-                    newChapter(chapter);
-                }
+                updateMediaItem(chapter, inJavaFXThread);
                 break;
         }
     }
 
-    private void newMovie(Movie movie) {
-        Platform.runLater(() -> itemList.add(new MediaItem(movie)));
-    }
-
-    private void newTVSeries(TVSeries tvSeries) {
-        // todo
-        itemList.add(new MediaItem(tvSeries));
-    }
-
-    private void newChapter(Chapter chapter) {
-        itemList.add(new MediaItem(chapter));
-    }
-
-    public void updateMediaItem(DatabaseMediator.ItemType itemType, Integer id, boolean hasNewMediaContent) {
-        MediaItemType type = MediaItemType.buildType(itemType);
-        int index = findMediaItem(type, id);
+    public synchronized void updateMediaItem(DatabaseItem integratedItem, boolean inJavaFXThread) {
+        int index = findMediaItem(MediaItemType.buildType(integratedItem.getItemType()), integratedItem.getId());
         if (index >= 0) {
-            switch (type) {
+            // the item already exists -> update
+            switch (MediaItemType.buildType(integratedItem.getItemType())) {
                 case MOVIE:
-                    Movie movie = Movie.getMovieById(integratedDB, id);
-                    if (movie != null) {
-                        itemList.get(index).update(movie);
-                    }
+                    itemList.get(index).update((Movie) integratedItem, !inJavaFXThread);
                     break;
                 case TV_SERIES:
-                    TVSeries tvSeries = TVSeries.getTVSeriesById(integratedDB, id);
-                    if (tvSeries != null) {
-                        itemList.get(index).update(tvSeries);
-                    }
+                    itemList.get(index).update((TVSeries) integratedItem, !inJavaFXThread);
                     break;
                 case CHAPTER:
-                    Chapter chapter = Chapter.getChapterById(integratedDB, id);
-                    if (chapter != null) {
-                        itemList.get(index).update(chapter);
-                    }
+                    itemList.get(index).update((Chapter) integratedItem, !inJavaFXThread);
+                    break;
+            }
+        } else {
+            // the item is new -> create it
+            switch (MediaItemType.buildType(integratedItem.getItemType())) {
+                case MOVIE:
+                    newMovie((Movie) integratedItem, inJavaFXThread);
+                    break;
+                case TV_SERIES:
+                    newTVSeries((TVSeries) integratedItem, inJavaFXThread);
+                    break;
+                case CHAPTER:
+                    newChapter((Chapter) integratedItem, inJavaFXThread);
                     break;
             }
         }
     }
 
-    public void mediaItemRemoved(DatabaseMediator.ItemType itemType, Integer id) {
+    private void newMovie(Movie movie, boolean inJavaFXThread) {
+        Util.runLaterIf(() -> itemList.add(new MediaItem(movie)), !inJavaFXThread);
+    }
+
+    private void newTVSeries(TVSeries tvSeries, boolean inJavaFXThread) {
+        Util.runLaterIf(() -> itemList.add(new MediaItem(tvSeries)), !inJavaFXThread);
+    }
+
+    private void newChapter(Chapter chapter, boolean inJavaFXThread) {
+        Util.runLaterIf(() -> itemList.add(new MediaItem(chapter)), !inJavaFXThread);
+    }
+
+    public void mediaItemRemoved(DatabaseMediator.ItemType itemType, Integer id, boolean inJavaFXThread) {
         MediaItemType type = MediaItemType.buildType(itemType);
         int index = findMediaItem(type, id);
         if (index >= 0) {
-            itemList.remove(index);
+            Util.runLaterIf(() -> itemList.remove(index), !inJavaFXThread);
         }
     }
 
@@ -483,6 +418,4 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return null;
         }
     }
-
-
 }

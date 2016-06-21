@@ -18,13 +18,13 @@ public class IntegrationEventsImpl implements IntegrationEvents {
     @Override
     public void newIntegratedItem(DatabaseMediator.ItemType type, Integer id) {
         System.out.println("New integrated item. Type: " + type + ", id: " + id);
-        mediaDatabaseProperties.newMediaItem(type, id);
+        mediaDatabaseProperties.updateMediaItem(type, id, false);
     }
 
     @Override
     public void integratedItemHasBeenModified(DatabaseMediator.ItemType type, Integer id, boolean hasNewMediaContent) {
         System.out.println("Integrated item has been modified. Type: " + type + ", id: " + id);
-        mediaDatabaseProperties.updateMediaItem(type, id, hasNewMediaContent);
+        mediaDatabaseProperties.updateMediaItem(type, id, false);
     }
 
     @Override
@@ -41,6 +41,6 @@ public class IntegrationEventsImpl implements IntegrationEvents {
     @Override
     public void integratedItemRemoved(DatabaseMediator.ItemType type, Integer id) {
         System.out.println("Integrated items removed");
-        mediaDatabaseProperties.mediaItemRemoved(type, id);
+        mediaDatabaseProperties.mediaItemRemoved(type, id, false);
     }
 }

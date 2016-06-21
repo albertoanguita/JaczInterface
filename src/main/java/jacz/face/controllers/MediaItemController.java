@@ -8,6 +8,7 @@ import jacz.face.state.PropertiesAccessor;
 import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 
 import java.net.URL;
 import java.util.List;
@@ -30,6 +31,19 @@ public class MediaItemController extends GenericController {
     @FXML
     protected Label yearLabel;
 
+    @FXML
+    private TextArea synopsisTextArea;
+
+    @FXML
+    private Label countriesLabel;
+
+    @FXML
+    private Label creatorsLabel;
+
+    @FXML
+    private Label actorsLabel;
+
+
 
 
     @Override
@@ -51,6 +65,37 @@ public class MediaItemController extends GenericController {
             @Override
             protected String computeValue() {
                 return formatNumber(mediaItem.getYear());
+            }
+        });
+        synopsisTextArea.textProperty().bind(mediaItem.synopsisProperty());
+        countriesLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(mediaItem.countriesProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return formatCountries(mediaItem.getCountries());
+            }
+        });
+        creatorsLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(mediaItem.creatorsProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return formatStringList(mediaItem.getCreators());
+            }
+        });
+        actorsLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(mediaItem.actorsProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return formatStringList(mediaItem.getActors());
             }
         });
 

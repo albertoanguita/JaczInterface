@@ -1,5 +1,6 @@
 package jacz.face.controllers;
 
+import jacz.database.DatabaseItem;
 import jacz.database.Movie;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
@@ -52,12 +53,12 @@ public class EditMovieController extends EditProducedMediaItemController {
     }
 
     public MovieData buildMovieData() {
-        return new MovieData(buildProducedMediaItemData(), Integer.parseInt(minutesTextField.getText()));
+        return new MovieData(buildProducedMediaItemData(), EditMovieController.parseInt(minutesTextField.getText()));
     }
 
-    public static void changeMovie(Movie movie, MovieData movieData) throws IOException {
+    public static DatabaseItem changeMovie(Movie movie, MovieData movieData) throws IOException {
         EditProducedMediaItemController.changeMovie(movie, movieData);
         movie.setMinutes(movieData.minutes);
-        ClientAccessor.getInstance().getClient().localItemModified(movie);
+        return ClientAccessor.getInstance().getClient().localItemModified(movie);
     }
 }

@@ -19,10 +19,11 @@
          <children>
             <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="SOMETIMES">
                <children>
-                  <VBox prefHeight="200.0" prefWidth="100.0">
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0">
                      <children>
                         <Pane fx:id="imagePane" prefHeight="200.0" prefWidth="200.0" />
                         <Button mnemonicParsing="false" onAction="#chooseImageFile" text="Select a file" />
+                        <Button mnemonicParsing="false" onAction="#clearImageFile" text="Clear" />
                      </children>
                   </VBox>
                   <AnchorPane HBox.hgrow="ALWAYS">

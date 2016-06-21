@@ -107,7 +107,7 @@ public abstract class EditMediaItemController extends GenericController {
     }
 
     public static Integer parseInt(String text) {
-        return text != null ? Integer.parseInt(text) : null;
+        return text != null && !text.isEmpty() ? Integer.parseInt(text) : null;
     }
 
     public static String parseText(String text) {

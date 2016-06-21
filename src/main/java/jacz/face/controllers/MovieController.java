@@ -18,31 +18,10 @@ import java.util.Optional;
 /**
  * Created by Alberto on 19/06/2016.
  */
-public class MovieController extends MediaItemController {
+public class MovieController extends ProducedMediaItemController {
 
     @FXML
     private Label durationLabel;
-
-    @FXML
-    private Label countriesLabel;
-
-    @FXML
-    private Label directorsLabel;
-
-    @FXML
-    private Label actorsLabel;
-
-    @FXML
-    private Label productionCompaniesLabel;
-
-    @FXML
-    private Label genresLabel;
-
-    @FXML
-    private TextArea synopsisTextArea;
-
-    @FXML
-    private Pane imagePane;
 
 //    @Override
 //    public void initialize(URL location, ResourceBundle resources) {
@@ -63,64 +42,6 @@ public class MovieController extends MediaItemController {
                 return formatNumber(mediaItem.getMinutes());
             }
         });
-        countriesLabel.textProperty().bind(new StringBinding() {
-            {
-                super.bind(mediaItem.countriesProperty());
-            }
-
-            @Override
-            protected String computeValue() {
-                return formatCountries(mediaItem.getCountries());
-            }
-        });
-        directorsLabel.textProperty().bind(new StringBinding() {
-            {
-                super.bind(mediaItem.creatorsProperty());
-            }
-
-            @Override
-            protected String computeValue() {
-                return formatStringList(mediaItem.getCreators());
-            }
-        });
-        actorsLabel.textProperty().bind(new StringBinding() {
-            {
-                super.bind(mediaItem.actorsProperty());
-            }
-
-            @Override
-            protected String computeValue() {
-                return formatStringList(mediaItem.getActors());
-            }
-        });
-        productionCompaniesLabel.textProperty().bind(new StringBinding() {
-            {
-                super.bind(mediaItem.productionCompaniesProperty());
-            }
-
-            @Override
-            protected String computeValue() {
-                return formatStringList(mediaItem.getProductionCompanies());
-            }
-        });
-        // todo
-        genresLabel.setText("");
-        synopsisTextArea.textProperty().bind(mediaItem.synopsisProperty());
-
-
-        ImageView imageView = new ImageView();
-        imagePane.getChildren().clear();
-        imagePane.getChildren().add(imageView);
-        imageView.fitWidthProperty().bind(imagePane.widthProperty());
-        imageView.fitHeightProperty().bind(imagePane.heightProperty());
-        if (mediaItem.getImagePath() != null) {
-            File imageFile = new File(mediaItem.getImagePath());
-            Image image = new Image(imageFile.toURI().toString());
-            imageView.setImage(image);
-            imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
-            imageView.setPreserveRatio(true);
-            imageView.setSmooth(true);
-        }
 
         // todo companies
     }

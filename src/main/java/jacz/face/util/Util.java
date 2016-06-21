@@ -15,12 +15,15 @@ import java.util.stream.Stream;
 public class Util {
 
     public static <T> void setLater(final WritableObjectValue<T> property, final T value) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                property.set(value);
-            }
-        });
+        Platform.runLater(() -> property.set(value));
+    }
+
+    public static <T> void setLaterIf(final WritableObjectValue<T> property, final T value, boolean setLater) {
+        if (setLater) {
+            setLater(property, value);
+        } else {
+            property.set(value);
+        }
     }
 
     public static <T> void setLater(final WritableBooleanValue property, final boolean value) {
@@ -47,6 +50,14 @@ public class Util {
 
     public static <T> void setLater(final WritableNumberValue property, final Number value) {
         Platform.runLater(() -> property.setValue(value));
+    }
+
+    public static void runLaterIf(Runnable action, boolean runLater) {
+        if (runLater) {
+            Platform.runLater(action);
+        } else {
+            action.run();
+        }
     }
 
     public static List<String> getCountriesNames() {
