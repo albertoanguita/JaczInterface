@@ -373,10 +373,10 @@ public class MainController extends GenericController {
         }
     }
 
-    private static void removeLocal(String db, PeerEngineClient peerEngineClient) {
-        Movie movie = Movie.getMovieById(db, 1);
-        peerEngineClient.removeLocalItem(movie);
-    }
+//    private static void removeLocal(String db, PeerEngineClient peerEngineClient) {
+//        Movie movie = Movie.getMovieById(db, 1);
+//        peerEngineClient.removeLocalItem(movie);
+//    }
 
 
 

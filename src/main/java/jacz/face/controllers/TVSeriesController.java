@@ -30,5 +30,4 @@ public class TVSeriesController extends ProducedMediaItemController {
             }
         });
     }
-
 }

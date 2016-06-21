@@ -22,7 +22,12 @@
                   <VBox layoutX="10.0" layoutY="10.0" maxHeight="300.0" maxWidth="400.0" spacing="30.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
                         <Pane fx:id="imagePane" minWidth="-Infinity" prefHeight="500.0" prefWidth="200.0" />
-                        <Button mnemonicParsing="false" onAction="#editTVSeries" text="Edit" />
+                        <HBox spacing="10.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#editTVSeries" text="Edit" />
+                              <Button mnemonicParsing="false" onAction="#removeLocalContent" text="Remove local content" />
+                           </children>
+                        </HBox>
                      </children>
                   </VBox>
                </children>

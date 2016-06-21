@@ -113,6 +113,19 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.minutes = null;
         }
 
+        public DatabaseItem getItem() {
+            switch (getType()) {
+                case MOVIE:
+                    return Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), getId());
+                case TV_SERIES:
+                    return TVSeries.getTVSeriesById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), getId());
+                case CHAPTER:
+                    return Chapter.getChapterById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), getId());
+                default:
+                    return null;
+            }
+        }
+
         private void update(CreationItem creationItem, boolean setLater) {
             Util.setLaterIf(this.title, creationItem.getTitle(), setLater);
             Util.setLaterIf(this.originalTitle, creationItem.getOriginalTitle(), setLater);
@@ -416,6 +429,19 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return buildImagePath(tvSeriesList.get(0));
         } else {
             return null;
+        }
+    }
+
+    public static DatabaseItem getItem(MediaItem mediaItem) {
+        switch (mediaItem.getType()) {
+            case MOVIE:
+                return Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), mediaItem.getId());
+            case TV_SERIES:
+                return TVSeries.getTVSeriesById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), mediaItem.getId());
+            case CHAPTER:
+                return Chapter.getChapterById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), mediaItem.getId());
+            default:
+                return null;
         }
     }
 }

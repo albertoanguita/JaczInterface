@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -128,6 +129,15 @@ public class MediaItemController extends GenericController {
                 listStr += ", " + mapper.apply(list.get(i));
             }
             return listStr;
+        }
+    }
+
+    public void removeLocalContent() throws IOException {
+        if (ClientAccessor.getInstance().getClient().removeLocalContent(mediaItem.getItem())) {
+            // the integrated item is totally removed
+            // todo this code is in main controller -> DRY
+            main.getNavigationHistory().backwards();
+            main.displayCurrentNavigationWindow();
         }
     }
 }
