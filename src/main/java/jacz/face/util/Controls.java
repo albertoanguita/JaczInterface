@@ -70,7 +70,7 @@ public class Controls {
             //pane.getChildren().add(getCountryLabel(pane, initialCountries, i, country));
             pane.getChildren().add(getListLabel(pane, genres, i, genre.toString(), paneListDuple -> genreListPane(paneListDuple.element1, paneListDuple.element2)));
         }
-        ChoiceBox<String> addGenre = new ChoiceBox<>(FXCollections.observableList(Util.getCountriesNames()));
+        ChoiceBox<String> addGenre = new ChoiceBox<>(FXCollections.observableList(Util.getGenresNames()));
         addGenre.setPrefWidth(50d);
         addGenre.valueProperty().addListener((observable, oldValue, newValue) -> {
             GenreCode genreCode = GenreCode.valueOf(newValue);

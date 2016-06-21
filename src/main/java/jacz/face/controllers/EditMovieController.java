@@ -7,12 +7,8 @@ import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.stage.FileChooser;
 
-import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -30,9 +26,6 @@ public class EditMovieController extends EditProducedMediaItemController {
             this.minutes = minutes;
         }
     }
-
-    @FXML
-    Pane imagePane;
 
     @FXML
     private TextField minutesTextField;
@@ -62,27 +55,7 @@ public class EditMovieController extends EditProducedMediaItemController {
         return new MovieData(buildProducedMediaItemData(), Integer.parseInt(minutesTextField.getText()));
     }
 
-    public void chooseImageFile() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Set movie poster");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
-        File selectedFile = fileChooser.showOpenDialog(main.getPrimaryStage());
-        if (selectedFile != null) {
-            System.out.println(selectedFile);
-            imagePane.setPrefWidth(140);
-            imagePane.setPrefHeight(180);
-            ImageView imageView = new ImageView();
-            Image image = new Image(selectedFile.toURI().toString(), 140, 180, true, true);
-            imageView.setImage(image);
-            imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
-            imagePane.getChildren().addAll(imageView);
-        }
-
-    }
-
-    public static void changeMovie(Movie movie, MovieData movieData) {
+    public static void changeMovie(Movie movie, MovieData movieData) throws IOException {
         EditProducedMediaItemController.changeMovie(movie, movieData);
         movie.setMinutes(movieData.minutes);
         ClientAccessor.getInstance().getClient().localItemModified(movie);

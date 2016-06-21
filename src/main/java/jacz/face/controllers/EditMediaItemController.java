@@ -102,6 +102,7 @@ public abstract class EditMediaItemController extends GenericController {
     }
 
     public MediaItemData buildMediaItemData() {
+        System.out.println("new synopsis: " + parseText(synopsisTextArea.getText()));
         return new MediaItemData(parseText(titleTextField.getText()), parseText(originalTitleTextField.getText()), parseInt(yearTextField.getText()), parseText(synopsisTextArea.getText()), Controls.getSelectedCountries(countriesHBox), Controls.getSelectedStringValues(creatorsFlowPane), Controls.getSelectedStringValues(actorsFlowPane));
     }
 

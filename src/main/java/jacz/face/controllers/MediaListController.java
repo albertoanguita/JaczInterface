@@ -240,7 +240,11 @@ public class MediaListController extends GenericController {
         result.ifPresent(newMovie -> {
             System.out.println("creating new movie: " + newMovie.toString());
             Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
-            EditMovieController.changeMovie(movie, newMovie);
+            try {
+                EditMovieController.changeMovie(movie, newMovie);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 

@@ -12,6 +12,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -30,6 +31,9 @@ public class MovieController extends MediaItemController {
 
     @FXML
     private Label actorsLabel;
+
+    @FXML
+    private Label productionCompaniesLabel;
 
     @FXML
     private Label genresLabel;
@@ -89,9 +93,19 @@ public class MovieController extends MediaItemController {
                 return formatStringList(mediaItem.getActors());
             }
         });
+        productionCompaniesLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(mediaItem.productionCompaniesProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return formatStringList(mediaItem.getProductionCompanies());
+            }
+        });
         // todo
         genresLabel.setText("");
-        synopsisTextArea.setText("");
+        synopsisTextArea.textProperty().bind(mediaItem.synopsisProperty());
 
 
         ImageView imageView = new ImageView();
@@ -123,7 +137,11 @@ public class MovieController extends MediaItemController {
             System.out.println(editMovie.toString());
 
             Movie movie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getId());
-            EditMovieController.changeMovie(movie, editMovie);
+            try {
+                EditMovieController.changeMovie(movie, editMovie);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
 
     }

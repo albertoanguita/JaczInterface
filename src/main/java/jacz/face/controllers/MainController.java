@@ -14,6 +14,7 @@ import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
+import jacz.util.concurrency.ThreadUtil;
 import jacz.util.lists.tuple.Duple;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
@@ -177,6 +178,7 @@ public class MainController extends GenericController {
 
 
 
+
         // move to initial window
 //        NavigationHistory.Element element = main.getNavigationHistory().getCurrentElement();
 //        try {
@@ -271,7 +273,7 @@ public class MainController extends GenericController {
         peerEngineClient.localItemModified(videoFile5);
         peerEngineClient.localItemModified(movie);
         try {
-            peerEngineClient.addLocalImageFile("./alien.jpg");
+            peerEngineClient.addLocalImageFile("./alien.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -281,7 +283,7 @@ public class MainController extends GenericController {
         movie.setImageHash(new ImageHash("eedd8704225fb2307f8afec037e6aab3".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(movie);
         try {
-            peerEngineClient.addLocalImageFile("./cisne_negro.jpg");
+            peerEngineClient.addLocalImageFile("./cisne_negro.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -291,7 +293,7 @@ public class MainController extends GenericController {
         movie.setImageHash(new ImageHash("5aee69a414abe5886444bdbd7e1dc592".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(movie);
         try {
-            peerEngineClient.addLocalImageFile("./gravity-poster.jpg");
+            peerEngineClient.addLocalImageFile("./gravity-poster.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -301,7 +303,7 @@ public class MainController extends GenericController {
         movie.setImageHash(new ImageHash("ee14fd01e0ca1330886d9043b3f44248".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(movie);
         try {
-            peerEngineClient.addLocalImageFile("./interstellar.jpg");
+            peerEngineClient.addLocalImageFile("./interstellar.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -311,7 +313,7 @@ public class MainController extends GenericController {
         movie.setImageHash(new ImageHash("951752219b972cdc9179e920bb6f24e1".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(movie);
         try {
-            peerEngineClient.addLocalImageFile("./mad-max.jpg");
+            peerEngineClient.addLocalImageFile("./mad-max.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -321,7 +323,7 @@ public class MainController extends GenericController {
         movie.setImageHash(new ImageHash("5138a57cde050f229fcc38608d795641".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(movie);
         try {
-            peerEngineClient.addLocalImageFile("./postal.jpg");
+            peerEngineClient.addLocalImageFile("./postal.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -334,7 +336,7 @@ public class MainController extends GenericController {
         tvSeries.setImageHash(new ImageHash("3bbd87be296c63cfd3e6d3490b9d3d2c".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(tvSeries);
         try {
-            peerEngineClient.addLocalImageFile("./breaking bad.jpg");
+            peerEngineClient.addLocalImageFile("./breaking bad.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -344,7 +346,7 @@ public class MainController extends GenericController {
         tvSeries.setImageHash(new ImageHash("a5fb7f1fe8102f00c634b292e8b5c8ee".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(tvSeries);
         try {
-            peerEngineClient.addLocalImageFile("./got.jpg");
+            peerEngineClient.addLocalImageFile("./got.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -357,7 +359,7 @@ public class MainController extends GenericController {
         movie.setImageHash(new ImageHash("f37725b46a263b3de9ff25b2061943e1".toUpperCase(), "jpg"));
         peerEngineClient.localItemModified(movie);
         try {
-            peerEngineClient.addLocalImageFile("./alien.jpg");
+            peerEngineClient.addLocalImageFile("./alien.jpg", false);
         } catch (IOException e) {
             e.printStackTrace();
         }

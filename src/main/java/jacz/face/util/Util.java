@@ -1,6 +1,7 @@
 package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.database.util.GenreCode;
 import javafx.application.Platform;
 import javafx.beans.value.*;
 
@@ -23,12 +24,7 @@ public class Util {
     }
 
     public static <T> void setLater(final WritableBooleanValue property, final boolean value) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                property.set(value);
-            }
-        });
+        Platform.runLater(() -> property.set(value));
     }
 
 //    public static <T> void setLater(final WritableIntegerValue property, final int value) {
@@ -59,5 +55,9 @@ public class Util {
 
     public static CountryCode getCountryFromName(String countryName) {
         return CountryCode.findByName("^" + countryName + "$").get(0);
+    }
+
+    public static List<String> getGenresNames() {
+        return Stream.of(GenreCode.values()).map(GenreCode::name).sorted().collect(Collectors.toList());
     }
 }

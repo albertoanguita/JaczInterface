@@ -112,28 +112,37 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.minutes = null;
         }
 
-        protected void update(CreationItem creationItem, String imagePath, Integer minutes) {
+        private void update(CreationItem creationItem) {
             Util.setLater(this.title, creationItem.getTitle());
             Util.setLater(this.originalTitle, creationItem.getOriginalTitle());
-            Util.setLater(this.imagePath, imagePath);
             Util.setLater(this.year, creationItem.getYear());
+            Util.setLater(this.synopsis, creationItem.getSynopsis());
             Util.setLater(this.countries, creationItem.getCountries());
             Util.setLater(this.creators, creationItem.getCreators());
             Util.setLater(this.actors, creationItem.getActors());
+            Util.setLater(this.productionCompanies, creationItem.getActors());
             Util.setLater(this.language, creationItem.getLanguage());
-            Util.setLater(this.minutes, minutes);
         }
 
-        protected void update(Movie movie) {
-            update(movie, buildImagePath(movie), movie.getMinutes());
+        public void update(ProducedCreationItem producedCreationItem) {
+            update((CreationItem) producedCreationItem);
+            Util.setLater(this.imagePath, buildImagePath(producedCreationItem));
+            Util.setLater(this.productionCompanies, producedCreationItem.getProductionCompanies());
+        }
+
+        public void update(Movie movie) {
+            update((ProducedCreationItem) movie);
+            Util.setLater(this.minutes, movie.getMinutes());
         }
 
         protected void update(TVSeries tvSeries) {
-            update(tvSeries, buildImagePath(tvSeries), null);
+            update((ProducedCreationItem) tvSeries);
         }
 
         protected void update(Chapter chapter) {
-            update(chapter, buildImagePath(chapter), chapter.getMinutes());
+            update((CreationItem) chapter);
+            Util.setLater(this.imagePath, buildImagePath(chapter));
+            Util.setLater(this.minutes, chapter.getMinutes());
         }
 
         public MediaItemType getType() {
@@ -298,9 +307,11 @@ public class MediaDatabaseProperties extends GenericStateProperties {
                         p.originalTitleProperty(),
                         p.imagePathProperty(),
                         p.yearProperty(),
+                        p.synopsisProperty(),
                         p.countriesProperty(),
                         p.creatorsProperty(),
                         p.actorsProperty(),
+                        p.productionCompaniesProperty(),
                         p.languageProperty(),
                         p.minutesProperty()};
             }
