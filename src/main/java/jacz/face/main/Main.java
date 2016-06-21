@@ -38,7 +38,7 @@ public class Main extends Application {
     private NavigationHistory navigationHistory;
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("media manager");
 
@@ -97,7 +97,7 @@ public class Main extends Application {
     private <T extends GenericController> Duple<T, Parent> loadController(String resourcePath) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
         Parent root = fxmlLoader.load(getClass().getResource(resourcePath).openStream());
-        ((GenericController)fxmlLoader.getController()).setMain(this);
+        ((GenericController) fxmlLoader.getController()).setMain(this);
         return new Duple<>(fxmlLoader.getController(), root);
     }
 
@@ -124,32 +124,134 @@ public class Main extends Application {
     }
 
     public Optional<EditMovieController.MovieData> editMovie(NavigationHistory.DialogIntention dialogIntention) {
+        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editItem(dialogIntention, "/view/edit_movie.fxml", "new movie");
+        dialogAndController.element1.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                return dialogAndController.element2.buildMovieData();
+            } else {
+                return null;
+            }
+        });
+        return dialogAndController.element1.showAndWait();
+    }
+
+//    public Optional<EditMovieController.MovieData> editMovie2(NavigationHistory.DialogIntention dialogIntention) {
+//        try {
+//            navigationHistory.setCurrentDialogIntention(dialogIntention);
+//            FXMLLoader fxmlLoader = new FXMLLoader();
+//            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
+//            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
+//            final EditMovieController editMovieController = fxmlLoader.getController();
+//            editMovieController.setMain(this);
+//
+//            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
+//            newMovieDialog.setTitle("new movie");
+//            newMovieDialog.getDialogPane().setContent(newMoviePane);
+//
+//            // Set the button types.
+//            newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+//
+//            // Convert the result to a settings value when the ok button is clicked.
+//            newMovieDialog.setResultConverter(dialogButton -> {
+//                if (dialogButton == ButtonType.OK) {
+//                    return editMovieController.buildMovieData();
+//                } else {
+//                    return null;
+//                }
+//            });
+//
+//            return newMovieDialog.showAndWait();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//
+//    }
+
+//    public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention) {
+//        try {
+//            navigationHistory.setCurrentDialogIntention(dialogIntention);
+//            FXMLLoader fxmlLoader = new FXMLLoader();
+//            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
+//            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
+//            final EditMovieController editMovieController = fxmlLoader.getController();
+//            editMovieController.setMain(this);
+//
+//            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
+//            newMovieDialog.setTitle("new movie");
+//            newMovieDialog.getDialogPane().setContent(newMoviePane);
+//
+//            // Set the button types.
+//            newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+//
+//            // Convert the result to a settings value when the ok button is clicked.
+//            newMovieDialog.setResultConverter(dialogButton -> {
+//                if (dialogButton == ButtonType.OK) {
+//                    return editMovieController.buildMovieData();
+//                } else {
+//                    return null;
+//                }
+//            });
+//
+//            return newMovieDialog.showAndWait();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//
+//    }
+
+    public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention) {
+        Duple<Dialog<EditTVSeriesController.TVSeriesData>, EditTVSeriesController> dialogAndController = editItem(dialogIntention, "/view/edit_tvseries.fxml", "new tv series");
+        dialogAndController.element1.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                return dialogAndController.element2.buildTVSeriesData();
+            } else {
+                return null;
+            }
+        });
+        return dialogAndController.element1.showAndWait();
+    }
+
+    public <T extends EditMediaItemController.MediaItemData, Y extends GenericController> Duple<Dialog<T>, Y> editItem(NavigationHistory.DialogIntention dialogIntention, String fxmlPath, String title) {
         try {
             navigationHistory.setCurrentDialogIntention(dialogIntention);
             FXMLLoader fxmlLoader = new FXMLLoader();
-            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
-            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
-            final EditMovieController editMovieController = fxmlLoader.getController();
-            editMovieController.setMain(this);
+            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource(fxmlPath).openStream());
 
-            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
-            newMovieDialog.setTitle("new movie");
+            Dialog<T> newMovieDialog = new Dialog<>();
+            newMovieDialog.setTitle(title);
             newMovieDialog.getDialogPane().setContent(newMoviePane);
 
             // Set the button types.
             newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
             // Convert the result to a settings value when the ok button is clicked.
-            newMovieDialog.setResultConverter(dialogButton -> {
-                if (dialogButton == ButtonType.OK) {
-                    return editMovieController.buildMovieData();
-                } else {
-                    return null;
-                }
-            });
-
-            return newMovieDialog.showAndWait();
-
+//            newMovieDialog.setResultConverter(dialogButton -> {
+//                if (dialogButton == ButtonType.OK) {
+//                    switch (mediaItemType) {
+//                        case MOVIE:
+//                            final EditMovieController editMovieController = fxmlLoader.getController();
+//                            editMovieController.setMain(this);
+//                            return editMovieController.buildMovieData();
+//                        case TV_SERIES:
+//                            final EditTVSeriesController editTVSeriesController = fxmlLoader.getController();
+//                            editTVSeriesController.setMain(this);
+//                            return editTVSeriesController.buildTVSeriesData();
+//                        case CHAPTER:
+//                            return null;
+//                        default:
+//                            return null;
+//                    }
+//                } else {
+//                    return null;
+//                }
+//            });
+            Y controller = fxmlLoader.getController();
+            controller.setMain(this);
+            return new Duple<>(newMovieDialog, controller);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

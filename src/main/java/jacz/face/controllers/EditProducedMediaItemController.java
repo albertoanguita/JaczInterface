@@ -1,7 +1,7 @@
 package jacz.face.controllers;
 
 import afu.org.apache.commons.io.FilenameUtils;
-import jacz.database.Movie;
+import jacz.database.ProducedCreationItem;
 import jacz.database.util.GenreCode;
 import jacz.database.util.ImageHash;
 import jacz.face.controllers.navigation.NavigationHistory;
@@ -60,14 +60,14 @@ public abstract class EditProducedMediaItemController extends EditMediaItemContr
     public void setMain(Main main) {
         super.setMain(main);
 
-        // todo get user intention from main
         if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
             // load the controls data from the edited item
             MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
 
             Controls.stringListPane(productionCompaniesFlowPane, mediaItem.getProductionCompanies());
             Controls.genreListPane(genresFlowPane, mediaItem.getGenres());
-            displayImage(mediaItem.getImagePath());
+            selectedImage = mediaItem.getImagePath();
+            displayImage(selectedImage);
         } else {
             Controls.stringListPane(productionCompaniesFlowPane, new ArrayList<>());
             Controls.genreListPane(genresFlowPane, new ArrayList<>());
@@ -110,10 +110,10 @@ public abstract class EditProducedMediaItemController extends EditMediaItemContr
     }
 
 
-    public static void changeMovie(Movie movie, ProducedMediaItemData producedMediaItemData) throws IOException {
-        EditMediaItemController.changeMovie(movie, producedMediaItemData);
-        movie.setProductionCompanies(producedMediaItemData.companies);
-        movie.setGenres(producedMediaItemData.genres);
+    protected static void changeProducedCreationItem(ProducedCreationItem producedCreationItem, ProducedMediaItemData producedMediaItemData) throws IOException {
+        EditMediaItemController.changeCreationItem(producedCreationItem, producedMediaItemData);
+        producedCreationItem.setProductionCompanies(producedMediaItemData.companies);
+        producedCreationItem.setGenres(producedMediaItemData.genres);
         ImageHash imageHash = null;
         if (producedMediaItemData.imagePath != null) {
             Duple<String, String> pathAndHash = ClientAccessor.getInstance().getClient().addLocalImageFile(producedMediaItemData.imagePath, true);
@@ -121,6 +121,6 @@ public abstract class EditProducedMediaItemController extends EditMediaItemContr
             System.out.println("Extension: " + extension);
             imageHash = new ImageHash(pathAndHash.element2, extension);
         }
-        movie.setImageHash(imageHash);
+        producedCreationItem.setImageHash(imageHash);
     }
 }

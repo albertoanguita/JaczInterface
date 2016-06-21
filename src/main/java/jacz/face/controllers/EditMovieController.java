@@ -32,11 +32,6 @@ public class EditMovieController extends EditProducedMediaItemController {
     private TextField minutesTextField;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        //super.initialize(url, resourceBundle);
-    }
-
-    @Override
     public void setMain(Main main) {
         super.setMain(main);
 
@@ -57,7 +52,7 @@ public class EditMovieController extends EditProducedMediaItemController {
     }
 
     public static DatabaseItem changeMovie(Movie movie, MovieData movieData) throws IOException {
-        EditProducedMediaItemController.changeMovie(movie, movieData);
+        EditProducedMediaItemController.changeProducedCreationItem(movie, movieData);
         movie.setMinutes(movieData.minutes);
         return ClientAccessor.getInstance().getClient().localItemModified(movie);
     }

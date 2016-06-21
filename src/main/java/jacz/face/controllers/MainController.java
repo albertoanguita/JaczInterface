@@ -204,7 +204,15 @@ public class MainController extends GenericController {
                 replaceViewContainerContent("/view/media_list_view.fxml");
                 break;
             case ITEM_DETAIL:
-                replaceViewContainerContent("/view/movie_view.fxml");
+                switch (element.mediaItemType) {
+
+                    case MOVIE:
+                        replaceViewContainerContent("/view/movie_view.fxml");
+                        break;
+                    case TV_SERIES:
+                        replaceViewContainerContent("/view/tvseries_view.fxml");
+                        break;
+                }
                 break;
             case TRANSFERS:
                 replaceViewContainerContent("/view/transfers_view.fxml");

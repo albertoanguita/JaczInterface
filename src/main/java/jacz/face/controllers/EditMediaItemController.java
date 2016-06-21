@@ -1,6 +1,7 @@
 package jacz.face.controllers;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.database.CreationItem;
 import jacz.database.Movie;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
@@ -81,10 +82,11 @@ public abstract class EditMediaItemController extends GenericController {
     public void setMain(Main main) {
         super.setMain(main);
 
-        // todo get user intention from main
         if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
             // load the controls data from the edited item
             MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
+            System.out.println(mediaItem.getType());
+            System.out.println(mediaItem.getTitle());
 
             titleTextField.setText(mediaItem.getTitle());
             titleTextField.setEditable(false);
@@ -102,7 +104,6 @@ public abstract class EditMediaItemController extends GenericController {
     }
 
     public MediaItemData buildMediaItemData() {
-        System.out.println("new synopsis: " + parseText(synopsisTextArea.getText()));
         return new MediaItemData(parseText(titleTextField.getText()), parseText(originalTitleTextField.getText()), parseInt(yearTextField.getText()), parseText(synopsisTextArea.getText()), Controls.getSelectedCountries(countriesHBox), Controls.getSelectedStringValues(creatorsFlowPane), Controls.getSelectedStringValues(actorsFlowPane));
     }
 
@@ -114,12 +115,12 @@ public abstract class EditMediaItemController extends GenericController {
         return text != null && !text.isEmpty() ? text : null;
     }
 
-    public static void changeMovie(Movie movie, MediaItemData mediaItemData) {
-        movie.setOriginalTitle(mediaItemData.originalTitle);
-        movie.setYear(mediaItemData.year);
-        movie.setSynopsis(mediaItemData.synopsis);
-        movie.setCountries(mediaItemData.countries);
-        movie.setCreators(mediaItemData.creators);
-        movie.setActors(mediaItemData.actors);
+    protected static void changeCreationItem(CreationItem creationItem, MediaItemData mediaItemData) {
+        creationItem.setOriginalTitle(mediaItemData.originalTitle);
+        creationItem.setYear(mediaItemData.year);
+        creationItem.setSynopsis(mediaItemData.synopsis);
+        creationItem.setCountries(mediaItemData.countries);
+        creationItem.setCreators(mediaItemData.creators);
+        creationItem.setActors(mediaItemData.actors);
     }
 }

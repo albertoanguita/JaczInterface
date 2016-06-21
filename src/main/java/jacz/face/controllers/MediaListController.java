@@ -3,6 +3,7 @@ package jacz.face.controllers;
 import jacz.database.DatabaseItem;
 import jacz.database.DatabaseMediator;
 import jacz.database.Movie;
+import jacz.database.TVSeries;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
@@ -126,7 +127,7 @@ public class MediaListController extends GenericController {
 
                 setOnMouseClicked(event -> {
                     System.out.println("click on cell " + this.getItem().getTitle());
-                    main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.MOVIE, item.getId()));
+                    main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(item.getType(), item.getId()));
                     try {
                         main.displayCurrentNavigationWindow();
                     } catch (IOException e) {
@@ -228,32 +229,61 @@ public class MediaListController extends GenericController {
 
 
     public void newMovie() {
+        // todo DRY code
         System.out.println("new movie");
 
 
-        Optional<EditMovieController.MovieData> result = main.editMovie(NavigationHistory.DialogIntention.NEW);
+        switch (main.getNavigationHistory().getCurrentElement().mediaItemType) {
 
-        System.out.println("new movie completed");
+            case MOVIE:
+                Optional<EditMovieController.MovieData> resultMovie = main.editMovie(NavigationHistory.DialogIntention.NEW);
 
-        result.ifPresent(newMovie -> {
-            System.out.println("creating new movie: " + newMovie.toString());
-            Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
-            try {
-                DatabaseItem integratedItem = EditMovieController.changeMovie(movie, newMovie);
-                PropertiesAccessor.getInstance().getMediaDatabaseProperties().updateMediaItem(integratedItem, true);
+                System.out.println("new movie completed");
 
-                // todo until we do not exit from here, the item is not added to the list!!
-                //
-                main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.MOVIE, integratedItem.getId()));
-                try {
-                    main.displayCurrentNavigationWindow();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+                resultMovie.ifPresent(newMovie -> {
+                    System.out.println("creating new movie: " + newMovie.toString());
+                    Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
+                    try {
+                        DatabaseItem integratedItem = EditMovieController.changeMovie(movie, newMovie);
+                        PropertiesAccessor.getInstance().getMediaDatabaseProperties().updateMediaItem(integratedItem, true);
+                        main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.MOVIE, integratedItem.getId()));
+                        try {
+                            main.displayCurrentNavigationWindow();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                break;
+            case TV_SERIES:
+                Optional<EditTVSeriesController.TVSeriesData> resultTVSeries = main.editTVSeries(NavigationHistory.DialogIntention.NEW);
+
+                System.out.println("new movie completed");
+
+                resultTVSeries.ifPresent(newTVSeries -> {
+                    System.out.println("creating new movie: " + newTVSeries.toString());
+                    TVSeries tvSeries = new TVSeries(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newTVSeries.title);
+                    try {
+                        DatabaseItem integratedItem = EditTVSeriesController.changeTVSeries(tvSeries, newTVSeries);
+                        PropertiesAccessor.getInstance().getMediaDatabaseProperties().updateMediaItem(integratedItem, true);
+                        main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.TV_SERIES, integratedItem.getId()));
+                        try {
+                            main.displayCurrentNavigationWindow();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                break;
+            default:
+                break;
+        }
+
+
     }
 
 }
