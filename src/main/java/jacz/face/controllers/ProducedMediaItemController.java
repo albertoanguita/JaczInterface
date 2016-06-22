@@ -49,7 +49,7 @@ public class ProducedMediaItemController extends MediaItemController {
 
             @Override
             protected String computeValue() {
-                return formatList(mediaItem.getGenres(), Enum::name);
+                return formatGenres(mediaItem.getGenres());
             }
         });
         if (mediaItem.getImagePath() != null) {

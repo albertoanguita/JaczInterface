@@ -14,9 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.controlsfx.control.ToggleSwitch?>
 
-<BorderPane minHeight="200.0" minWidth="500.0" prefHeight="650.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jacz.face.controllers.MainController">
+<BorderPane minHeight="200.0" minWidth="400.0" prefHeight="650.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jacz.face.controllers.MainController">
    <top>
-      <ToolBar minWidth="-Infinity" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <ToolBar prefHeight="40.0" BorderPane.alignment="CENTER">
         <items>
             <ToggleSwitch fx:id="connectSwitch" alignment="CENTER" prefHeight="0.0" prefWidth="35.0">
                <padding>
@@ -24,7 +24,11 @@
                </padding>
             </ToggleSwitch>
             <Label text="Status:" />
-            <Label fx:id="connectedLabel" minWidth="150.0" text="disconnected" />
+            <AnchorPane minWidth="200.0">
+               <children>
+                  <Label fx:id="connectedLabel" text="disconnected" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
             <ToggleButton disable="true" mnemonicParsing="false" selected="true" text="Show remote" />
           <Button fx:id="settingsButton" mnemonicParsing="false" onAction="#openSettings" text="Settings" />
             <Button fx:id="backwardsButton" mnemonicParsing="false" onAction="#navigateBackwards" text="&lt;" />

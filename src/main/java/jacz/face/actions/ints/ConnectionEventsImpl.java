@@ -43,6 +43,7 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void couldNotFetchLocalAddress(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setNetworkTopologyStateIssue(ConnectionStateProperties.NetworkTopologyStateIssue.COULD_NOT_FETCH_LOCAL_ADDRESS);
     }
 
     @Override
@@ -58,6 +59,7 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void couldNotFetchExternalAddress(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setNetworkTopologyStateIssue(ConnectionStateProperties.NetworkTopologyStateIssue.COULD_NOT_FETCH_EXTERNAL_ADDRESS);
     }
 
     @Override

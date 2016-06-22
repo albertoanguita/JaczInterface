@@ -3,10 +3,7 @@ package jacz.face.state;
 import jacz.face.util.Util;
 import jacz.peerengineservice.client.connection.ConnectionState;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 
 /**
  * Collection of properties related to the connection state
@@ -20,9 +17,16 @@ public class ConnectionStateProperties extends GenericStateProperties {
         CONNECTED
     }
 
+    public enum NetworkTopologyStateIssue {
+        COULD_NOT_FETCH_LOCAL_ADDRESS,
+        COULD_NOT_FETCH_EXTERNAL_ADDRESS
+    }
+
     private final SimpleBooleanProperty isWishForConnectionProperty;
 
     private final SimpleObjectProperty<ConnectionState.NetworkTopologyState> networkTopologyStateProperty;
+
+    private final ObjectProperty<NetworkTopologyStateIssue> networkTopologyStateIssue;
 
     private final SimpleObjectProperty<ConnectionState.LocalServerConnectionsState> localServerConnectionStateProperty;
 
@@ -43,6 +47,7 @@ public class ConnectionStateProperties extends GenericStateProperties {
     public ConnectionStateProperties() {
         isWishForConnectionProperty = new SimpleBooleanProperty(false);
         networkTopologyStateProperty = new SimpleObjectProperty<>(ConnectionState.NetworkTopologyState.init());
+        networkTopologyStateIssue = new SimpleObjectProperty<>(null);
         localServerConnectionStateProperty = new SimpleObjectProperty<>(ConnectionState.LocalServerConnectionsState.init());
         connectionToServerStateProperty = new SimpleObjectProperty<>(ConnectionState.ConnectionToServerState.init());
         localPortProperty = new SimpleIntegerProperty(-1);
@@ -86,6 +91,10 @@ public class ConnectionStateProperties extends GenericStateProperties {
         Util.setLater(localAddressProperty, connectionState.getLocalAddress());
         Util.setLater(externalAddressProperty, connectionState.getExternalAddress());
         Util.setLater(hasGatewayProperty, connectionState.isHasGateway());
+    }
+
+    public void setNetworkTopologyStateIssue(NetworkTopologyStateIssue issue) {
+        Util.setLater(networkTopologyStateIssue, issue);
     }
 
     public final boolean isWishForConnection() {

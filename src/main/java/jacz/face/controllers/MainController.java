@@ -20,13 +20,16 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.io.IOException;
@@ -66,6 +69,8 @@ public class MainController extends GenericController {
 
     @FXML
     private Label connectedRegularPeersLabel;
+
+    private PopOver detailedConnectionStatusPopOver;
 
     //@FXML
     //private Label serverAddressLabel;
@@ -114,6 +119,32 @@ public class MainController extends GenericController {
                 }
             }
         });
+        Label detailedConnectionStatusLabel = new Label();
+        detailedConnectionStatusLabel.textProperty().bind(new StringBinding() {
+             {
+                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty());
+             }
+
+             @Override
+             protected String computeValue() {
+                 switch (PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty().get()) {
+                     case DISCONNECTED:
+                         return Messages.ServerMessages.DISCONNECTED();
+                     case CONNECTING:
+                         return Messages.ServerMessages.CONNECTING();
+                     case DISCONNECTING:
+                         return Messages.ServerMessages.DISCONNECTING();
+                     case CONNECTED:
+                         return Messages.ServerMessages.CONNECTED();
+                     default:
+                         return Messages.ServerMessages.DISCONNECTED();
+                 }
+             }
+         });
+        detailedConnectionStatusPopOver = new PopOver(detailedConnectionStatusLabel);
+        detailedConnectionStatusPopOver.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+        connectedLabel.setOnMouseEntered(event -> detailedConnectionStatusPopOver.show(connectedLabel));
+        connectedLabel.setOnMouseExited(event -> detailedConnectionStatusPopOver.hide());
 
         BooleanProperty receiveWishForConnectionStatus = new SimpleBooleanProperty(false);
         receiveWishForConnectionStatus.bind(new BooleanBinding() {
@@ -175,8 +206,6 @@ public class MainController extends GenericController {
                 return Integer.toString(PropertiesAccessor.getInstance().getPeersStateProperties().connectedRegularPeersProperty().get());
             }
         });
-
-
 
 
         // move to initial window
@@ -377,7 +406,6 @@ public class MainController extends GenericController {
 //        Movie movie = Movie.getMovieById(db, 1);
 //        peerEngineClient.removeLocalItem(movie);
 //    }
-
 
 
     public void setText(final String str) {
