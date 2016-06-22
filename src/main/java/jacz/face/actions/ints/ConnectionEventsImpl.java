@@ -38,12 +38,13 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void localAddressFetched(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void couldNotFetchLocalAddress(ConnectionState state) {
         connectionStateProperties.updateState(state);
-        connectionStateProperties.setNetworkTopologyStateIssue(ConnectionStateProperties.NetworkTopologyStateIssue.COULD_NOT_FETCH_LOCAL_ADDRESS);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.COULD_NOT_FETCH_LOCAL_ADDRESS);
     }
 
     @Override
@@ -54,17 +55,19 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void externalAddressFetched(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void couldNotFetchExternalAddress(ConnectionState state) {
         connectionStateProperties.updateState(state);
-        connectionStateProperties.setNetworkTopologyStateIssue(ConnectionStateProperties.NetworkTopologyStateIssue.COULD_NOT_FETCH_EXTERNAL_ADDRESS);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.COULD_NOT_FETCH_EXTERNAL_ADDRESS);
     }
 
     @Override
     public void unrecognizedMessageFromServer(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.UNRECOGNIZED_MESSAGE_FROM_SERVER);
     }
 
     @Override
@@ -76,22 +79,26 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     public void connectionToServerEstablished(ConnectionState state) {
         connectionToServerStatus.connectionEstablished(state);
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void registrationRequired(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void localServerUnreachable(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.LOCAL_SERVER_UNREACHABLE);
     }
 
     @Override
     public void unableToConnectToServer(ConnectionState state) {
         connectionToServerStatus.unableToConnect();
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.UNABLE_TO_CONNECT_TO_SERVER);
     }
 
     @Override
@@ -102,11 +109,13 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void localServerOpen(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void couldNotOpenLocalServer(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.UNABLE_TO_OPEN_LOCAL_SERVER);
     }
 
     @Override
@@ -117,6 +126,7 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void localServerClosed(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
@@ -127,16 +137,19 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void NATRuleCreated(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void couldNotFetchUPNPGateway(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.UNABLE_TO_FETCH_UPNP_SERVER);
     }
 
     @Override
     public void errorCreatingNATRule(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.ERROR_CREATING_NAT_RULE);
     }
 
     @Override
@@ -147,27 +160,32 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void NATRuleDestroyed(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void couldNotDestroyNATRule(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.ERROR_DESTROYING_NAT_RULE);
     }
 
     @Override
     public void listeningConnectionsWithoutNATRule(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void disconnectedFromServer(ConnectionState state) {
         connectionToServerStatus.disconnected();
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void failedToRefreshServerConnection(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.setCurrentConnectionIssue(ConnectionStateProperties.ConnectionIssue.FAILED_TO_REFRESH_SERVER_CONNECTION);
     }
 
     @Override
@@ -178,11 +196,13 @@ public class ConnectionEventsImpl implements ConnectionEvents {
     @Override
     public void registrationSuccessful(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override
     public void alreadyRegistered(ConnectionState state) {
         connectionStateProperties.updateState(state);
+        connectionStateProperties.clearCurrentConnectionIssue();
     }
 
     @Override

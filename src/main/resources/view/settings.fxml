@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -11,7 +12,6 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import org.controlsfx.control.CheckComboBox?>
-
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jacz.face.controllers.SettingsController">
    <children>
@@ -76,6 +76,7 @@
                               <CheckComboBox fx:id="additionalCountriesCheckComboBox" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                            </children>
                         </GridPane>
+                        <ComboBox fx:id="mainCountryComboBox" layoutX="30.0" layoutY="231.0" prefWidth="150.0" />
                      </children>
                   </AnchorPane>
             </content>

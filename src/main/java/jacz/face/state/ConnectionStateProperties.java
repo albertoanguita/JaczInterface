@@ -17,16 +17,22 @@ public class ConnectionStateProperties extends GenericStateProperties {
         CONNECTED
     }
 
-    public enum NetworkTopologyStateIssue {
+    public enum ConnectionIssue {
         COULD_NOT_FETCH_LOCAL_ADDRESS,
-        COULD_NOT_FETCH_EXTERNAL_ADDRESS
+        COULD_NOT_FETCH_EXTERNAL_ADDRESS,
+        UNRECOGNIZED_MESSAGE_FROM_SERVER,
+        LOCAL_SERVER_UNREACHABLE,
+        UNABLE_TO_CONNECT_TO_SERVER,
+        UNABLE_TO_OPEN_LOCAL_SERVER,
+        FAILED_TO_REFRESH_SERVER_CONNECTION,
+        UNABLE_TO_FETCH_UPNP_SERVER,
+        ERROR_CREATING_NAT_RULE,
+        ERROR_DESTROYING_NAT_RULE,
     }
 
     private final SimpleBooleanProperty isWishForConnectionProperty;
 
     private final SimpleObjectProperty<ConnectionState.NetworkTopologyState> networkTopologyStateProperty;
-
-    private final ObjectProperty<NetworkTopologyStateIssue> networkTopologyStateIssue;
 
     private final SimpleObjectProperty<ConnectionState.LocalServerConnectionsState> localServerConnectionStateProperty;
 
@@ -44,10 +50,12 @@ public class ConnectionStateProperties extends GenericStateProperties {
 
     private final SimpleObjectProperty<AggregatedConnectionStatus> aggregatedConnectionStatusProperty;
 
+    private final ObjectProperty<ConnectionIssue> currentConnectionIssue;
+
+
     public ConnectionStateProperties() {
         isWishForConnectionProperty = new SimpleBooleanProperty(false);
         networkTopologyStateProperty = new SimpleObjectProperty<>(ConnectionState.NetworkTopologyState.init());
-        networkTopologyStateIssue = new SimpleObjectProperty<>(null);
         localServerConnectionStateProperty = new SimpleObjectProperty<>(ConnectionState.LocalServerConnectionsState.init());
         connectionToServerStateProperty = new SimpleObjectProperty<>(ConnectionState.ConnectionToServerState.init());
         localPortProperty = new SimpleIntegerProperty(-1);
@@ -56,6 +64,8 @@ public class ConnectionStateProperties extends GenericStateProperties {
         externalAddressProperty = new SimpleStringProperty("");
         hasGatewayProperty = new SimpleBooleanProperty(false);
         aggregatedConnectionStatusProperty = new SimpleObjectProperty<>(AggregatedConnectionStatus.DISCONNECTED);
+        currentConnectionIssue = new SimpleObjectProperty<>(null);
+
         aggregatedConnectionStatusProperty.bind(new ObjectBinding<AggregatedConnectionStatus>() {
             {
                 super.bind(isWishForConnectionProperty, networkTopologyStateProperty, localServerConnectionStateProperty, connectionToServerStateProperty);
@@ -93,8 +103,12 @@ public class ConnectionStateProperties extends GenericStateProperties {
         Util.setLater(hasGatewayProperty, connectionState.isHasGateway());
     }
 
-    public void setNetworkTopologyStateIssue(NetworkTopologyStateIssue issue) {
-        Util.setLater(networkTopologyStateIssue, issue);
+    public void setCurrentConnectionIssue(ConnectionIssue issue) {
+        Util.setLater(currentConnectionIssue, issue);
+    }
+
+    public void clearCurrentConnectionIssue() {
+        Util.setLater(currentConnectionIssue, null);
     }
 
     public final boolean isWishForConnection() {
@@ -111,14 +125,6 @@ public class ConnectionStateProperties extends GenericStateProperties {
 
     public final SimpleObjectProperty<ConnectionState.NetworkTopologyState> networkTopologyStateProperty() {
         return networkTopologyStateProperty;
-    }
-
-    public NetworkTopologyStateIssue getNetworkTopologyStateIssue() {
-        return networkTopologyStateIssue.get();
-    }
-
-    public ObjectProperty<NetworkTopologyStateIssue> networkTopologyStateIssueProperty() {
-        return networkTopologyStateIssue;
     }
 
     public final ConnectionState.LocalServerConnectionsState getLocalServerConnectionsState() {
@@ -185,4 +191,11 @@ public class ConnectionStateProperties extends GenericStateProperties {
         return aggregatedConnectionStatusProperty;
     }
 
+    public ConnectionIssue getCurrentConnectionIssue() {
+        return currentConnectionIssue.get();
+    }
+
+    public ObjectProperty<ConnectionIssue> currentConnectionIssueProperty() {
+        return currentConnectionIssue;
+    }
 }

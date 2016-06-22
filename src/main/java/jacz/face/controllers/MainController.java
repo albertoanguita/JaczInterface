@@ -21,6 +21,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -117,8 +118,21 @@ public class MainController extends GenericController {
                 }
             }
         });
-        Label detailedConnectionStatusLabel = new Label();
-        detailedConnectionStatusLabel.textProperty().bind(new StringBinding() {
+        Label detailedConnectionStatusIssueLabel = new Label();
+        Label detailedNetworkTopologyStatusLabel = new Label();
+        Label detailedLocalServerStatusLabel = new Label();
+        Label detailedConnectionToServerStatusLabel = new Label();
+        detailedConnectionStatusIssueLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().currentConnectionIssueProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return Messages.networkTopologyIssueMessages(PropertiesAccessor.getInstance().getConnectionStateProperties().getCurrentConnectionIssue());
+            }
+        });
+        detailedNetworkTopologyStatusLabel.textProperty().bind(new StringBinding() {
              {
                  super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().networkTopologyStateProperty());
              }
@@ -128,32 +142,48 @@ public class MainController extends GenericController {
                  return Messages.networkTopologyStateMessages(PropertiesAccessor.getInstance().getConnectionStateProperties().getNetworkTopologyState());
              }
          });
-        Label detailedConnectionStatusIssueLabel = new Label();
-        detailedConnectionStatusIssueLabel.textProperty().bind(new StringBinding() {
+        detailedLocalServerStatusLabel.textProperty().bind(new StringBinding() {
              {
-                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().networkTopologyStateIssueProperty());
+                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().localServerConnectionStateProperty());
              }
 
              @Override
              protected String computeValue() {
-                 return Messages.networkTopologyIssueMessages(PropertiesAccessor.getInstance().getConnectionStateProperties().getNetworkTopologyStateIssue());
+                 return Messages.localServerConnectionStateMessages(PropertiesAccessor.getInstance().getConnectionStateProperties().getLocalServerConnectionsState());
              }
          });
+        detailedConnectionToServerStatusLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().connectionToServerStateProperty());
+            }
+
+            @Override
+            protected String computeValue() {
+                return Messages.connectionToServerStateMessages(PropertiesAccessor.getInstance().getConnectionStateProperties().getConnectionToServerState());
+            }
+        });
 
         VBox detailedConnectionStatusVBox = new VBox();
         detailedConnectionStatusVBox.getChildren().addAll(
-                detailedConnectionStatusLabel,
-                detailedConnectionStatusIssueLabel
+                detailedConnectionStatusIssueLabel,
+                detailedNetworkTopologyStatusLabel,
+                detailedLocalServerStatusLabel,
+                detailedConnectionToServerStatusLabel
         );
         AnchorPane detailedConnectionStatusPane = new AnchorPane(detailedConnectionStatusVBox);
         AnchorPane.setBottomAnchor(detailedConnectionStatusVBox, 5.0d);
         AnchorPane.setLeftAnchor(detailedConnectionStatusVBox, 5.0d);
         AnchorPane.setTopAnchor(detailedConnectionStatusVBox, 5.0d);
         AnchorPane.setRightAnchor(detailedConnectionStatusVBox, 5.0d);
-        detailedConnectionStatusPopOver = new PopOver(detailedConnectionStatusPane);
-        detailedConnectionStatusPopOver.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+        //detailedConnectionStatusPopOver = new PopOver(detailedConnectionStatusPane);
+        //detailedConnectionStatusPopOver.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
         connectedLabel.setOnMouseEntered(event -> {
             System.out.println("show popover");
+            if (detailedConnectionStatusPopOver != null && detailedConnectionStatusPopOver.isShowing()) {
+                detailedConnectionStatusPopOver.hide();
+            }
+            detailedConnectionStatusPopOver = new PopOver(detailedConnectionStatusPane);
+            detailedConnectionStatusPopOver.setArrowLocation(PopOver.ArrowLocation.LEFT_CENTER);
             detailedConnectionStatusPopOver.show(connectedLabel);
         });
         connectedLabel.setOnMouseExited(event -> {
@@ -178,10 +208,11 @@ public class MainController extends GenericController {
                 }
             }
         });
-        PropertiesAccessor.getInstance().getConnectionStateProperties().isWishForConnectionProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("change in iswish...: " + newValue);
-            Util.setLater(connectSwitch.selectedProperty(), newValue);
-        });
+        // todo fix
+//        PropertiesAccessor.getInstance().getConnectionStateProperties().isWishForConnectionProperty().addListener((observable, oldValue, newValue) -> {
+//            System.out.println("change in iswish...: " + newValue);
+//            Util.setLater(connectSwitch.selectedProperty(), newValue);
+//        });
 
         connectSwitch.setOnMouseClicked(event -> {
             if (connectSwitch.isSelected()) {
@@ -497,6 +528,8 @@ public class MainController extends GenericController {
 
             // Set the button types.
             settingsDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+            Node okButton = settingsDialog.getDialogPane().lookupButton(ButtonType.OK);
+            okButton.disableProperty().bind(settingsController.invalidProperty());
 
             // Convert the result to a settings value when the ok button is clicked.
             settingsDialog.setResultConverter(dialogButton -> {
