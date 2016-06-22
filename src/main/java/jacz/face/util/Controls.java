@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.util.Callback;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -24,15 +25,22 @@ public class Controls {
             //pane.getChildren().add(getCountryLabel(pane, initialCountries, i, country));
             pane.getChildren().add(getListLabel(pane, initialCountries, i, country.getName(), paneListDuple -> countryListPane(paneListDuple.element1, paneListDuple.element2)));
         }
-        ChoiceBox<String> addCountry = new ChoiceBox<>(FXCollections.observableList(Util.getCountriesNames()));
-        addCountry.setPrefWidth(50d);
-        addCountry.valueProperty().addListener((observable, oldValue, newValue) -> {
+        //ChoiceBox<String> addCountry = new ChoiceBox<>(FXCollections.observableList(Util.getCountriesNames()));
+
+
+        ComboBox<String> addCountryC = new ComboBox<>();
+        addCountryC.setPrefWidth(50d);
+        addCountryC.getItems().addAll(FXCollections.observableList(Util.getCountriesNames(initialCountries)));
+        addCountryC.valueProperty().addListener((observable, oldValue, newValue) -> {
             CountryCode country = Util.getCountryFromName(newValue);
             pane.getChildren().clear();
             initialCountries.add(country);
             countryListPane(pane, initialCountries);
         });
-        pane.getChildren().add(addCountry);
+        // todo does not currently work because the combo box is not editable
+        addCountryC.setPromptText("new country");
+
+        pane.getChildren().add(addCountryC);
     }
 
     public static List<CountryCode> getSelectedCountries(Pane pane) {

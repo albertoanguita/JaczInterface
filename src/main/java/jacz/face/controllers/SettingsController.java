@@ -101,7 +101,7 @@ public class SettingsController extends GenericController {
     private TextField maxRegularConnectionsAddCountriesTextField;
 
     @FXML
-    private ChoiceBox<String> mainCountryChoiceBox;
+    private ComboBox<String> mainCountryComboBox;
 
     @FXML
     private CheckComboBox<String> additionalCountriesCheckComboBox;
@@ -122,10 +122,8 @@ public class SettingsController extends GenericController {
         maxRegularConnectionsTextField.disableProperty().bind(useRegularConnectionsCheckBox.selectedProperty().not());
         maxRegularConnectionsAddCountriesTextField.disableProperty().bind(useRegularConnectionsCheckBox.selectedProperty().not());
 
-        mainCountryChoiceBox.setItems(FXCollections.observableList(Util.getCountriesNames()));
-        int indexOfMainCountry = Util.getCountriesNames().indexOf(client.getMainCountry().getName());
-        SingleSelectionModel<String> selectionModel = mainCountryChoiceBox.getSelectionModel();
-        selectionModel.select(indexOfMainCountry);
+        mainCountryComboBox.setItems(FXCollections.observableList(Util.getCountriesNames()));
+        mainCountryComboBox.setValue(client.getMainCountry().getName());
 
         IndexedCheckModel<String> cm = additionalCountriesCheckComboBox.getCheckModel();
         List<String> availableCountries = Util.getCountriesNames();
@@ -241,7 +239,7 @@ public class SettingsController extends GenericController {
                 useRegularConnectionsCheckBox.isSelected(),
                 parseMaxConnections(maxRegularConnectionsTextField.getText()),
                 parseMaxConnections(maxRegularConnectionsAddCountriesTextField.getText()),
-                Util.getCountryFromName(mainCountryChoiceBox.getValue()),
+                Util.getCountryFromName(mainCountryComboBox.getValue()),
                 parseAdditionalCountries(additionalCountriesCheckComboBox));
 
     }

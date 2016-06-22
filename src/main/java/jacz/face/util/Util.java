@@ -5,6 +5,8 @@ import jacz.database.util.GenreCode;
 import javafx.application.Platform;
 import javafx.beans.value.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,7 +63,11 @@ public class Util {
     }
 
     public static List<String> getCountriesNames() {
-        return Stream.of(CountryCode.values()).map(CountryCode::getName).sorted().collect(Collectors.toList());
+        return getCountriesNames(new ArrayList<>());
+    }
+
+    public static List<String> getCountriesNames(Collection<CountryCode> except) {
+        return Stream.of(CountryCode.values()).filter(country -> !except.contains(country)).map(CountryCode::getName).sorted().collect(Collectors.toList());
     }
 
     public static CountryCode getCountryFromName(String countryName) {
@@ -70,5 +76,9 @@ public class Util {
 
     public static List<String> getGenresNames() {
         return Stream.of(GenreCode.values()).map(GenreCode::name).sorted().collect(Collectors.toList());
+    }
+
+    public static List<String> getGenresNames(Collection<GenreCode> except) {
+        return Stream.of(GenreCode.values()).filter(genre -> !except.contains(genre)).map(GenreCode::name).sorted().collect(Collectors.toList());
     }
 }

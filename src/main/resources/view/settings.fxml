@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
@@ -72,11 +71,10 @@
                               <TextField fx:id="maxRegularConnectionsAddCountriesTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <Label text="Additional countries" GridPane.rowIndex="4" />
                               <CheckBox fx:id="useRegularConnectionsCheckBox" mnemonicParsing="false" selected="true" GridPane.columnIndex="1" />
-                              <ChoiceBox fx:id="mainCountryChoiceBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <CheckComboBox fx:id="additionalCountriesCheckComboBox" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <ComboBox fx:id="mainCountryComboBox" prefWidth="150.0" promptText="Pick a country" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                            </children>
                         </GridPane>
-                        <ComboBox fx:id="mainCountryComboBox" layoutX="30.0" layoutY="231.0" prefWidth="150.0" />
                      </children>
                   </AnchorPane>
             </content>
