@@ -14,21 +14,19 @@ import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
-import jacz.util.concurrency.ThreadUtil;
 import jacz.util.lists.tuple.Duple;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -122,29 +120,46 @@ public class MainController extends GenericController {
         Label detailedConnectionStatusLabel = new Label();
         detailedConnectionStatusLabel.textProperty().bind(new StringBinding() {
              {
-                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty());
+                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().networkTopologyStateProperty());
              }
 
              @Override
              protected String computeValue() {
-                 switch (PropertiesAccessor.getInstance().getConnectionStateProperties().aggregatedConnectionStatusProperty().get()) {
-                     case DISCONNECTED:
-                         return Messages.ServerMessages.DISCONNECTED();
-                     case CONNECTING:
-                         return Messages.ServerMessages.CONNECTING();
-                     case DISCONNECTING:
-                         return Messages.ServerMessages.DISCONNECTING();
-                     case CONNECTED:
-                         return Messages.ServerMessages.CONNECTED();
-                     default:
-                         return Messages.ServerMessages.DISCONNECTED();
-                 }
+                 return Messages.networkTopologyStateMessages(PropertiesAccessor.getInstance().getConnectionStateProperties().getNetworkTopologyState());
              }
          });
-        detailedConnectionStatusPopOver = new PopOver(detailedConnectionStatusLabel);
+        Label detailedConnectionStatusIssueLabel = new Label();
+        detailedConnectionStatusIssueLabel.textProperty().bind(new StringBinding() {
+             {
+                 super.bind(PropertiesAccessor.getInstance().getConnectionStateProperties().networkTopologyStateIssueProperty());
+             }
+
+             @Override
+             protected String computeValue() {
+                 return Messages.networkTopologyIssueMessages(PropertiesAccessor.getInstance().getConnectionStateProperties().getNetworkTopologyStateIssue());
+             }
+         });
+
+        VBox detailedConnectionStatusVBox = new VBox();
+        detailedConnectionStatusVBox.getChildren().addAll(
+                detailedConnectionStatusLabel,
+                detailedConnectionStatusIssueLabel
+        );
+        AnchorPane detailedConnectionStatusPane = new AnchorPane(detailedConnectionStatusVBox);
+        AnchorPane.setBottomAnchor(detailedConnectionStatusVBox, 5.0d);
+        AnchorPane.setLeftAnchor(detailedConnectionStatusVBox, 5.0d);
+        AnchorPane.setTopAnchor(detailedConnectionStatusVBox, 5.0d);
+        AnchorPane.setRightAnchor(detailedConnectionStatusVBox, 5.0d);
+        detailedConnectionStatusPopOver = new PopOver(detailedConnectionStatusPane);
         detailedConnectionStatusPopOver.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
-        connectedLabel.setOnMouseEntered(event -> detailedConnectionStatusPopOver.show(connectedLabel));
-        connectedLabel.setOnMouseExited(event -> detailedConnectionStatusPopOver.hide());
+        connectedLabel.setOnMouseEntered(event -> {
+            System.out.println("show popover");
+            detailedConnectionStatusPopOver.show(connectedLabel);
+        });
+        connectedLabel.setOnMouseExited(event -> {
+            System.out.println("hide popover");
+            detailedConnectionStatusPopOver.hide();
+        });
 
         BooleanProperty receiveWishForConnectionStatus = new SimpleBooleanProperty(false);
         receiveWishForConnectionStatus.bind(new BooleanBinding() {

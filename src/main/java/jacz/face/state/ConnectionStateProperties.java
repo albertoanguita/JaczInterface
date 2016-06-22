@@ -113,6 +113,14 @@ public class ConnectionStateProperties extends GenericStateProperties {
         return networkTopologyStateProperty;
     }
 
+    public NetworkTopologyStateIssue getNetworkTopologyStateIssue() {
+        return networkTopologyStateIssue.get();
+    }
+
+    public ObjectProperty<NetworkTopologyStateIssue> networkTopologyStateIssueProperty() {
+        return networkTopologyStateIssue;
+    }
+
     public final ConnectionState.LocalServerConnectionsState getLocalServerConnectionsState() {
         return localServerConnectionStateProperty.get();
     }

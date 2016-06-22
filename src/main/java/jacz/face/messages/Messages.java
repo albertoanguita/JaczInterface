@@ -1,6 +1,8 @@
 package jacz.face.messages;
 
 
+import jacz.face.state.ConnectionStateProperties;
+import jacz.peerengineservice.client.connection.ConnectionState;
 import jacz.util.network.IP4Port;
 
 /**
@@ -28,5 +30,41 @@ public final class Messages {
         public static String PORT(int port) { return "" + port;}
 
 
+    }
+
+    public static String networkTopologyStateMessages(ConnectionState.NetworkTopologyState networkTopologyState) {
+        switch (networkTopologyState) {
+
+            case NO_DATA:
+                return "Unknown network topology";
+            case FETCHING_DATA:
+                return "Analyzing network topology";
+            case WAITING_FOR_NEXT_LOCAL_ADDRESS_FETCH:
+                return "Waiting for a new network topology analysis";
+            case LOCAL_ADDRESS_FETCHED:
+                return "Local ip address fetched";
+            case WAITING_FOR_NEXT_EXTERNAL_ADDRESS_FETCH:
+                return "Waiting for a new network topology analysis";
+            case ALL_FETCHED:
+                return "Network topology fetched";
+            default:
+                return null;
+        }
+    }
+
+    public static String networkTopologyIssueMessages(ConnectionStateProperties.NetworkTopologyStateIssue issue) {
+        if (issue == null) {
+            return null;
+        } else {
+            switch (issue) {
+
+                case COULD_NOT_FETCH_LOCAL_ADDRESS:
+                    return "Unable to fetch local ip address";
+                case COULD_NOT_FETCH_EXTERNAL_ADDRESS:
+                    return "Unable to fetch public ip address";
+                default:
+                    return null;
+            }
+        }
     }
 }
