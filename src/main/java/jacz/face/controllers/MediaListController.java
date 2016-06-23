@@ -1,7 +1,6 @@
 package jacz.face.controllers;
 
 import jacz.database.DatabaseItem;
-import jacz.database.DatabaseMediator;
 import jacz.database.Movie;
 import jacz.database.TVSeries;
 import jacz.face.controllers.navigation.NavigationHistory;
@@ -11,20 +10,15 @@ import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.GridCell;
 import org.controlsfx.control.GridView;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
@@ -151,7 +145,8 @@ public class MediaListController extends GenericController {
 
     private FilteredList<MediaDatabaseProperties.MediaItem> filteredSeries;
 
-    GridView<MediaDatabaseProperties.MediaItem> moviesGridView;
+    @FXML
+    GridView<MediaDatabaseProperties.MediaItem> itemsGridView;
 
     private class TitleFilter implements Predicate<MediaDatabaseProperties.MediaItem> {
 
@@ -172,10 +167,10 @@ public class MediaListController extends GenericController {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // todo rest of bindings
 
-        moviesGridView = new GridView<>();
+        //itemsGridView = new GridView<>();
         filteredMovies = new FilteredList<>(PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMovieList());
         filteredSeries = new FilteredList<>(PropertiesAccessor.getInstance().getMediaDatabaseProperties().getSeriesList());
-        moviesGridView.setCellFactory(mediaItem -> new MediaItemGridCell(main));
+        itemsGridView.setCellFactory(mediaItem -> new MediaItemGridCell(main));
         //final ObservableList<Color> list = FXCollections.observableArrayList();
 
 
@@ -194,11 +189,11 @@ public class MediaListController extends GenericController {
 
         //moviesGridView.setStyle("-fx-border-color: black");
 
-        vBoxPane.getChildren().add(moviesGridView);
-        moviesGridView.setCellHeight(200);
-        moviesGridView.setCellWidth(150);
-        moviesGridView.setHorizontalCellSpacing(10);
-        moviesGridView.setVerticalCellSpacing(10);
+        //vBoxPane.getChildren().add(itemsGridView);
+        itemsGridView.setCellHeight(200);
+        itemsGridView.setCellWidth(150);
+        itemsGridView.setHorizontalCellSpacing(10);
+        itemsGridView.setVerticalCellSpacing(10);
 
         filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             System.out.println("update filter with: " + newValue);
@@ -220,10 +215,10 @@ public class MediaListController extends GenericController {
         super.setMain(main);
         if (main.getNavigationHistory().getCurrentElement().mediaItemType == MediaItemType.MOVIE) {
             System.out.println("movies");
-            moviesGridView.setItems(filteredMovies);
+            itemsGridView.setItems(filteredMovies);
         } else {
             System.out.println("series");
-            moviesGridView.setItems(filteredSeries);
+            itemsGridView.setItems(filteredSeries);
         }
     }
 

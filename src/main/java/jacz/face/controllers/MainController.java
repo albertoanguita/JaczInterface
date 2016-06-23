@@ -71,6 +71,21 @@ public class MainController extends GenericController {
 
     private PopOver detailedConnectionStatusPopOver;
 
+    @FXML
+    private Label moviesSelector;
+
+    @FXML
+    private Label seriesSelector;
+
+    @FXML
+    private Label favoritesSelector;
+
+    @FXML
+    private Label transfersSelector;
+
+    @FXML
+    private Label peersSelector;
+
     //@FXML
     //private Label serverAddressLabel;
 
@@ -271,28 +286,52 @@ public class MainController extends GenericController {
         forwardButton.disableProperty().bind(main.getNavigationHistory().canMoveForwardProperty().not());
     }
 
+    public NavigationHistory.Element initialElement() {
+        //selectLeftMenuSelector(moviesSelector);
+        return NavigationHistory.Element.mediaList(MediaItemType.MOVIE);
+    }
+
     public void moveToNavigationElement(NavigationHistory.Element element) throws IOException {
         switch (element.window) {
 
             case MEDIA_LIST:
-                //main.setCurrentMediaView(Main.MediaView.MOVIES);
+                switch (element.mediaItemType) {
+
+                    case MOVIE:
+                        selectLeftMenuSelector(moviesSelector);
+                        break;
+                    case TV_SERIES:
+                        selectLeftMenuSelector(seriesSelector);
+                        break;
+                    case CHAPTER:
+                        break;
+                    case ALL:
+                        break;
+                    case FAVORITE:
+                        selectLeftMenuSelector(favoritesSelector);
+                        break;
+                }
                 replaceViewContainerContent("/view/media_list_view.fxml");
                 break;
             case ITEM_DETAIL:
                 switch (element.mediaItemType) {
 
                     case MOVIE:
+                        selectLeftMenuSelector(moviesSelector);
                         replaceViewContainerContent("/view/movie_view.fxml");
                         break;
                     case TV_SERIES:
+                        selectLeftMenuSelector(seriesSelector);
                         replaceViewContainerContent("/view/tvseries_view.fxml");
                         break;
                 }
                 break;
             case TRANSFERS:
+                selectLeftMenuSelector(transfersSelector);
                 replaceViewContainerContent("/view/transfers_view.fxml");
                 break;
             case PEERS:
+                selectLeftMenuSelector(peersSelector);
                 replaceViewContainerContent("/view/peers_view.fxml");
                 break;
         }
@@ -481,6 +520,20 @@ public class MainController extends GenericController {
     public void switchToPeersView() throws IOException {
         main.getNavigationHistory().navigate(NavigationHistory.Element.peers());
         main.displayCurrentNavigationWindow();
+    }
+
+    private void selectLeftMenuSelector(Label selector) {
+        resetLeftMenuSelector(moviesSelector);
+        resetLeftMenuSelector(seriesSelector);
+        resetLeftMenuSelector(favoritesSelector);
+        resetLeftMenuSelector(transfersSelector);
+        resetLeftMenuSelector(peersSelector);
+        selector.getStyleClass().add("selected");
+    }
+
+    private void resetLeftMenuSelector(Label selector) {
+        selector.getStyleClass().clear();
+        selector.getStyleClass().add("left_menu_selector");
     }
 
     private void replaceViewContainerContent(String fxml) throws IOException {

@@ -7,7 +7,6 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToolBar?>
-<?import javafx.scene.effect.Glow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -16,7 +15,7 @@
 
 <BorderPane minHeight="200.0" minWidth="400.0" prefHeight="650.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jacz.face.controllers.MainController">
    <top>
-      <ToolBar prefHeight="40.0" BorderPane.alignment="CENTER">
+      <ToolBar id="toolbar" prefHeight="40.0" BorderPane.alignment="CENTER">
         <items>
             <ToggleSwitch fx:id="connectSwitch" alignment="CENTER" prefHeight="0.0" prefWidth="35.0">
                <padding>
@@ -43,21 +42,18 @@
       </ToolBar>
    </top>
    <left>
-      <ScrollPane hbarPolicy="NEVER" BorderPane.alignment="CENTER">
+      <ScrollPane id="leftpane" hbarPolicy="NEVER" BorderPane.alignment="CENTER">
          <content>
             <AnchorPane>
                <children>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="30.0">
                      <children>
-                        <Label id="movies_selector" onMouseClicked="#switchToMoviesView" styleClass="left_menu_selector" text="Movies">
-                           <effect>
-                              <Glow />
-                           </effect></Label>
-                        <Label id="series_selector" onMouseClicked="#switchToSeriesView" styleClass="left_menu_selector" text="Series" />
-                        <Label id="favorites_selector" onMouseClicked="#switchToFavoritesView" styleClass="left_menu_selector" text="Favorites" />
+                        <Label id="movies_selector" fx:id="moviesSelector" onMouseClicked="#switchToMoviesView" styleClass="left_menu_selector" text="Movies" />
+                        <Label id="series_selector" fx:id="seriesSelector" onMouseClicked="#switchToSeriesView" styleClass="left_menu_selector" text="Series" />
+                        <Label id="favorites_selector" fx:id="favoritesSelector" onMouseClicked="#switchToFavoritesView" styleClass="left_menu_selector" text="Favorites" />
                         <Separator prefWidth="200.0" />
-                        <Label id="transfers_selector" onMouseClicked="#switchToTransfersView" styleClass="left_menu_selector" text="Transfers" />
-                        <Label id="peers_selector" onMouseClicked="#switchToPeersView" styleClass="left_menu_selector" text="Peers" />
+                        <Label id="transfers_selector" fx:id="transfersSelector" onMouseClicked="#switchToTransfersView" styleClass="left_menu_selector" text="Transfers" />
+                        <Label id="peers_selector" fx:id="peersSelector" onMouseClicked="#switchToPeersView" styleClass="left_menu_selector" text="Peers" />
                      </children>
                   </VBox>
                </children>
@@ -66,7 +62,7 @@
       </ScrollPane>
    </left>
    <center>
-      <VBox minHeight="100.0" minWidth="200.0" BorderPane.alignment="CENTER">
+      <VBox id="main_pane" minHeight="100.0" minWidth="200.0" BorderPane.alignment="CENTER">
          <children>
             <AnchorPane fx:id="viewContainer" maxHeight="10000.0" minHeight="300.0" minWidth="200.0" prefHeight="500.0" prefWidth="700.0" VBox.vgrow="ALWAYS" />
             <Separator minWidth="1.0" prefHeight="0.0" prefWidth="1.0" />

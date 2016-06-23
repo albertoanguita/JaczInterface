@@ -78,6 +78,8 @@ public class Main extends Application {
     }
 
     private void gotoScene(Scene scene) {
+        String style = getClass().getResource("/styles/default.css").toExternalForm();
+        scene.getStylesheets().addAll(style);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -135,73 +137,6 @@ public class Main extends Application {
         return dialogAndController.element1.showAndWait();
     }
 
-//    public Optional<EditMovieController.MovieData> editMovie2(NavigationHistory.DialogIntention dialogIntention) {
-//        try {
-//            navigationHistory.setCurrentDialogIntention(dialogIntention);
-//            FXMLLoader fxmlLoader = new FXMLLoader();
-//            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
-//            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
-//            final EditMovieController editMovieController = fxmlLoader.getController();
-//            editMovieController.setMain(this);
-//
-//            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
-//            newMovieDialog.setTitle("new movie");
-//            newMovieDialog.getDialogPane().setContent(newMoviePane);
-//
-//            // Set the button types.
-//            newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-//
-//            // Convert the result to a settings value when the ok button is clicked.
-//            newMovieDialog.setResultConverter(dialogButton -> {
-//                if (dialogButton == ButtonType.OK) {
-//                    return editMovieController.buildMovieData();
-//                } else {
-//                    return null;
-//                }
-//            });
-//
-//            return newMovieDialog.showAndWait();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//
-//    }
-
-//    public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention) {
-//        try {
-//            navigationHistory.setCurrentDialogIntention(dialogIntention);
-//            FXMLLoader fxmlLoader = new FXMLLoader();
-//            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource("/view/edit_movie.fxml").openStream());
-//            //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
-//            final EditMovieController editMovieController = fxmlLoader.getController();
-//            editMovieController.setMain(this);
-//
-//            Dialog<EditMovieController.MovieData> newMovieDialog = new Dialog<>();
-//            newMovieDialog.setTitle("new movie");
-//            newMovieDialog.getDialogPane().setContent(newMoviePane);
-//
-//            // Set the button types.
-//            newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-//
-//            // Convert the result to a settings value when the ok button is clicked.
-//            newMovieDialog.setResultConverter(dialogButton -> {
-//                if (dialogButton == ButtonType.OK) {
-//                    return editMovieController.buildMovieData();
-//                } else {
-//                    return null;
-//                }
-//            });
-//
-//            return newMovieDialog.showAndWait();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//
-//    }
 
     public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention) {
         Duple<Dialog<EditTVSeriesController.TVSeriesData>, EditTVSeriesController> dialogAndController = editItem(dialogIntention, "/view/edit_tvseries.fxml", "new tv series");
@@ -228,27 +163,6 @@ public class Main extends Application {
             // Set the button types.
             newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
-            // Convert the result to a settings value when the ok button is clicked.
-//            newMovieDialog.setResultConverter(dialogButton -> {
-//                if (dialogButton == ButtonType.OK) {
-//                    switch (mediaItemType) {
-//                        case MOVIE:
-//                            final EditMovieController editMovieController = fxmlLoader.getController();
-//                            editMovieController.setMain(this);
-//                            return editMovieController.buildMovieData();
-//                        case TV_SERIES:
-//                            final EditTVSeriesController editTVSeriesController = fxmlLoader.getController();
-//                            editTVSeriesController.setMain(this);
-//                            return editTVSeriesController.buildTVSeriesData();
-//                        case CHAPTER:
-//                            return null;
-//                        default:
-//                            return null;
-//                    }
-//                } else {
-//                    return null;
-//                }
-//            });
             Y controller = fxmlLoader.getController();
             controller.setMain(this);
             return new Duple<>(newMovieDialog, controller);

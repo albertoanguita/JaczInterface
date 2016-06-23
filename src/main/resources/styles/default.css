@@ -1,0 +1,12 @@
+/* default style for the interface */
+
+/*
+{
+    -fx-background-color: white;
+}
+*/
+
+.left_menu_selector.selected {
+    -fx-border-width: 2px;
+    -fx-border-color: black;
+}
