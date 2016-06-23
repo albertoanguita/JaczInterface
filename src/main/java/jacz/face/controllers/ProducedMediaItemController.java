@@ -2,6 +2,7 @@ package jacz.face.controllers;
 
 import jacz.database.util.GenreCode;
 import jacz.face.main.Main;
+import jacz.face.util.Util;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -53,39 +54,11 @@ public class ProducedMediaItemController extends MediaItemController {
             }
         });
         if (mediaItem.getImagePath() != null) {
-            displayImage(mediaItem.getImagePath());
+            Util.displayImage(imagePane, mediaItem.getImagePath());
         }
         mediaItem.imagePathProperty().addListener((observable, oldValue, newValue) -> {
-            displayImage(newValue);
+            Util.displayImage(imagePane, newValue);
         });
-
-//        ImageView imageView = new ImageView();
-//        imagePane.getChildren().clear();
-//        imagePane.getChildren().add(imageView);
-//        imageView.fitWidthProperty().bind(imagePane.widthProperty());
-//        imageView.fitHeightProperty().bind(imagePane.heightProperty());
-//        if (mediaItem.getImagePath() != null) {
-//            File imageFile = new File(mediaItem.getImagePath());
-//            Image image = new Image(imageFile.toURI().toString());
-//            imageView.setImage(image);
-//            imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
-//            imageView.setPreserveRatio(true);
-//            imageView.setSmooth(true);
-//        }
-    }
-
-    private void displayImage(String path) {
-        if (path != null) {
-            imagePane.setPrefWidth(140);
-            imagePane.setPrefHeight(180);
-            ImageView imageView = new ImageView();
-            Image image = new Image(new File(path).toURI().toString(), 140, 180, true, true);
-            imageView.setImage(image);
-            imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
-            imagePane.getChildren().addAll(imageView);
-        } else {
-            imagePane.getChildren().clear();
-        }
     }
 
 }

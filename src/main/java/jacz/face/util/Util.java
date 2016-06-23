@@ -4,7 +4,11 @@ import com.neovisionaries.i18n.CountryCode;
 import jacz.database.util.GenreCode;
 import javafx.application.Platform;
 import javafx.beans.value.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -80,5 +84,22 @@ public class Util {
 
     public static List<String> getGenresNames(Collection<GenreCode> except) {
         return Stream.of(GenreCode.values()).filter(genre -> !except.contains(genre)).map(GenreCode::name).sorted().collect(Collectors.toList());
+    }
+
+    public static void displayImage(Pane pane, String imagePath) {
+        if (imagePath != null) {
+            ImageView imageView = new ImageView();
+            imageView.fitWidthProperty().bind(pane.widthProperty());
+            imageView.fitHeightProperty().bind(pane.heightProperty());
+            Image image = new Image(new File(imagePath).toURI().toString());
+            imageView.setImage(image);
+            imageView.setPreserveRatio(true);
+            imageView.setSmooth(true);
+            // todo remove style, set elsewhere
+            imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
+            pane.getChildren().addAll(imageView);
+        } else {
+            pane.getChildren().clear();
+        }
     }
 }

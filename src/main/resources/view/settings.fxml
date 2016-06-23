@@ -9,8 +9,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import org.controlsfx.control.CheckComboBox?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jacz.face.controllers.SettingsController">
    <children>
@@ -50,7 +50,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <GridPane hgap="10.0" prefHeight="178.0" prefWidth="395.0" vgap="10.0" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="20.0">
+                        <GridPane hgap="10.0" prefHeight="178.0" vgap="10.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="20.0">
                            <columnConstraints>
                               <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                               <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
@@ -71,8 +71,8 @@
                               <TextField fx:id="maxRegularConnectionsAddCountriesTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <Label text="Additional countries" GridPane.rowIndex="4" />
                               <CheckBox fx:id="useRegularConnectionsCheckBox" mnemonicParsing="false" selected="true" GridPane.columnIndex="1" />
-                              <CheckComboBox fx:id="additionalCountriesCheckComboBox" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                               <ComboBox fx:id="mainCountryComboBox" prefWidth="150.0" promptText="Pick a country" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <HBox fx:id="additionalCountriesHBox" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                            </children>
                         </GridPane>
                      </children>

@@ -9,6 +9,7 @@ import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
+import jacz.face.util.Util;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -35,22 +36,22 @@ import java.util.function.Predicate;
  */
 public class MediaListController extends GenericController {
 
-    private static class MediaItemGridCellEventHandler implements EventHandler<MouseEvent> {
-
-        private final DatabaseMediator.ItemType type;
-
-        private final Integer id;
-
-        public MediaItemGridCellEventHandler(DatabaseMediator.ItemType type, Integer id) {
-            this.type = type;
-            this.id = id;
-        }
-
-        @Override
-        public void handle(MouseEvent event) {
-            System.out.println("mouse clicked: " + type + ", " + id.toString());
-        }
-    }
+//    private static class MediaItemGridCellEventHandler implements EventHandler<MouseEvent> {
+//
+//        private final DatabaseMediator.ItemType type;
+//
+//        private final Integer id;
+//
+//        public MediaItemGridCellEventHandler(DatabaseMediator.ItemType type, Integer id) {
+//            this.type = type;
+//            this.id = id;
+//        }
+//
+//        @Override
+//        public void handle(MouseEvent event) {
+//            System.out.println("mouse clicked: " + type + ", " + id.toString());
+//        }
+//    }
 
     private static class MediaItemGridCell extends GridCell<MediaDatabaseProperties.MediaItem> {
         private AnchorPane rootPane;
@@ -61,8 +62,6 @@ public class MediaListController extends GenericController {
             Pane imagePane = new Pane();
             imagePane.setPrefWidth(140);
             imagePane.setPrefHeight(180);
-            ImageView image = new ImageView();
-            //imagePane.getChildren().add(image);
             Label title = new Label();
             Label year = new Label();
 
@@ -70,7 +69,7 @@ public class MediaListController extends GenericController {
             title.setStyle("-fx-background-color: aqua");
             year.setStyle("-fx-background-color: blue");
 
-            VBox vBoxPane = new VBox(image, title, year);
+            VBox vBoxPane = new VBox(imagePane, title, year);
             vBoxPane.setPrefWidth(160);
             vBoxPane.setPrefHeight(210);
 
@@ -102,21 +101,22 @@ public class MediaListController extends GenericController {
                 this.setGraphic(null);
             } else {
                 VBox vBoxPane = (VBox) rootPane.getChildren().get(0);
-                //Pane imagePane = (Pane) vBoxPane.getChildren().get(0);
-                ImageView imageView = (ImageView) vBoxPane.getChildren().get(0);
+                Pane imagePane = (Pane) vBoxPane.getChildren().get(0);
+                //ImageView imageView = (ImageView) vBoxPane.getChildren().get(0);
                 Label title = (Label) vBoxPane.getChildren().get(1);
                 Label year = (Label) vBoxPane.getChildren().get(2);
-                if (item.getImagePath() != null) {
-                    File imageFile = new File(item.getImagePath());
-                    Image image = new Image(imageFile.toURI().toString(), 140, 180, true, true);
-                    imageView.setImage(image);
-                    imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
-//                    imageView.setFitHeight(50);
-//                    //imageView.setFitHeight(200);
-//                    imageView.setPreserveRatio(true);
-//                    imageView.setSmooth(true);
-
-                }
+                Util.displayImage(imagePane, item.getImagePath());
+//                if (item.getImagePath() != null) {
+//                    File imageFile = new File(item.getImagePath());
+//                    Image image = new Image(imageFile.toURI().toString(), 140, 180, true, true);
+//                    imageView.setImage(image);
+//                    imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
+////                    imageView.setFitHeight(50);
+////                    //imageView.setFitHeight(200);
+////                    imageView.setPreserveRatio(true);
+////                    imageView.setSmooth(true);
+//
+//                }
                 title.setText(item.getTitle());
                 if (item.getYear() != null) {
                     year.setText("(" + item.getYear().toString() + ")");

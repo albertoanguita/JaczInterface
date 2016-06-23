@@ -17,7 +17,7 @@
    <children>
       <VBox layoutX="10.0" layoutY="9.5" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <children>
-            <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="SOMETIMES">
+            <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" VBox.vgrow="SOMETIMES">
                <children>
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0">
                      <children>

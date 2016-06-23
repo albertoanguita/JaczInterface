@@ -1,12 +1,14 @@
 package jacz.face.controllers;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.face.util.Controls;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.control.IndexedCheckModel;
 import org.controlsfx.validation.ValidationResult;
@@ -104,7 +106,7 @@ public class SettingsController extends GenericController {
     private ComboBox<String> mainCountryComboBox;
 
     @FXML
-    private CheckComboBox<String> additionalCountriesCheckComboBox;
+    private HBox additionalCountriesHBox;
 
     private ValidationSupport validationSupport;
 
@@ -125,14 +127,15 @@ public class SettingsController extends GenericController {
         mainCountryComboBox.setItems(FXCollections.observableList(Util.getCountriesNames()));
         mainCountryComboBox.setValue(client.getMainCountry().getName());
 
-        IndexedCheckModel<String> cm = additionalCountriesCheckComboBox.getCheckModel();
-        List<String> availableCountries = Util.getCountriesNames();
-        additionalCountriesCheckComboBox.getItems().addAll(FXCollections.observableList(Util.getCountriesNames()));
-        for (CountryCode additionalCountry : client.getAdditionalCountries()) {
-            String countryName = additionalCountry.getName();
-            int index = availableCountries.indexOf(countryName);
-            cm.check(index);
-        }
+        Controls.countryListPane(additionalCountriesHBox, client.getAdditionalCountries());
+//        IndexedCheckModel<String> cm = additionalCountriesCheckComboBox.getCheckModel();
+//        List<String> availableCountries = Util.getCountriesNames();
+//        additionalCountriesCheckComboBox.getItems().addAll(FXCollections.observableList(Util.getCountriesNames()));
+//        for (CountryCode additionalCountry : client.getAdditionalCountries()) {
+//            String countryName = additionalCountry.getName();
+//            int index = availableCountries.indexOf(countryName);
+//            cm.check(index);
+//        }
 
         validationSupport = new ValidationSupport();
         validationSupport.registerValidator(localPortTextField, false, new Validator<String>() {
@@ -240,7 +243,7 @@ public class SettingsController extends GenericController {
                 parseMaxConnections(maxRegularConnectionsTextField.getText()),
                 parseMaxConnections(maxRegularConnectionsAddCountriesTextField.getText()),
                 Util.getCountryFromName(mainCountryComboBox.getValue()),
-                parseAdditionalCountries(additionalCountriesCheckComboBox));
+                Controls.getSelectedCountries(additionalCountriesHBox));
 
     }
 
