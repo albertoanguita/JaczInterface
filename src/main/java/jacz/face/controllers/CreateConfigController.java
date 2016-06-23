@@ -71,7 +71,7 @@ public class CreateConfigController extends GenericController {
     public TextField nickBox;
 
     @FXML
-    public ChoiceBox<String> countrySelector;
+    public ComboBox<String> countrySelector;
 
     @FXML
     ProgressBar progressBar;
