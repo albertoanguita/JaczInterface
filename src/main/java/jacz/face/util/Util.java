@@ -2,6 +2,7 @@ package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
 import jacz.database.util.GenreCode;
+import jacz.database.util.QualityCode;
 import javafx.application.Platform;
 import javafx.beans.value.*;
 import javafx.scene.image.Image;
@@ -101,5 +102,9 @@ public class Util {
         } else {
             pane.getChildren().clear();
         }
+    }
+
+    public static List<String> getQualityNames() {
+        return Stream.of(QualityCode.values()).map(QualityCode::name).sorted().collect(Collectors.toList());
     }
 }

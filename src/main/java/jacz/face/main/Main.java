@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -126,7 +127,7 @@ public class Main extends Application {
     }
 
     public Optional<EditMovieController.MovieData> editMovie(NavigationHistory.DialogIntention dialogIntention) {
-        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editItem(dialogIntention, "/view/edit_movie.fxml", "new movie");
+        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editItem(dialogIntention, "/view/edit_movie_2.fxml", "new movie");
         dialogAndController.element1.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 return dialogAndController.element2.buildMovieData();
@@ -154,7 +155,7 @@ public class Main extends Application {
         try {
             navigationHistory.setCurrentDialogIntention(dialogIntention);
             FXMLLoader fxmlLoader = new FXMLLoader();
-            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource(fxmlPath).openStream());
+            TabPane newMoviePane = fxmlLoader.load(getClass().getResource(fxmlPath).openStream());
 
             Dialog<T> newMovieDialog = new Dialog<>();
             newMovieDialog.setTitle(title);

@@ -1,12 +1,18 @@
 package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.database.VideoFile;
 import jacz.database.util.GenreCode;
+import jacz.database.util.QualityCode;
+import jacz.face.state.PeersStateProperties;
 import jacz.util.lists.tuple.Duple;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,6 +23,57 @@ import java.util.stream.Collectors;
  * todo replace with list views that can be sorted with drag and drop (there are examples on the net)
  */
 public class Controls {
+
+
+//    private static class VideoFileCell extends TreeCell<VideoFile> {
+//
+//        public VideoFileCell() {
+//        }
+//
+//        @Override
+//        protected void updateItem(VideoFile file, boolean empty) {
+//            // calling super here is very important - don't skip this!
+//            super.updateItem(file, empty);
+//            if (empty) {
+//                this.setGraphic(null);
+//            } else {
+//                // build an anchor pane with an hbox inside it that stores all video file info fields
+//                VBox nameAndHash = new VBox();
+//                nameAndHash.getChildren().add(new Label(file.getName()));
+//                nameAndHash.getChildren().add(new Label("Hash: " + file.getHash()));
+//
+//                Label size = new Label(file.getLength() + "B");
+//
+//                ChoiceBox<String> quality = new ChoiceBox<>(FXCollections.observableList(Util.getQualityNames()));
+//                quality.setValue(file.getQuality().name());
+//
+//                HBox hBox = new HBox(nameAndHash, size, quality, );
+//                AnchorPane rootPane = new AnchorPane(hBox);
+//                this.setGraphic(rootPane);
+//            }
+//
+//
+//                // format the number as if it were a monetary value using the
+//            // formatting relevant to the current locale. This would format
+//            // 43.68 as "$43.68", and -23.67 as "-$23.67"
+//            setText(file == null ? "" : file.getName());
+//
+//            // change the text fill based on whether it is positive (green)
+//            // or negative (red). If the cell is selected, the text will
+//            // always be white (so that it can be read against the blue
+//            // background), and if the value is zero, we'll make it black.
+////            if (item != null) {
+////                double value = item.doubleValue();
+////                setTextFill(isSelected() ? Color.WHITE :
+////                        value == 0 ? Color.BLACK :
+////                                value < 0 ? Color.RED : Color.GREEN);
+////            }
+//        }
+//    }
+
+
+
+
 
     public static void countryListPane(Pane pane, List<CountryCode> initialCountries) {
         for (int i = 0; i < initialCountries.size(); i++) {
@@ -120,4 +177,7 @@ public class Controls {
                 .collect(Collectors.toList());
     }
 
+    public static void populateFilesTreeView(TreeView<AnchorPane> filesTreeView, List<VideoFile> videoFiles) {
+
+    }
 }

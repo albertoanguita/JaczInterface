@@ -2,15 +2,20 @@ package jacz.face.controllers;
 
 import jacz.database.DatabaseItem;
 import jacz.database.Movie;
+import jacz.database.VideoFile;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
+import jacz.face.util.VideoFilesEditor;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -31,6 +36,9 @@ public class EditMovieController extends EditProducedMediaItemController {
     @FXML
     private TextField minutesTextField;
 
+    @FXML
+    private ListView<VBox> filesListView;
+
     @Override
     public void setMain(Main main) {
         super.setMain(main);
@@ -44,6 +52,8 @@ public class EditMovieController extends EditProducedMediaItemController {
             titleTextField.setEditable(false);
             originalTitleTextField.setText(mediaItem.getOriginalTitle());
             minutesTextField.setText(mediaItem.getMinutes() != null ? mediaItem.getMinutes().toString() : null);
+
+            VideoFilesEditor.populateVideoFilesListView(filesListView, mediaItem.getVideoFiles());
         }
     }
 

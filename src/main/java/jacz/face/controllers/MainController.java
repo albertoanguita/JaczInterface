@@ -11,7 +11,6 @@ import jacz.face.messages.Messages;
 import jacz.face.state.ConnectionToServerStatus;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
-import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
 import jacz.util.lists.tuple.Duple;

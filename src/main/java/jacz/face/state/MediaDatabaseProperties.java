@@ -4,15 +4,14 @@ import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.*;
 import jacz.database.util.GenreCode;
+import jacz.database.util.LocalizedLanguage;
+import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -20,6 +19,7 @@ import javafx.util.Callback;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Stores observable lists for the integrated database (movies and series)
@@ -62,7 +62,9 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObjectProperty<Integer> minutes;
 
-        private MediaItem(CreationItem creationItem, MediaItemType type, String imagePath, List<String> productionCompanies, List<GenreCode> genres, Integer minutes) {
+        private final ObjectProperty<List<VideoFileModel>> videoFiles;
+
+        private MediaItem(CreationItem creationItem, MediaItemType type, String imagePath, List<String> productionCompanies, List<GenreCode> genres, Integer minutes, List<VideoFileModel> videoFiles) {
             this.type = type;
             this.id = creationItem.getId();
             this.title = new SimpleStringProperty(creationItem.getTitle());
@@ -77,23 +79,24 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.genres = new SimpleObjectProperty<>(genres);
             this.language = new SimpleObjectProperty<>(creationItem.getLanguage());
             this.minutes = new SimpleObjectProperty<>(minutes);
+            this.videoFiles = new SimpleObjectProperty<>(videoFiles);
         }
 
-        public MediaItem(ProducedCreationItem producedCreationItem, MediaItemType type, String imagePath, Integer minutes) {
-            this(producedCreationItem, type, imagePath, producedCreationItem.getProductionCompanies(), producedCreationItem.getGenres(), minutes);
+        public MediaItem(ProducedCreationItem producedCreationItem, MediaItemType type, String imagePath, Integer minutes, List<VideoFileModel> videoFiles) {
+            this(producedCreationItem, type, imagePath, producedCreationItem.getProductionCompanies(), producedCreationItem.getGenres(), minutes, videoFiles);
         }
 
         public MediaItem(Movie movie) {
-            this(movie, MediaItemType.MOVIE, buildImagePath(movie), movie.getMinutes());
+            this(movie, MediaItemType.MOVIE, buildImagePath(movie), movie.getMinutes(), VideoFileModel.buildVideoFileModelList(movie.getVideoFiles()));
         }
 
         public MediaItem(TVSeries tvSeries) {
-            this(tvSeries, MediaItemType.TV_SERIES, buildImagePath(tvSeries), null);
+            this(tvSeries, MediaItemType.TV_SERIES, buildImagePath(tvSeries), null, null);
         }
 
         public MediaItem(Chapter chapter) {
             // todo season and chapter number???
-            this(chapter, MediaItemType.CHAPTER, buildImagePath(chapter), null, null, chapter.getMinutes());
+            this(chapter, MediaItemType.CHAPTER, buildImagePath(chapter), null, null, chapter.getMinutes(), VideoFileModel.buildVideoFileModelList(chapter.getVideoFiles()));
         }
 
         public MediaItem(MediaItemType type, Integer id) {
@@ -111,6 +114,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.genres = null;
             this.language = null;
             this.minutes = null;
+            this.videoFiles = null;
         }
 
         public DatabaseItem getItem() {
@@ -263,6 +267,14 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return minutes;
         }
 
+        public List<VideoFileModel> getVideoFiles() {
+            return videoFiles.get();
+        }
+
+        public ObjectProperty<List<VideoFileModel>> videoFilesProperty() {
+            return videoFiles;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -277,6 +289,140 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             int result = type.hashCode();
             result = 31 * result + id.hashCode();
             return result;
+        }
+    }
+
+    public static class FileModel {
+
+        public final String hash;
+
+        private final ObjectProperty<Long> length;
+
+        private final StringProperty name;
+
+        private final ObservableList<String> additionalSources;
+
+        public FileModel(File file) {
+            hash = file.getHash();
+            length = new SimpleObjectProperty<>(file.getLength());
+            name = new SimpleStringProperty(file.getName());
+            additionalSources = FXCollections.observableList(file.getAdditionalSources());
+        }
+
+        public String getHash() {
+            return hash;
+        }
+
+        public Long getLength() {
+            return length.get();
+        }
+
+        public ObjectProperty<Long> lengthProperty() {
+            return length;
+        }
+
+        public String getName() {
+            return name.get();
+        }
+
+        public StringProperty nameProperty() {
+            return name;
+        }
+
+        public ObservableList<String> getAdditionalSources() {
+            return additionalSources;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof FileModel)) return false;
+
+            FileModel fileModel = (FileModel) o;
+
+            return hash.equals(fileModel.hash);
+        }
+
+        @Override
+        public int hashCode() {
+            return hash.hashCode();
+        }
+    }
+
+    public static class VideoFileModel extends FileModel {
+
+
+        private final ObjectProperty<Integer> minutes;
+        private final ObjectProperty<Integer> resolution;
+        private final ObjectProperty<QualityCode> quality;
+        private final ObservableList<SubtitleFileModel> subtitleFiles;
+        private final ObservableList<LocalizedLanguage> languages;
+
+        public VideoFileModel(VideoFile videoFile) {
+            super(videoFile);
+            minutes = new SimpleObjectProperty<>(videoFile.getMinutes());
+            resolution = new SimpleObjectProperty<>(videoFile.getResolution());
+            quality = new SimpleObjectProperty<>(videoFile.getQuality());
+            subtitleFiles = FXCollections.observableList(SubtitleFileModel.buildSubtitleFileModelList(videoFile.getSubtitleFiles()));
+            languages = FXCollections.observableList(videoFile.getLocalizedLanguages());
+        }
+
+        public static List<VideoFileModel> buildVideoFileModelList(List<VideoFile> videoFiles) {
+            return videoFiles.stream().map(VideoFileModel::new).collect(Collectors.toList());
+        }
+
+        public Integer getMinutes() {
+            return minutes.get();
+        }
+
+        public ObjectProperty<Integer> minutesProperty() {
+            return minutes;
+        }
+
+        public Integer getResolution() {
+            return resolution.get();
+        }
+
+        public ObjectProperty<Integer> resolutionProperty() {
+            return resolution;
+        }
+
+        public QualityCode getQuality() {
+            return quality.get();
+        }
+
+        public ObjectProperty<QualityCode> qualityProperty() {
+            return quality;
+        }
+
+        public ObservableList<SubtitleFileModel> getSubtitleFiles() {
+            return subtitleFiles;
+        }
+
+        public ObservableList<LocalizedLanguage> getLanguages() {
+            return languages;
+        }
+    }
+
+    public static class SubtitleFileModel extends FileModel {
+
+        private final ObjectProperty<LocalizedLanguage> language;
+
+        public SubtitleFileModel(SubtitleFile subtitleFile) {
+            super(subtitleFile);
+            language = new SimpleObjectProperty<>(subtitleFile.getLocalizedLanguage());
+        }
+
+        public static List<SubtitleFileModel> buildSubtitleFileModelList(List<SubtitleFile> subtitleFiles) {
+            return subtitleFiles.stream().map(SubtitleFileModel::new).collect(Collectors.toList());
+        }
+
+        public LocalizedLanguage getLanguage() {
+            return language.get();
+        }
+
+        public ObjectProperty<LocalizedLanguage> languageProperty() {
+            return language;
         }
     }
 
