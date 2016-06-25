@@ -309,6 +309,13 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             additionalSources = FXCollections.observableList(file.getAdditionalSources());
         }
 
+        public FileModel(String hash) {
+            this.hash = hash;
+            length = new SimpleObjectProperty<>(null);
+            name = new SimpleStringProperty(null);
+            additionalSources = FXCollections.emptyObservableList();
+        }
+
         public String getHash() {
             return hash;
         }
@@ -317,12 +324,20 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return length.get();
         }
 
+        public void setLength(Long length) {
+            this.length.set(length);
+        }
+
         public ObjectProperty<Long> lengthProperty() {
             return length;
         }
 
         public String getName() {
             return name.get();
+        }
+
+        public void setName(String name) {
+            this.name.set(name);
         }
 
         public StringProperty nameProperty() {
@@ -367,12 +382,25 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             languages = FXCollections.observableList(videoFile.getLocalizedLanguages());
         }
 
+        public VideoFileModel(String hash) {
+            super(hash);
+            minutes = new SimpleObjectProperty<>(null);
+            resolution = new SimpleObjectProperty<>(null);
+            quality = new SimpleObjectProperty<>(null);
+            subtitleFiles = FXCollections.emptyObservableList();
+            languages = FXCollections.emptyObservableList();
+        }
+
         public static List<VideoFileModel> buildVideoFileModelList(List<VideoFile> videoFiles) {
             return videoFiles.stream().map(VideoFileModel::new).collect(Collectors.toList());
         }
 
         public Integer getMinutes() {
             return minutes.get();
+        }
+
+        public void setMinutes(Integer minutes) {
+            this.minutes.set(minutes);
         }
 
         public ObjectProperty<Integer> minutesProperty() {
@@ -383,12 +411,20 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return resolution.get();
         }
 
+        public void setResolution(Integer resolution) {
+            this.resolution.set(resolution);
+        }
+
         public ObjectProperty<Integer> resolutionProperty() {
             return resolution;
         }
 
         public QualityCode getQuality() {
             return quality.get();
+        }
+
+        public void setQuality(QualityCode quality) {
+            this.quality.set(quality);
         }
 
         public ObjectProperty<QualityCode> qualityProperty() {
@@ -411,6 +447,11 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         public SubtitleFileModel(SubtitleFile subtitleFile) {
             super(subtitleFile);
             language = new SimpleObjectProperty<>(subtitleFile.getLocalizedLanguage());
+        }
+
+        public SubtitleFileModel(String hash) {
+            super(hash);
+            language = new SimpleObjectProperty<>(null);
         }
 
         public static List<SubtitleFileModel> buildSubtitleFileModelList(List<SubtitleFile> subtitleFiles) {

@@ -53,7 +53,7 @@ public class EditMovieController extends EditProducedMediaItemController {
             originalTitleTextField.setText(mediaItem.getOriginalTitle());
             minutesTextField.setText(mediaItem.getMinutes() != null ? mediaItem.getMinutes().toString() : null);
 
-            VideoFilesEditor.populateVideoFilesListView(filesListView, mediaItem.getVideoFiles());
+            //VideoFilesEditor.populateVideoFilesListView(filesListView, mediaItem.getVideoFiles());
         }
     }
 
