@@ -42,6 +42,7 @@ public class MovieController extends ProducedMediaItemController {
             // local movie that is associated with this integrated move
             Movie integratedMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), mediaItem.getId());
             localMovie = (Movie) ClientAccessor.getInstance().getClient().copyIntegratedItemToLocalItem(integratedMovie);
+            main.getNavigationHistory().getCurrentElement().updateLocalId(localMovie.getId());
         } else {
             // retrieve the existing local movie
             localMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getLocalId());
@@ -50,9 +51,9 @@ public class MovieController extends ProducedMediaItemController {
         result.ifPresent(editMovie -> {
             System.out.println(editMovie.toString());
 
-            Movie movie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getLocalId());
+            //Movie movie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getLocalId());
             try {
-                EditMovieController.changeMovie(movie, editMovie);
+                EditMovieController.changeMovie(localMovie, editMovie);
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -121,7 +121,7 @@ public class MediaListController extends GenericController {
 
                 setOnMouseClicked(event -> {
                     System.out.println("click on cell " + this.getItem().getTitle());
-                    main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(item.getType(), item.getId()));
+                    main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(item.getType(), item.getId(), item.getLocalId()));
                     try {
                         main.displayCurrentNavigationWindow();
                     } catch (IOException e) {
@@ -242,7 +242,7 @@ public class MediaListController extends GenericController {
                     try {
                         DatabaseItem integratedItem = EditMovieController.changeMovie(movie, newMovie);
                         PropertiesAccessor.getInstance().getMediaDatabaseProperties().updateMediaItem(integratedItem, true);
-                        main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.MOVIE, integratedItem.getId()));
+                        main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.MOVIE, integratedItem.getId(), movie.getId()));
                         try {
                             main.displayCurrentNavigationWindow();
                         } catch (IOException e) {
@@ -264,7 +264,7 @@ public class MediaListController extends GenericController {
                     try {
                         DatabaseItem integratedItem = EditTVSeriesController.changeTVSeries(tvSeries, newTVSeries);
                         PropertiesAccessor.getInstance().getMediaDatabaseProperties().updateMediaItem(integratedItem, true);
-                        main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.TV_SERIES, integratedItem.getId()));
+                        main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(MediaItemType.TV_SERIES, integratedItem.getId(), tvSeries.getId()));
                         try {
                             main.displayCurrentNavigationWindow();
                         } catch (IOException e) {

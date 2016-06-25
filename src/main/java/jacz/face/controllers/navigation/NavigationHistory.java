@@ -33,26 +33,33 @@ public class NavigationHistory {
 
         public final Integer itemId;
 
-        private Element(Window window, MediaItemType mediaItemType, Integer itemId) {
+        public Integer localId;
+
+        private Element(Window window, MediaItemType mediaItemType, Integer itemId, Integer localId) {
             this.window = window;
             this.mediaItemType = mediaItemType;
             this.itemId = itemId;
+            this.localId = localId;
+        }
+
+        public void updateLocalId(Integer localId) {
+            this.localId = localId;
         }
 
         public static Element mediaList(MediaItemType mediaItemType) {
-            return new Element(Window.MEDIA_LIST, mediaItemType, null);
+            return new Element(Window.MEDIA_LIST, mediaItemType, null, null);
         }
 
-        public static Element itemDetail(MediaItemType mediaItemType, Integer itemId) {
-            return new Element(Window.ITEM_DETAIL, mediaItemType, itemId);
+        public static Element itemDetail(MediaItemType mediaItemType, Integer itemId, Integer localId) {
+            return new Element(Window.ITEM_DETAIL, mediaItemType, itemId, localId);
         }
 
         public static Element transfers() {
-            return new Element(Window.TRANSFERS, null, null);
+            return new Element(Window.TRANSFERS, null, null, null);
         }
 
         public static Element peers() {
-            return new Element(Window.PEERS, null, null);
+            return new Element(Window.PEERS, null, null, null);
         }
     }
 
