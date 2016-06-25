@@ -9,6 +9,7 @@ public enum MediaItemType {
     MOVIE,
     TV_SERIES,
     CHAPTER,
+    // todo remove?
     ALL,
     FAVORITE;
 
@@ -22,6 +23,19 @@ public enum MediaItemType {
                 return CHAPTER;
             default:
                 throw new IllegalArgumentException("Invalid media item type: " + itemType.toString());
+        }
+    }
+
+    public DatabaseMediator.ItemType parse() {
+        switch (this) {
+            case MOVIE:
+                return DatabaseMediator.ItemType.MOVIE;
+            case TV_SERIES:
+                return DatabaseMediator.ItemType.TV_SERIES;
+            case CHAPTER:
+                return DatabaseMediator.ItemType.CHAPTER;
+            default:
+                return null;
         }
     }
 }

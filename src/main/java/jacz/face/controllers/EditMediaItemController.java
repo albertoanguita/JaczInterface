@@ -9,6 +9,7 @@ import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Controls;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;

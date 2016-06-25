@@ -9,6 +9,7 @@ import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.VideoFilesEditor;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -37,7 +38,10 @@ public class EditMovieController extends EditProducedMediaItemController {
     private TextField minutesTextField;
 
     @FXML
-    private ListView<VBox> filesListView;
+    private ListView<MediaDatabaseProperties.VideoFileModel> filesListView;
+
+    @FXML
+    private Button newVideoFileButton;
 
     @Override
     public void setMain(Main main) {
@@ -53,7 +57,10 @@ public class EditMovieController extends EditProducedMediaItemController {
             originalTitleTextField.setText(mediaItem.getOriginalTitle());
             minutesTextField.setText(mediaItem.getMinutes() != null ? mediaItem.getMinutes().toString() : null);
 
-            //VideoFilesEditor.populateVideoFilesListView(filesListView, mediaItem.getVideoFiles());
+            // retrieve movie object for populating the video files editor pane
+            Movie movie = Movie.getMovieById(Cl)
+
+            VideoFilesEditor.populateVideoFilesListView(filesListView, newVideoFileButton, main, , mediaItem.getVideoFiles());
         }
     }
 

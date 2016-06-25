@@ -237,6 +237,7 @@ public class MediaListController extends GenericController {
 
                 resultMovie.ifPresent(newMovie -> {
                     System.out.println("creating new movie: " + newMovie.toString());
+                    // the new movie is stored at the local database, as it has been created by the user
                     Movie movie = new Movie(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), newMovie.title);
                     try {
                         DatabaseItem integratedItem = EditMovieController.changeMovie(movie, newMovie);

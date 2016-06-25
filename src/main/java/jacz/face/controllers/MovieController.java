@@ -36,11 +36,21 @@ public class MovieController extends ProducedMediaItemController {
 
 
     public void editMovie() {
+        Movie localMovie;
+        if (mediaItem.getLocalId() == null) {
+            // there is no local movie associated to this integrated move -> copy the integrated content to a new
+            // local movie that is associated with this integrated move
+            Movie integratedMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), mediaItem.getId());
+            localMovie = (Movie) ClientAccessor.getInstance().getClient().copyIntegratedItemToLocalItem(integratedMovie);
+        } else {
+            // retrieve the existing local movie
+            localMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getLocalId());
+        }
         Optional<EditMovieController.MovieData> result = main.editMovie(NavigationHistory.DialogIntention.EDIT);
         result.ifPresent(editMovie -> {
             System.out.println(editMovie.toString());
 
-            Movie movie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getId());
+            Movie movie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getLocalId());
             try {
                 EditMovieController.changeMovie(movie, editMovie);
             } catch (IOException e) {

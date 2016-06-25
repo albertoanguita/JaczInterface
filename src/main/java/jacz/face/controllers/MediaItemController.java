@@ -7,6 +7,7 @@ import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
 import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 
@@ -44,6 +45,11 @@ public class MediaItemController extends GenericController {
     @FXML
     private Label actorsLabel;
 
+    @FXML
+    Button editButton;
+
+    @FXML
+    Button removeLocalContentButton;
 
 
 
@@ -100,6 +106,8 @@ public class MediaItemController extends GenericController {
             }
         });
 
+        // if there is no local content, the remove local content button must be disabled
+        removeLocalContentButton.disableProperty().bind(mediaItem.localIdProperty().isNull().and(mediaItem.deletedIdProperty().isNull()));
     }
 
     protected String formatNumber(Integer year) {

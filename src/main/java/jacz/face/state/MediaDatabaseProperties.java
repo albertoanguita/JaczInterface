@@ -10,6 +10,8 @@ import jacz.face.controllers.ClientAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
+import jacz.peerengineservice.PeerId;
+import jacz.util.lists.tuple.Duple;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -37,6 +39,14 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         private final MediaItemType type;
 
         private final Integer id;
+
+        // todo we also need the deletedId, it counts as local content
+        // todo if editing, what to do with deleted content???
+        private final ObjectProperty<Integer> localId;
+
+        private final ObjectProperty<List<Duple<PeerId, Integer>>> remoteIds;
+
+        private final ObjectProperty<Integer> deletedId;
 
         private final StringProperty title;
 
@@ -67,6 +77,9 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         private MediaItem(CreationItem creationItem, MediaItemType type, String imagePath, List<String> productionCompanies, List<GenreCode> genres, Integer minutes, List<VideoFileModel> videoFiles) {
             this.type = type;
             this.id = creationItem.getId();
+            this.localId = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToLocal().get(type.parse(), creationItem.getId()));
+            this.remoteIds = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToRemote().get(type.parse(), creationItem.getId()));
+            this.deletedId = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToDeleted().get(type.parse(), creationItem.getId()));
             this.title = new SimpleStringProperty(creationItem.getTitle());
             this.originalTitle = new SimpleStringProperty(creationItem.getOriginalTitle());
             this.imagePath = new SimpleStringProperty(imagePath);
@@ -88,6 +101,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public MediaItem(Movie movie) {
             this(movie, MediaItemType.MOVIE, buildImagePath(movie), movie.getMinutes(), VideoFileModel.buildVideoFileModelList(movie.getVideoFiles()));
+            ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToLocal().get(DatabaseMediator.ItemType.MOVIE, movie.getId());
         }
 
         public MediaItem(TVSeries tvSeries) {
@@ -102,6 +116,9 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         public MediaItem(MediaItemType type, Integer id) {
             this.type = type;
             this.id = id;
+            this.localId = null;
+            this.remoteIds = null;
+            this.deletedId = null;
             this.title = null;
             this.originalTitle = null;
             this.imagePath = null;
@@ -131,6 +148,9 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
 
         private void update(CreationItem creationItem, boolean setLater) {
+            Util.setLaterIf(this.localId, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToLocal().get(type.parse(), creationItem.getId()), setLater);
+            Util.setLaterIf(this.remoteIds, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToRemote().get(type.parse(), creationItem.getId()), setLater);
+            Util.setLaterIf(this.deletedId, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToDeleted().get(type.parse(), creationItem.getId()), setLater);
             Util.setLaterIf(this.title, creationItem.getTitle(), setLater);
             Util.setLaterIf(this.originalTitle, creationItem.getOriginalTitle(), setLater);
             Util.setLaterIf(this.year, creationItem.getYear(), setLater);
@@ -169,6 +189,30 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public Integer getId() {
             return id;
+        }
+
+        public Integer getLocalId() {
+            return localId.get();
+        }
+
+        public ObjectProperty<Integer> localIdProperty() {
+            return localId;
+        }
+
+        public List<Duple<PeerId, Integer>> getRemoteIds() {
+            return remoteIds.get();
+        }
+
+        public ObjectProperty<List<Duple<PeerId, Integer>>> remoteIdsProperty() {
+            return remoteIds;
+        }
+
+        public Integer getDeletedId() {
+            return deletedId.get();
+        }
+
+        public ObjectProperty<Integer> deletedIdProperty() {
+            return deletedId;
         }
 
         public String getTitle() {

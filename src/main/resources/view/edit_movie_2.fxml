@@ -16,7 +16,6 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-
 <TabPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jacz.face.controllers.EditMovieController">
    <tabs>
       <Tab closable="false" text="Movie data">
@@ -92,7 +91,7 @@
                <children>
                   <VBox layoutX="10.0" layoutY="10.0" spacing="20.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
-                        <Button fx:id="s" mnemonicParsing="false" text="New video file" />
+                        <Button fx:id="newVideoFileButton" mnemonicParsing="false" text="New video file" />
                         <ListView fx:id="filesListView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="SOMETIMES" />
                      </children>
                   </VBox>
