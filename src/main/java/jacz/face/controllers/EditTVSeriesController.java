@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by Alberto on 21/06/2016.
  */
-public class EditTVSeriesController extends EditProducedMediaItemController {
+public class EditTVSeriesController extends EditProducedCreationItemController {
 
     public static class TVSeriesData extends ProducedMediaItemData {
 
@@ -29,7 +29,7 @@ public class EditTVSeriesController extends EditProducedMediaItemController {
     }
 
     public static DatabaseItem changeTVSeries(TVSeries tvSeries, TVSeriesData tvSeriesData) throws IOException {
-        EditProducedMediaItemController.changeProducedCreationItem(tvSeries, tvSeriesData);
+        EditProducedCreationItemController.changeProducedCreationItem(tvSeries, tvSeriesData);
         return ClientAccessor.getInstance().getClient().localItemModified(tvSeries);
     }
 }

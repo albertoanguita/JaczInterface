@@ -231,7 +231,7 @@ public class MediaListController extends GenericController {
         switch (main.getNavigationHistory().getCurrentElement().mediaItemType) {
 
             case MOVIE:
-                Optional<EditMovieController.MovieData> resultMovie = main.editMovie(NavigationHistory.DialogIntention.NEW);
+                Optional<EditMovieController.MovieData> resultMovie = main.editMovie(NavigationHistory.DialogIntention.NEW, null);
 
                 System.out.println("new movie completed");
 
@@ -254,7 +254,7 @@ public class MediaListController extends GenericController {
                 });
                 break;
             case TV_SERIES:
-                Optional<EditTVSeriesController.TVSeriesData> resultTVSeries = main.editTVSeries(NavigationHistory.DialogIntention.NEW);
+                Optional<EditTVSeriesController.TVSeriesData> resultTVSeries = main.editTVSeries(NavigationHistory.DialogIntention.NEW, null);
 
                 System.out.println("new movie completed");
 

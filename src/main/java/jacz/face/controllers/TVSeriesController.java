@@ -18,7 +18,8 @@ public class TVSeriesController extends ProducedMediaItemController {
     }
 
     public void editTVSeries() {
-        Optional<EditTVSeriesController.TVSeriesData> result = main.editTVSeries(NavigationHistory.DialogIntention.EDIT);
+        // todo load local tvSeries
+        Optional<EditTVSeriesController.TVSeriesData> result = main.editTVSeries(NavigationHistory.DialogIntention.EDIT, null);
 
         result.ifPresent(editTVSeries -> {
             System.out.println(editTVSeries.toString());

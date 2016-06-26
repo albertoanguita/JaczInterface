@@ -1,8 +1,10 @@
 package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.database.ProducedCreationItem;
 import jacz.database.util.GenreCode;
 import jacz.database.util.QualityCode;
+import jacz.face.controllers.ClientAccessor;
 import javafx.application.Platform;
 import javafx.beans.value.*;
 import javafx.scene.image.Image;
@@ -107,4 +109,15 @@ public class Util {
     public static List<String> getQualityNames() {
         return Stream.of(QualityCode.values()).map(QualityCode::name).sorted().collect(Collectors.toList());
     }
+
+    public static String buildImagePath(ProducedCreationItem producedCreationItem) {
+        String hash = producedCreationItem.getImageHash() != null ? producedCreationItem.getImageHash().getHash() : null;
+        if (hash != null) {
+            return ClientAccessor.getInstance().getClient().getFile(hash);
+        } else {
+            return null;
+        }
+    }
+
+
 }

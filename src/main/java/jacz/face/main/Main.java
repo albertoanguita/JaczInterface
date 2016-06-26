@@ -1,6 +1,8 @@
 package jacz.face.main;
 
+import jacz.database.DatabaseItem;
 import jacz.database.Movie;
+import jacz.database.TVSeries;
 import jacz.face.controllers.*;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.state.PropertiesAccessor;
@@ -14,7 +16,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -126,8 +127,8 @@ public class Main extends Application {
 
     }
 
-    public Optional<EditMovieController.MovieData> editMovie(NavigationHistory.DialogIntention dialogIntention) {
-        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editItem(dialogIntention, "/view/edit_movie_2.fxml", "new movie");
+    public Optional<EditMovieController.MovieData> editMovie(NavigationHistory.DialogIntention dialogIntention, Movie movie) {
+        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editItem(dialogIntention, movie, "/view/edit_movie_2.fxml", "new movie");
         dialogAndController.element1.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 return dialogAndController.element2.buildMovieData();
@@ -139,8 +140,8 @@ public class Main extends Application {
     }
 
 
-    public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention) {
-        Duple<Dialog<EditTVSeriesController.TVSeriesData>, EditTVSeriesController> dialogAndController = editItem(dialogIntention, "/view/edit_tvseries.fxml", "new tv series");
+    public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention, TVSeries tvSeries) {
+        Duple<Dialog<EditTVSeriesController.TVSeriesData>, EditTVSeriesController> dialogAndController = editItem(dialogIntention, tvSeries, "/view/edit_tvseries.fxml", "new tv series");
         dialogAndController.element1.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 return dialogAndController.element2.buildTVSeriesData();
@@ -151,7 +152,7 @@ public class Main extends Application {
         return dialogAndController.element1.showAndWait();
     }
 
-    public <T extends EditMediaItemController.MediaItemData, Y extends GenericController> Duple<Dialog<T>, Y> editItem(NavigationHistory.DialogIntention dialogIntention, String fxmlPath, String title) {
+    public <T extends EditCreationItemController.MediaItemData, Y extends GenericEditController> Duple<Dialog<T>, Y> editItem(NavigationHistory.DialogIntention dialogIntention, DatabaseItem item, String fxmlPath, String title) {
         try {
             navigationHistory.setCurrentDialogIntention(dialogIntention);
             FXMLLoader fxmlLoader = new FXMLLoader();
@@ -165,7 +166,7 @@ public class Main extends Application {
             newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
             Y controller = fxmlLoader.getController();
-            controller.setMain(this);
+            controller.setMainAndItem(this, item);
             return new Duple<>(newMovieDialog, controller);
         } catch (IOException e) {
             e.printStackTrace();

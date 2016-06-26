@@ -2,6 +2,7 @@ package jacz.face.controllers;
 
 import com.neovisionaries.i18n.CountryCode;
 import jacz.database.CreationItem;
+import jacz.database.DatabaseItem;
 import jacz.database.Movie;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
@@ -23,7 +24,7 @@ import java.util.ResourceBundle;
 /**
  * Created by alberto on 6/20/16.
  */
-public abstract class EditMediaItemController extends GenericController {
+public abstract class EditCreationItemController extends GenericEditController {
 
     public static class MediaItemData {
 
@@ -80,23 +81,25 @@ public abstract class EditMediaItemController extends GenericController {
     }
 
     @Override
-    public void setMain(Main main) {
-        super.setMain(main);
+    public void setMainAndItem(Main main, DatabaseItem item) {
+        super.setMainAndItem(main, item);
 
-        if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
+        //if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
+        if (item != null) {
             // load the controls data from the edited item
-            MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
-            System.out.println(mediaItem.getType());
-            System.out.println(mediaItem.getTitle());
+            CreationItem creationItem = (CreationItem) item;
+            //MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
+            System.out.println(creationItem.getItemType());
+            System.out.println(creationItem.getTitle());
 
-            titleTextField.setText(mediaItem.getTitle());
+            titleTextField.setText(creationItem.getTitle());
             titleTextField.setEditable(false);
-            originalTitleTextField.setText(mediaItem.getOriginalTitle());
-            yearTextField.setText(mediaItem.getYear() != null ? mediaItem.getYear().toString() : null);
-            synopsisTextArea.setText(mediaItem.getSynopsis() != null ? mediaItem.getSynopsis() : null);
-            Controls.countryListPane(countriesHBox, mediaItem.getCountries());
-            Controls.stringListPane(creatorsFlowPane, mediaItem.getCreators());
-            Controls.stringListPane(actorsFlowPane, mediaItem.getActors());
+            originalTitleTextField.setText(creationItem.getOriginalTitle());
+            yearTextField.setText(creationItem.getYear() != null ? creationItem.getYear().toString() : null);
+            synopsisTextArea.setText(creationItem.getSynopsis() != null ? creationItem.getSynopsis() : null);
+            Controls.countryListPane(countriesHBox, creationItem.getCountries());
+            Controls.stringListPane(creatorsFlowPane, creationItem.getCreators());
+            Controls.stringListPane(actorsFlowPane, creationItem.getActors());
         } else {
             Controls.countryListPane(countriesHBox, new ArrayList<>());
             Controls.stringListPane(creatorsFlowPane, new ArrayList<>());

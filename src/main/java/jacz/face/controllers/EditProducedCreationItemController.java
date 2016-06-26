@@ -1,13 +1,11 @@
 package jacz.face.controllers;
 
 import afu.org.apache.commons.io.FilenameUtils;
+import jacz.database.DatabaseItem;
 import jacz.database.ProducedCreationItem;
 import jacz.database.util.GenreCode;
 import jacz.database.util.ImageHash;
-import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
-import jacz.face.state.MediaDatabaseProperties;
-import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Controls;
 import jacz.face.util.Util;
 import jacz.util.lists.tuple.Duple;
@@ -24,7 +22,7 @@ import java.util.List;
 /**
  * Created by alberto on 6/20/16.
  */
-public abstract class EditProducedMediaItemController extends EditMediaItemController {
+public abstract class EditProducedCreationItemController extends EditCreationItemController {
 
     public static class ProducedMediaItemData extends MediaItemData {
 
@@ -56,16 +54,18 @@ public abstract class EditProducedMediaItemController extends EditMediaItemContr
 
 
     @Override
-    public void setMain(Main main) {
-        super.setMain(main);
+    public void setMainAndItem(Main main, DatabaseItem item) {
+        super.setMainAndItem(main, item);
 
-        if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
+        //if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
+        if (item != null) {
             // load the controls data from the edited item
-            MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
+            ProducedCreationItem producedCreationItem = (ProducedCreationItem) item;
+            //MediaDatabaseProperties.MediaItem mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
 
-            Controls.stringListPane(productionCompaniesFlowPane, mediaItem.getProductionCompanies());
-            Controls.genreListPane(genresFlowPane, mediaItem.getGenres());
-            selectedImage = mediaItem.getImagePath();
+            Controls.stringListPane(productionCompaniesFlowPane, producedCreationItem.getProductionCompanies());
+            Controls.genreListPane(genresFlowPane, producedCreationItem.getGenres());
+            selectedImage = Util.buildImagePath(producedCreationItem);
             Util.displayImage(imagePane, selectedImage);
         } else {
             Controls.stringListPane(productionCompaniesFlowPane, new ArrayList<>());
@@ -96,7 +96,7 @@ public abstract class EditProducedMediaItemController extends EditMediaItemContr
 
 
     protected static void changeProducedCreationItem(ProducedCreationItem producedCreationItem, ProducedMediaItemData producedMediaItemData) throws IOException {
-        EditMediaItemController.changeCreationItem(producedCreationItem, producedMediaItemData);
+        EditCreationItemController.changeCreationItem(producedCreationItem, producedMediaItemData);
         producedCreationItem.setProductionCompanies(producedMediaItemData.companies);
         producedCreationItem.setGenres(producedMediaItemData.genres);
         ImageHash imageHash = null;

@@ -47,7 +47,7 @@ public class MovieController extends ProducedMediaItemController {
             // retrieve the existing local movie
             localMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), mediaItem.getLocalId());
         }
-        Optional<EditMovieController.MovieData> result = main.editMovie(NavigationHistory.DialogIntention.EDIT);
+        Optional<EditMovieController.MovieData> result = main.editMovie(NavigationHistory.DialogIntention.EDIT, localMovie);
         result.ifPresent(editMovie -> {
             System.out.println(editMovie.toString());
 
