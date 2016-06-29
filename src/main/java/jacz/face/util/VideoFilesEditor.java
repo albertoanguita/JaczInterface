@@ -1,6 +1,5 @@
 package jacz.face.util;
 
-import jacz.database.File;
 import jacz.database.Movie;
 import jacz.database.SubtitleFile;
 import jacz.database.VideoFile;
@@ -11,23 +10,21 @@ import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.util.lists.tuple.Duple;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
-import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +51,31 @@ public class VideoFilesEditor {
 
         public FileData(jacz.database.File file) {
             this(file.getHash(), file.getLength(), file.getName(), file.getAdditionalSources());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof FileData)) return false;
+
+            FileData fileData = (FileData) o;
+
+            return hash.equals(fileData.hash);
+        }
+
+        @Override
+        public int hashCode() {
+            return hash.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "FileData{" +
+                    "hash='" + hash + '\'' +
+                    ", length=" + length +
+                    ", name='" + name + '\'' +
+                    ", additionalSources=" + additionalSources +
+                    '}';
         }
     }
 
@@ -86,6 +108,18 @@ public class VideoFilesEditor {
             this.subtitleFiles = videoFile.getSubtitleFiles().stream().map(SubtitleFileData::new).collect(Collectors.toList());
             this.localizedLanguages = videoFile.getLocalizedLanguages();
         }
+
+        @Override
+        public String toString() {
+            return "VideoFileData{" +
+                    super.toString() +
+                    "minutes=" + minutes +
+                    ", resolution=" + resolution +
+                    ", quality=" + quality +
+                    ", subtitleFiles=" + subtitleFiles +
+                    ", localizedLanguages=" + localizedLanguages +
+                    '}';
+        }
     }
 
     public static class SubtitleFileData extends FileData {
@@ -100,6 +134,22 @@ public class VideoFilesEditor {
         public SubtitleFileData(SubtitleFile subtitleFile) {
             super(subtitleFile);
             this.localizedLanguage = subtitleFile.getLocalizedLanguage();
+        }
+    }
+
+    public static class UpdateResult {
+
+        public final boolean change;
+
+        public final List<VideoFile> videoFiles;
+
+        public UpdateResult(boolean change, List<VideoFile> videoFiles) {
+            this.change = change;
+            this.videoFiles = videoFiles;
+        }
+
+        public static UpdateResult emptyResult() {
+            return new UpdateResult(false, new ArrayList<>());
         }
     }
 
@@ -133,6 +183,11 @@ public class VideoFilesEditor {
     }
 
 
+
+    public static final String QUALITY_NULL_VALUE = " ";
+
+
+
     public static void populateVideoFilesPane(VBox filesListVBox, Button newMovieButton, Main main, Movie movie, List<VideoFile> videoFiles) {
         populateVideoFilesPaneData(filesListVBox, newMovieButton, main, movie, videoFiles.stream().map(VideoFileData::new).collect(Collectors.toList()));
         // todo scroll
@@ -143,32 +198,157 @@ public class VideoFilesEditor {
 
     private static void populateVideoFilesPaneData(VBox filesListVBox, Button newMovieButton, Main main, Movie movie, List<VideoFileData> videoFileDataList) {
         filesListVBox.getChildren().clear();
-        for (VideoFileData videoFileData : videoFileDataList) {
-            filesListVBox.getChildren().add(buildVideoFileVBox(videoFileData));
+        for (int i = 0; i < videoFileDataList.size(); i++) {
+            VideoFileData videoFileData = videoFileDataList.get(i);
+            filesListVBox.getChildren().add(buildVideoFileVBox(filesListVBox, newMovieButton, videoFileData, i, main, movie));
         }
-        setupNewFileButton(filesListVBox, newMovieButton, main, movie, videoFileDataList);
+        setupNewFileButton(filesListVBox, newMovieButton, main, movie);
         // todo scroll
         //ScrollPane scrollPane = new ScrollPane(vBox, ScrollPane.SCROLLBARS_AS_NEEDED);
         //scrollPane.scroll
         //pane.getChildren().add(filesListVBox);
     }
 
-    private static VBox buildVideoFileVBox(VideoFileData videoFileData) {
+    private static VBox buildVideoFileVBox(VBox filesListVBox, Button newMovieButton, VideoFileData videoFileData, int index, Main main, Movie movie) {
         // for each video file we paint an VBox with two nodes. The first
         // one is an HBox with the basic info of the video file (name, hash, length...). The second one is another
         // VBox composed of HBoxes. Each HBox represents one subtitle file.
         // todo add a list view above subtitles for the additional sources
         Label nameLabel = new Label(formatName(videoFileData.name));
+        nameLabel.setMaxWidth(100d);
         Label hashLabel = new Label(formatHash(videoFileData.hash));
-        Label sizeLabel = new Label(formatSize(videoFileData.length));
         VBox nameHash = new VBox(nameLabel, hashLabel);
-        HBox basicInfo = new HBox(nameHash, sizeLabel);
+        Label sizeLabel = new Label(formatSize(videoFileData.length));
+        sizeLabel.setMaxWidth(100d);
+        Pane minutesPane = buildTextFieldPane(formatDuration(videoFileData.minutes), 40d, 40d, 40d, "min");
+        Pane resolutionPane = buildTextFieldPane(formatResolution(videoFileData.resolution), 40d, 40d, 40d, "px");
+        Pane qualityPane = buildQualityPane(videoFileData.quality, Control.USE_COMPUTED_SIZE, Control.USE_COMPUTED_SIZE, Control.USE_COMPUTED_SIZE, "quality");
+        VBox languagesVBox = new VBox();
+        Controls.localizedLanguageListPane(languagesVBox, videoFileData.localizedLanguages);
+        Button removeButton = new Button("x");
+        HBox basicInfo = new HBox(nameHash, sizeLabel, minutesPane, resolutionPane, qualityPane, languagesVBox, removeButton);
         basicInfo.setAlignment(Pos.CENTER_LEFT);
-        basicInfo.setSpacing(3d);
-        return new VBox(basicInfo);
+        basicInfo.setSpacing(15d);
+        VBox subtitlesVBox = new VBox();
+        Button newSubtitleButton = new Button("Add subtitle");
+        populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, videoFileData.subtitleFiles);
+        VBox subtitlesContainer = new VBox(subtitlesVBox, newSubtitleButton);
+        AnchorPane subtitlesPane = new AnchorPane(subtitlesContainer);
+        AnchorPane.setLeftAnchor(subtitlesContainer, 30d);
+        VBox videoFileVBox = new VBox(basicInfo, subtitlesPane);
+        removeButton.setOnAction(event -> {
+            List<VideoFileData> newVideoFileDataList = parseVideoFileDataList(filesListVBox);
+            newVideoFileDataList.remove(index);
+            populateVideoFilesPaneData(filesListVBox, newMovieButton, main, movie, newVideoFileDataList);
+        });
+        return videoFileVBox;
     }
 
-    private static void setupNewFileButton(VBox filesListVBox, Button newMovieButton, Main main, Movie movie, List<VideoFileData> videoFileDataList) {
+//    private static void populateSubtitleFilesPane(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie, List<SubtitleFile> subtitleFiles) {
+//        populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, subtitleFiles.stream().map(SubtitleFileData::new).collect(Collectors.toList()));
+//    }
+
+    private static void populateSubtitleFilesPaneData(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie, List<SubtitleFileData> subtitleFileDataList) {
+        subtitlesVBox.getChildren().clear();
+        for (SubtitleFileData subtitleFileData : subtitleFileDataList) {
+            subtitlesVBox.getChildren().add(buildSubtitleFileHBox(subtitleFileData, subtitleFileDataList, () -> populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, subtitleFileDataList)));
+        }
+        setupNewSubtitleButton(subtitlesVBox, newSubtitleButton, main, movie, subtitleFileDataList);
+        // todo scroll
+        //ScrollPane scrollPane = new ScrollPane(vBox, ScrollPane.SCROLLBARS_AS_NEEDED);
+        //scrollPane.scroll
+        //pane.getChildren().add(filesListVBox);
+    }
+
+
+    private static HBox buildSubtitleFileHBox(SubtitleFileData subtitleFileData, List<SubtitleFileData> subtitleFileDataList, Runnable rePaint) {
+        // for each video file we paint an VBox with two nodes. The first
+        // one is an HBox with the basic info of the video file (name, hash, length...). The second one is another
+        // VBox composed of HBoxes. Each HBox represents one subtitle file.
+        // todo add a list view above subtitles for the additional sources
+        Label nameLabel = new Label(formatName(subtitleFileData.name));
+        nameLabel.setMaxWidth(100d);
+        Label hashLabel = new Label(formatHash(subtitleFileData.hash));
+        VBox nameHash = new VBox(nameLabel, hashLabel);
+        Label sizeLabel = new Label(formatSize(subtitleFileData.length));
+        sizeLabel.setMaxWidth(100d);
+        HBox localizedLanguageHBox = new HBox();
+        Controls.localizedLanguageEditor(localizedLanguageHBox, subtitleFileData.localizedLanguage);
+        localizedLanguageHBox.setSpacing(15d);
+//        Label localizedLanguageLabel = new Label(formatSize(subtitleFileData.length));
+//        sizeLabel.setMaxWidth(100d);
+        Button removeButton = new Button("x");
+        HBox basicInfo = new HBox(nameHash, sizeLabel, localizedLanguageHBox, removeButton);
+        basicInfo.setAlignment(Pos.CENTER_LEFT);
+        basicInfo.setSpacing(15d);
+        removeButton.setOnAction(event -> {
+            subtitleFileDataList.remove(subtitleFileData);
+            rePaint.run();
+        });
+        return basicInfo;
+    }
+
+    private static Pane buildTextFieldPane(String text, Double minWidth, Double prefWidth, Double maxWidth, String postLabel) {
+        HBox pane = new HBox();
+        pane.setAlignment(Pos.CENTER_LEFT);
+        TextField textField = new TextField(text);
+        textField.setAlignment(Pos.CENTER_RIGHT);
+        if (minWidth != null) {
+            textField.setMinWidth(minWidth);
+        }
+        if (prefWidth != null) {
+            textField.setPrefWidth(prefWidth);
+        }
+        if (maxWidth != null) {
+            textField.setMaxWidth(maxWidth);
+        }
+        pane.getChildren().add(textField);
+        if (postLabel != null) {
+            Label label = new Label(postLabel);
+            label.setMinWidth(Control.USE_COMPUTED_SIZE);
+            label.setPrefWidth(Control.USE_COMPUTED_SIZE);
+            label.setMaxWidth(Control.USE_COMPUTED_SIZE);
+            pane.getChildren().add(label);
+        }
+        return pane;
+    }
+
+    private static <T> T parseTextFieldPane(Pane pane, Function<String, T> parser) {
+        TextField textField = (TextField) pane.getChildren().get(0);
+        return parser.apply(textField.getText());
+    }
+
+    private static Pane buildQualityPane(QualityCode quality, Double minWidth, Double prefWidth, Double maxWidth, String postLabel) {
+        HBox pane = new HBox();
+        pane.setAlignment(Pos.CENTER_LEFT);
+        ChoiceBox<String> qualityChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(Util.getQualitiesNames(QUALITY_NULL_VALUE)));
+        qualityChoiceBox.setValue(quality == null ? QUALITY_NULL_VALUE : quality.name());
+        if (minWidth != null) {
+            qualityChoiceBox.setMinWidth(minWidth);
+        }
+        if (prefWidth != null) {
+            qualityChoiceBox.setPrefWidth(prefWidth);
+        }
+        if (maxWidth != null) {
+            qualityChoiceBox.setMaxWidth(maxWidth);
+        }
+        pane.getChildren().add(qualityChoiceBox);
+        if (postLabel != null) {
+            Label label = new Label(postLabel);
+            label.setMinWidth(Control.USE_COMPUTED_SIZE);
+            label.setPrefWidth(Control.USE_COMPUTED_SIZE);
+            label.setMaxWidth(Control.USE_COMPUTED_SIZE);
+            pane.getChildren().add(label);
+        }
+        return pane;
+    }
+
+    private static QualityCode parseQualityPane(Pane pane) {
+        ChoiceBox<String> qualityChoiceBox = (ChoiceBox<String>) pane.getChildren().get(0);
+        return Util.getQualityFromName(qualityChoiceBox.getValue());
+    }
+
+    private static void setupNewFileButton(VBox filesListVBox, Button newMovieButton, Main main, Movie movie) {
         newMovieButton.setOnAction(event -> {
             // open a file selector. When a file is selected, load it into the file hash database and use its
             // metadata to populate a new VideoFileModel object that is added to the existing ones
@@ -179,9 +359,28 @@ public class VideoFilesEditor {
                     new FileChooser.ExtensionFilter("All Files", "*.*"));
             java.io.File selectedMovieFile = fileChooser.showOpenDialog(main.getPrimaryStage());
             if (selectedMovieFile != null) {
+                List<VideoFileData> newVideoFileDataList = parseVideoFileDataList(filesListVBox);
                 VideoFileData videoFileData = addNewVideoFile(selectedMovieFile.toString(), movie);
-                videoFileDataList.add(videoFileData);
-                populateVideoFilesPaneData(filesListVBox, newMovieButton, main, movie, videoFileDataList);
+                newVideoFileDataList.add(videoFileData);
+                populateVideoFilesPaneData(filesListVBox, newMovieButton, main, movie, newVideoFileDataList);
+            }
+        });
+    }
+
+    private static void setupNewSubtitleButton(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie, List<SubtitleFileData> subtitleFileDataList) {
+        newSubtitleButton.setOnAction(event -> {
+            // open a file selector. When a file is selected, load it into the file hash database and use its
+            // metadata to populate a new VideoFileModel object that is added to the existing ones
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select a subtitle file");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Subtitle Files", "*.srt", "*.sub"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*"));
+            java.io.File selectedSubtitleFile = fileChooser.showOpenDialog(main.getPrimaryStage());
+            if (selectedSubtitleFile != null) {
+                SubtitleFileData subtitleFileData = addNewSubtitleFile(selectedSubtitleFile.toString(), movie);
+                subtitleFileDataList.add(subtitleFileData);
+                populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, subtitleFileDataList);
             }
         });
     }
@@ -190,8 +389,21 @@ public class VideoFilesEditor {
         try {
             Duple<String, String> pathAndHash = ClientAccessor.getInstance().getClient().addLocalMovieFile(newMovieFile, movie, true);
             Long length = new java.io.File(pathAndHash.element1).length();
+            System.out.println("new file length: " + length);
             return new VideoFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null, null, null, new ArrayList<>(), new ArrayList<>());
             // todo update automatic metadata (did not find a suitable api for this, skipping...)
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static SubtitleFileData addNewSubtitleFile(String newSubtitleFile, Movie movie) {
+        try {
+            Duple<String, String> pathAndHash = ClientAccessor.getInstance().getClient().addLocalMovieFile(newSubtitleFile, movie, true);
+            Long length = new java.io.File(pathAndHash.element1).length();
+            System.out.println("new file length: " + length);
+            return new SubtitleFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -215,16 +427,16 @@ public class VideoFilesEditor {
 //                .collect(Collectors.toList()));
 //    }
 
-    private static VBox buildVideoFileVBoxFromModel(MediaDatabaseProperties.VideoFileModel videoFileModel) {
-        Label nameLabel = new Label(formatName(videoFileModel.getName()));
-        Label hashLabel = new Label(formatHash(videoFileModel.getHash()));
-        Label sizeLabel = new Label(formatSize(videoFileModel.getLength()));
-        VBox nameHash = new VBox(nameLabel, hashLabel);
-        HBox basicInfo = new HBox(nameHash, sizeLabel);
-        basicInfo.setAlignment(Pos.CENTER_LEFT);
-        basicInfo.setSpacing(3d);
-        return new VBox(basicInfo);
-    }
+//    private static VBox buildVideoFileVBoxFromModel(MediaDatabaseProperties.VideoFileModel videoFileModel) {
+//        Label nameLabel = new Label(formatName(videoFileModel.getName()));
+//        Label hashLabel = new Label(formatHash(videoFileModel.getHash()));
+//        Label sizeLabel = new Label(formatSize(videoFileModel.getLength()));
+//        VBox nameHash = new VBox(nameLabel, hashLabel);
+//        HBox basicInfo = new HBox(nameHash, sizeLabel);
+//        basicInfo.setAlignment(Pos.CENTER_LEFT);
+//        basicInfo.setSpacing(3d);
+//        return new VBox(basicInfo);
+//    }
 
     private static String formatName(String name) {
         return name != null ? name : "unnamed file";
@@ -237,6 +449,168 @@ public class VideoFilesEditor {
 
     private static String formatSize(Long length) {
         return length == null ? "?" : length.toString() + " bytes";
+    }
+
+    private static String formatDuration(Integer minutes) {
+        return minutes == null ? "" : minutes.toString();
+    }
+
+    private static String formatResolution(Integer resolution) {
+        return resolution == null ? "" : resolution.toString();
+    }
+
+    private static String parseName(String text) {
+        return text.equals("unnamed file") ? null : text;
+    }
+
+    private static String parseHash(String text) {
+        String hash = text.substring("(MD5: ".length(), text.length() - 1);
+        return !hash.isEmpty() ? hash : null;
+    }
+
+    private static Long parseSize(String text) {
+        if (text.equals("?")) {
+            return null;
+        } else {
+            String sizeText = text.substring(0, text.length() - " bytes".length());
+            return Long.parseLong(sizeText);
+        }
+    }
+
+    private static Integer parseMinutes(String text) {
+        return Util.parseInteger(text);
+    }
+
+    private static Integer parseResolution(String text) {
+        return Util.parseInteger(text);
+    }
+
+
+    public static UpdateResult updateVideoFiles(VBox filesListVBox, List<VideoFile> oldVideoFiles, String dbPath) {
+        return updateVideoFiles(filesListVBox, oldVideoFiles, parseVideoFileDataList(filesListVBox), dbPath);
+    }
+
+    public static UpdateResult updateVideoFiles(VBox filesListVBox, List<VideoFile> oldVideoFiles, List<VideoFileData> videoFileDataList, String dbPath) {
+        System.out.println(videoFileDataList);
+        if (videoFileDataList.isEmpty() && oldVideoFiles.isEmpty()) {
+            // no items in any list -> no changes
+            return UpdateResult.emptyResult();
+        } else if (videoFileDataList.isEmpty()) {
+            // the remaining video files must be deleted
+            for (VideoFile videoFile : oldVideoFiles) {
+                ClientAccessor.getInstance().getClient().removeLocalItem(videoFile);
+            }
+            // the list of video files has changed (the resulting list is an empty list)
+            return new UpdateResult(true, new ArrayList<>());
+        } else if (oldVideoFiles.isEmpty()) {
+            // there are new files to add to the video file list
+            List<VideoFile> newVideoFiles = videoFileDataList.stream().map(videoFileData -> createNewVideoFile(videoFileData, dbPath)).collect(Collectors.toList());
+            return new UpdateResult(true, newVideoFiles);
+        } else {
+            // both lists have remaining elements
+            // pick the first video file and search it among the video file data list elements
+            // if it exists, update. If not, remove.
+            // Also check if the order is the same
+            VideoFile videoFile = oldVideoFiles.remove(0);
+            int index = videoFileDataList.indexOf(new VideoFileData(videoFile));
+//            int index = find(videoFile.getHash(), videoFileDataList);
+            if (index < 0) {
+                // there is no such video file -> remove
+                // keep searching recursively. Change will be true
+                ClientAccessor.getInstance().getClient().removeLocalItem(videoFile);
+                return new UpdateResult(true, updateVideoFiles(filesListVBox, oldVideoFiles, videoFileDataList, dbPath).videoFiles);
+            } else {
+                // there is such a file -> update the video file and keep searching
+                // the change will be true if this element is not at the beginning
+                VideoFileData videoFileData = videoFileDataList.remove(index);
+                updateVideoFile(videoFile, videoFileData);
+                UpdateResult updatedVideoFiles = updateVideoFiles(filesListVBox, oldVideoFiles, videoFileDataList, dbPath);
+                // add the updated video file as first element again
+                updatedVideoFiles.videoFiles.add(0, videoFile);
+                return new UpdateResult(index != 0 || updatedVideoFiles.change, updatedVideoFiles.videoFiles);
+            }
+        }
+    }
+
+//    private static int find(String hash, List<VideoFileData> videoFileDataList) {
+//        for (int i = 0; i < videoFileDataList.size(); i++) {
+//            if (videoFileDataList.get(i).hash.equals(hash)) {
+//                return i;
+//            }
+//        }
+//        return -1;
+//    }
+
+
+    private static List<VideoFileData> parseVideoFileDataList(VBox filesListVBox) {
+        return filesListVBox.getChildren().stream().map(videoFileVBox -> parseVideoFileNode((VBox) videoFileVBox)).collect(Collectors.toList());
+    }
+
+
+    private static VideoFileData parseVideoFileNode(VBox videoFileVBox) {
+        HBox basicInfoHBox = (HBox) videoFileVBox.getChildren().get(0);
+        List<Node> nodeList = basicInfoHBox.getChildren();
+        VBox nameHash = (VBox) nodeList.get(0);
+        Label nameLabel = (Label) nameHash.getChildren().get(0);
+        Label hashLabel = (Label) nameHash.getChildren().get(1);
+        String name = parseName(nameLabel.getText());
+        String hash = parseHash(hashLabel.getText());
+        Label sizeLabel = (Label) nodeList.get(1);
+        Long length = parseSize(sizeLabel.getText());
+        Pane minutesPane = (Pane) nodeList.get(2);
+        Integer minutes = parseTextFieldPane(minutesPane, VideoFilesEditor::parseMinutes);
+        Pane resolutionPane = (Pane) nodeList.get(3);
+        Integer resolution = parseTextFieldPane(resolutionPane, VideoFilesEditor::parseResolution);
+        Pane qualityPane = (Pane) nodeList.get(4);
+        QualityCode quality = parseQualityPane(qualityPane);
+//        TextField resolutionTextField = (TextField) nodeList.get(3);
+//        Integer resolution = parseResolution(resolutionTextField.getText());
+        return new VideoFileData(hash, length, name, new ArrayList<>(), minutes, resolution, quality, new ArrayList<>(), new ArrayList<>());
+    }
+
+    private static VideoFile createNewVideoFile(VideoFileData videoFileData, String dbPath) {
+        VideoFile videoFile = new VideoFile(dbPath, videoFileData.hash);
+        updateVideoFile(videoFile, videoFileData);
+        return videoFile;
+    }
+
+
+    private static boolean updateVideoFile(VideoFile videoFile, VideoFileData videoFileData) {
+        // todo subtitles
+        boolean changes = false;
+        if (!jacz.util.objects.Util.equals(videoFile.getLength(), videoFileData.length)) {
+            videoFile.setLengthPostponed(videoFileData.length);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(videoFile.getName(), videoFileData.name)) {
+            videoFile.setNamePostponed(videoFileData.name);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(videoFile.getAdditionalSources(), videoFileData.additionalSources)) {
+            videoFile.setAdditionalSourcesPostponed(videoFileData.additionalSources);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(videoFile.getMinutes(), videoFileData.minutes)) {
+            videoFile.setMinutesPostponed(videoFileData.minutes);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(videoFile.getResolution(), videoFileData.resolution)) {
+            videoFile.setResolutionPostponed(videoFileData.resolution);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(videoFile.getQuality(), videoFileData.quality)) {
+            videoFile.setQualityPostponed(videoFileData.quality);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(videoFile.getLocalizedLanguages(), videoFileData.localizedLanguages)) {
+            videoFile.setLocalizedLanguagesPostponed(videoFileData.localizedLanguages);
+            changes = true;
+        }
+        if (changes) {
+            videoFile.flushChanges();
+            ClientAccessor.getInstance().getClient().localItemModified(videoFile);
+        }
+        return changes;
     }
 
 
@@ -259,7 +633,7 @@ public class VideoFilesEditor {
             // the video file model was not found in the given list of video files -> build a new Video File
             videoFile = new VideoFile(dbPath, videoFileModel.hash);
         }
-        updateVideoFile(videoFile, videoFileModel);
+        //updateVideoFile(videoFile, videoFileModel);
         return null;
     }
 
@@ -274,10 +648,6 @@ public class VideoFilesEditor {
             }
         }
         return null;
-    }
-
-    private static void updateVideoFile(VideoFile videoFile, MediaDatabaseProperties.VideoFileModel videoFileModel) {
-        // todo
     }
 
 }

@@ -131,7 +131,7 @@ public class Main extends Application {
         Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editItem(dialogIntention, movie, "/view/edit_movie_2.fxml", "new movie");
         dialogAndController.element1.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
-                return dialogAndController.element2.buildMovieData();
+                return dialogAndController.element2.buildMovieData(movie);
             } else {
                 return null;
             }

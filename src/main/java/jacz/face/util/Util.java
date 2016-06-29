@@ -1,18 +1,20 @@
 package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
+import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.ProducedCreationItem;
 import jacz.database.util.GenreCode;
 import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
 import javafx.application.Platform;
-import javafx.beans.value.*;
+import javafx.beans.value.WritableBooleanValue;
+import javafx.beans.value.WritableNumberValue;
+import javafx.beans.value.WritableObjectValue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,41 +26,27 @@ import java.util.stream.Stream;
 public class Util {
 
     public static <T> void setLater(final WritableObjectValue<T> property, final T value) {
-        Platform.runLater(() -> property.set(value));
+        setLaterIf(property, value, false);
     }
 
     public static <T> void setLaterIf(final WritableObjectValue<T> property, final T value, boolean setLater) {
-        if (setLater) {
-            setLater(property, value);
-        } else {
-            property.set(value);
-        }
+        runLaterIf(() -> property.set(value), setLater);
     }
 
     public static <T> void setLater(final WritableBooleanValue property, final boolean value) {
-        Platform.runLater(() -> property.set(value));
+        setLaterIf(property, value, false);
     }
 
-//    public static <T> void setLater(final WritableIntegerValue property, final int value) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                property.set(value);
-//            }
-//        });
-//    }
-//
-//    public static <T> void setLater(final WritableLongValue property, final long value) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                property.set(value);
-//            }
-//        });
-//    }
+    public static <T> void setLaterIf(final WritableBooleanValue property, final boolean value, boolean setLater) {
+        runLaterIf(() -> property.set(value), setLater);
+    }
 
     public static <T> void setLater(final WritableNumberValue property, final Number value) {
-        Platform.runLater(() -> property.setValue(value));
+        setLaterIf(property, value, false);
+    }
+
+    public static <T> void setLaterIf(final WritableNumberValue property, final Number value, boolean setLater) {
+        runLaterIf(() -> property.setValue(value), setLater);
     }
 
     public static void runLaterIf(Runnable action, boolean runLater) {
@@ -70,24 +58,120 @@ public class Util {
     }
 
     public static List<String> getCountriesNames() {
-        return getCountriesNames(new ArrayList<>());
+        return getCountriesNamesStream().collect(Collectors.toList());
+    }
+
+    public static List<String> getCountriesNames(String nullValue) {
+        return Stream.concat(Stream.of(nullValue), getCountriesNamesStream()).collect(Collectors.toList());
     }
 
     public static List<String> getCountriesNames(Collection<CountryCode> except) {
-        return Stream.of(CountryCode.values()).filter(country -> !except.contains(country)).map(CountryCode::getName).sorted().collect(Collectors.toList());
+        return getCountriesNamesStream(except).collect(Collectors.toList());
+    }
+
+    private static Stream<String> getCountriesNamesStream() {
+        return Stream.of(CountryCode.values()).map(CountryCode::getName).sorted();
+    }
+
+    private static Stream<String> getCountriesNamesStream(Collection<CountryCode> except) {
+        return Stream.of(CountryCode.values()).filter(country -> !except.contains(country)).map(CountryCode::getName).sorted();
     }
 
     public static CountryCode getCountryFromName(String countryName) {
-        return CountryCode.findByName("^" + countryName + "$").get(0);
+        if (countryName == null) {
+            return null;
+        } else {
+            List<CountryCode> foundCountries = CountryCode.findByName("^" + countryName + "$");
+            return foundCountries.isEmpty() ? null : foundCountries.get(0);
+        }
+    }
+
+    public static List<String> getLanguagesNames() {
+        return getLanguagesNamesStream().collect(Collectors.toList());
+    }
+
+    public static List<String> getLanguagesNames(String nullValue) {
+        return Stream.concat(Stream.of(nullValue), getLanguagesNamesStream()).collect(Collectors.toList());
+    }
+
+    public static List<String> getLanguagesNames(Collection<LanguageCode> except) {
+        return getLanguagesNamesStream(except).collect(Collectors.toList());
+    }
+
+    private static Stream<String> getLanguagesNamesStream() {
+        return Stream.of(LanguageCode.values()).map(LanguageCode::getName).sorted();
+    }
+
+    private static Stream<String> getLanguagesNamesStream(Collection<LanguageCode> except) {
+        return Stream.of(LanguageCode.values()).filter(language -> !except.contains(language)).map(LanguageCode::getName).sorted();
+    }
+
+    public static LanguageCode getLanguageFromName(String languageName) {
+        if (languageName == null) {
+            return null;
+        } else {
+            List<LanguageCode> foundLanguages = LanguageCode.findByName("^" + languageName + "$");
+            return foundLanguages.isEmpty() ? null : foundLanguages.get(0);
+        }
     }
 
     public static List<String> getGenresNames() {
-        return Stream.of(GenreCode.values()).map(GenreCode::name).sorted().collect(Collectors.toList());
+        return getGenresNamesStream().collect(Collectors.toList());
+    }
+
+    public static List<String> getGenresNames(String nullValue) {
+        return Stream.concat(Stream.of(nullValue), getGenresNamesStream()).collect(Collectors.toList());
     }
 
     public static List<String> getGenresNames(Collection<GenreCode> except) {
-        return Stream.of(GenreCode.values()).filter(genre -> !except.contains(genre)).map(GenreCode::name).sorted().collect(Collectors.toList());
+        return getGenresNamesStream(except).collect(Collectors.toList());
     }
+
+    private static Stream<String> getGenresNamesStream() {
+        return Stream.of(GenreCode.values()).map(GenreCode::name).sorted();
+    }
+
+    private static Stream<String> getGenresNamesStream(Collection<GenreCode> except) {
+        return Stream.of(GenreCode.values()).filter(genre -> !except.contains(genre)).map(GenreCode::name).sorted();
+    }
+
+    public static GenreCode getGenreFromName(String genreName) {
+        try {
+            return GenreCode.valueOf(genreName);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public static List<String> getQualitiesNames() {
+        return getQualitiesNamesStream().collect(Collectors.toList());
+    }
+
+    public static List<String> getQualitiesNames(String nullValue) {
+        return Stream.concat(Stream.of(nullValue), getQualitiesNamesStream()).collect(Collectors.toList());
+    }
+
+    public static List<String> getQualitiesNames(Collection<QualityCode> except) {
+        return getQualitiesNamesStream(except).collect(Collectors.toList());
+    }
+
+    private static Stream<String> getQualitiesNamesStream() {
+        return Stream.of(QualityCode.values()).map(QualityCode::name);
+    }
+
+    private static Stream<String> getQualitiesNamesStream(Collection<QualityCode> except) {
+        return Stream.of(QualityCode.values()).filter(quality -> !except.contains(quality)).map(QualityCode::name);
+    }
+
+    public static QualityCode getQualityFromName(String qualityName) {
+        try {
+            return QualityCode.valueOf(qualityName);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+
 
     public static void displayImage(Pane pane, String imagePath) {
         if (imagePath != null) {
@@ -119,5 +203,7 @@ public class Util {
         }
     }
 
-
+    public static Integer parseInteger(String text) {
+        return text != null && !text.isEmpty() ? Integer.parseInt(text) : null;
+    }
 }

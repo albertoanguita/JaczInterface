@@ -1,10 +1,10 @@
 package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
+import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.VideoFile;
 import jacz.database.util.GenreCode;
-import jacz.database.util.QualityCode;
-import jacz.face.state.PeersStateProperties;
+import jacz.database.util.LocalizedLanguage;
 import jacz.util.lists.tuple.Duple;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
@@ -12,7 +12,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -71,30 +70,21 @@ public class Controls {
 //        }
 //    }
 
+    public static final String NO_LANGUAGE = " ";
 
-
-
+    public static final String NO_COUNTRY = " ";
 
     public static void countryListPane(Pane pane, List<CountryCode> initialCountries) {
-        for (int i = 0; i < initialCountries.size(); i++) {
-            CountryCode country = initialCountries.get(i);
-            //pane.getChildren().add(getCountryLabel(pane, initialCountries, i, country));
-            pane.getChildren().add(getListLabel(pane, initialCountries, i, country.getName(), paneListDuple -> countryListPane(paneListDuple.element1, paneListDuple.element2)));
-        }
-        //ChoiceBox<String> addCountry = new ChoiceBox<>(FXCollections.observableList(Util.getCountriesNames()));
+        pane.getChildren().clear();
+        buildCloseableLabelList(pane, initialCountries, CountryCode::getName, ContentDisplay.RIGHT, "", "", () -> countryListPane(pane, initialCountries));
 
-
-        ComboBox<String> addCountry = new ComboBox<>();
-        addCountry.setPrefWidth(50d);
-        addCountry.getItems().addAll(FXCollections.observableList(Util.getCountriesNames(initialCountries)));
-        addCountry.valueProperty().addListener((observable, oldValue, newValue) -> {
-            CountryCode country = Util.getCountryFromName(newValue);
-            pane.getChildren().clear();
+        ComboBox<String> addCountry = buildComboBoxWithAction(Util.getCountriesNames(initialCountries), 50d, countryName -> {
+            CountryCode country = Util.getCountryFromName(countryName);
             initialCountries.add(country);
             countryListPane(pane, initialCountries);
         });
-        // todo does not currently work because the combo box is not editable
-        addCountry.setPromptText("new country");
+//        // todo does not currently work because the combo box is not editable
+//        addCountry.setPromptText("new country");
 
         pane.getChildren().add(addCountry);
     }
@@ -104,21 +94,13 @@ public class Controls {
     }
 
     public static void stringListPane(Pane pane, List<String> stringList) {
-        for (int i = 0; i < stringList.size(); i++) {
-            String value = stringList.get(i);
-            pane.getChildren().add(getListLabel(pane, stringList, i, value, paneListDuple -> stringListPane(paneListDuple.element1, paneListDuple.element2)));
-        }
-        TextField newValueTextField = new TextField();
-        newValueTextField.setPrefWidth(50d);
-        newValueTextField.setOnKeyPressed(key -> {
-            if (key.getCode().equals(KeyCode.ENTER) && !newValueTextField.getText().isEmpty()) {
-                stringList.add(newValueTextField.getText());
-                pane.getChildren().clear();
-                stringListPane(pane, stringList);
-                pane.getChildren().get(stringList.size()).requestFocus();
-                key.consume();
-                System.out.println(pane.getHeight());
-            }
+        pane.getChildren().clear();
+        buildCloseableLabelList(pane, stringList, str -> str, ContentDisplay.RIGHT, "", "", () -> stringListPane(pane, stringList));
+
+        TextField newValueTextField = buildTextFieldWithAction(50d, newValue -> {
+            stringList.add(newValue);
+            stringListPane(pane, stringList);
+            pane.getChildren().get(stringList.size()).requestFocus();
         });
         pane.getChildren().add(newValueTextField);
     }
@@ -129,16 +111,11 @@ public class Controls {
     }
 
     public static void genreListPane(Pane pane, List<GenreCode> genres) {
-        for (int i = 0; i < genres.size(); i++) {
-            GenreCode genre = genres.get(i);
-            //pane.getChildren().add(getCountryLabel(pane, initialCountries, i, country));
-            pane.getChildren().add(getListLabel(pane, genres, i, genre.toString(), paneListDuple -> genreListPane(paneListDuple.element1, paneListDuple.element2)));
-        }
-        ComboBox<String> addGenre = new ComboBox<>(FXCollections.observableList(Util.getGenresNames()));
-        addGenre.setPrefWidth(50d);
-        addGenre.valueProperty().addListener((observable, oldValue, newValue) -> {
-            GenreCode genreCode = GenreCode.valueOf(newValue);
-            pane.getChildren().clear();
+        pane.getChildren().clear();
+        buildCloseableLabelList(pane, genres, GenreCode::toString, ContentDisplay.RIGHT, "", "", () -> genreListPane(pane, genres));
+
+        ComboBox<String> addGenre = buildComboBoxWithAction(Util.getGenresNames(genres), 50d, genreName -> {
+            GenreCode genreCode = GenreCode.valueOf(genreName);
             genres.add(genreCode);
             genreListPane(pane, genres);
         });
@@ -149,24 +126,176 @@ public class Controls {
         return getSelectedItems(pane, GenreCode::valueOf);
     }
 
-    private static <E> Label getListLabel(Pane pane, List<E> list, int index, String value, Consumer<Duple<Pane, List<E>>> updatePane) {
-        Button closeButton = new Button("X");
-        closeButton.setOnAction(event -> {
-            pane.getChildren().clear();
-            list.remove(index);
-            updatePane.accept(new Duple<>(pane, list));
+    public static void localizedLanguageListPane(Pane pane, List<LocalizedLanguage> initialLanguages) {
+        pane.getChildren().clear();
+        buildCloseableLabelList(pane, initialLanguages, Controls::formatLocalizedLanguage, ContentDisplay.RIGHT, "", "", () -> localizedLanguageListPane(pane, initialLanguages));
+//        for (int i = 0; i < initialLanguages.size(); i++) {
+//            LocalizedLanguage localizedLanguage = initialLanguages.get(i);
+//            pane.getChildren().add(getListLabel(pane, initialLanguages, i, formatLocalizedLanguage(localizedLanguage), paneListDuple -> localizedLanguageListPane(paneListDuple.element1, paneListDuple.element2)));
+//        }
+        HBox newHBox = new HBox();
+        Duple<ComboBox<String>, ComboBox<String>>  languageCountryComboBoxes = localizedLanguageEditor(newHBox, null, null);
+        Button addButton = new Button("Add");
+        addButton.disableProperty().bind(languageCountryComboBoxes.element1.valueProperty().isEqualTo(NO_LANGUAGE));
+        addButton.setOnAction(event -> {
+            LanguageCode language = Util.getLanguageFromName(languageCountryComboBoxes.element1.getValue());
+            CountryCode country = Util.getCountryFromName(languageCountryComboBoxes.element2.getValue());
+            initialLanguages.add(new LocalizedLanguage(language, country));
+            localizedLanguageListPane(pane, initialLanguages);
         });
+        newHBox.getChildren().add(addButton);
 
-        // In real life, use an external style sheet rather than inline styles:
-        // I did it this way for brevity
-        //closeButton.setStyle("-fx-font-size: 6pt; -fx-text-fill:red;");
 
+
+
+//        ComboBox<String> addLanguage = new ComboBox<>();
+//        ComboBox<String> addCountry = new ComboBox<>();
+//        Button addButton = new Button("Add");
+//        addButton.setDisable(true);
+//        addLanguage.setPrefWidth(50d);
+//        addLanguage.getItems().addAll(FXCollections.observableList(Util.getLanguagesNames()));
+//        addCountry.setPrefWidth(50d);
+//        addCountry.getItems().addAll(FXCollections.observableList(Util.getCountriesNames()));
+//        addLanguage.valueProperty().addListener((observable, oldValue, newValue) -> {
+//            addButton.setDisable(false);
+//        });
+//        addButton.setOnAction(event -> {
+//            LanguageCode language = Util.getLanguageFromName(addLanguage.getValue());
+//            CountryCode country = Util.getCountryFromName(addCountry.getValue());
+//            pane.getChildren().clear();
+//            initialLanguages.add(new LocalizedLanguage(language, country));
+//            localizedLanguageListPane(pane, initialLanguages);
+//        });
+//        HBox newHBox = new HBox(addLanguage, addCountry, addButton);
+
+        pane.getChildren().add(newHBox);
+    }
+
+    public static Duple<ComboBox<String>, ComboBox<String>> emptyLocalizedLanguageEditor(Pane pane) {
+        return localizedLanguageEditor(pane, null, null);
+    }
+
+    public static Duple<ComboBox<String>, ComboBox<String>> localizedLanguageEditor(Pane pane, LocalizedLanguage localizedLanguage) {
+        return localizedLanguage != null ?
+                localizedLanguageEditor(pane, localizedLanguage.language, localizedLanguage.country) :
+                emptyLocalizedLanguageEditor(pane);
+    }
+
+    public static Duple<ComboBox<String>, ComboBox<String>> localizedLanguageEditor(Pane pane, LanguageCode languageCode, CountryCode countryCode) {
+        pane.getChildren().clear();
+        HBox languageHBox = new HBox();
+        languageHBox.setSpacing(5d);
+        ComboBox<String> languageComboBox = languageEditor(languageHBox, languageCode);
+//        HBox languageHBox = languageEditor(localizedLanguage.language);
+//        ComboBox<String> languageComboBox = (ComboBox<String>) languageHBox.getChildren().get(1);
+        HBox countryHBox = new HBox();
+        countryHBox.setSpacing(5d);
+        ComboBox<String> countryComboBox = countryEditor(countryHBox, countryCode);
+        countryHBox.disableProperty().bind(languageComboBox.valueProperty().isEqualTo(NO_LANGUAGE));
+        pane.getChildren().addAll(languageHBox, countryHBox);
+        return new Duple<>(languageComboBox, countryComboBox);
+    }
+
+    public static ComboBox<String> languageEditor(Pane pane, LanguageCode languageCode) {
+        pane.getChildren().clear();
+        Label title = new Label("Language");
+        ComboBox<String> languageComboBox = new ComboBox<>();
+        languageComboBox.setPrefWidth(50d);
+        languageComboBox.getItems().addAll(FXCollections.observableList(Util.getLanguagesNames(NO_LANGUAGE)));
+        languageComboBox.setValue(languageCode == null ? NO_LANGUAGE : languageCode.getName());
+        pane.getChildren().addAll(title, languageComboBox);
+        return languageComboBox;
+//        hBox.setSpacing(5d);
+//        return hBox;
+    }
+
+    public static ComboBox<String> countryEditor(Pane pane, CountryCode countryCode) {
+        pane.getChildren().clear();
+        Label title = new Label("Country (optional)");
+        ComboBox<String> countryComboBox = new ComboBox<>();
+        countryComboBox.setPrefWidth(50d);
+        countryComboBox.getItems().addAll(FXCollections.observableList(Util.getCountriesNames(NO_COUNTRY)));
+        countryComboBox.setValue(countryCode == null ? NO_COUNTRY : countryCode.getName());
+        pane.getChildren().addAll(title, countryComboBox);
+        return countryComboBox;
+//        HBox hBox = new HBox(title, countryComboBox);
+//        hBox.setSpacing(5d);
+//        return hBox;
+    }
+
+    public static LocalizedLanguage parseLocalizedLanguage(Pane pane) {
+        LanguageCode languageCode = parseLanguageEditor((HBox) pane.getChildren().get(0));
+        CountryCode countryCode = parseCountryEditor((HBox) pane.getChildren().get(1));
+        return new LocalizedLanguage(languageCode, countryCode);
+    }
+
+    public static LanguageCode parseLanguageEditor(HBox hBox) {
+        ComboBox<String> languageComboBox = (ComboBox<String>) hBox.getChildren().get(1);
+        return Util.getLanguageFromName(languageComboBox.getValue());
+    }
+
+    public static CountryCode parseCountryEditor(HBox hBox) {
+        ComboBox<String> countryComboBox = (ComboBox<String>) hBox.getChildren().get(1);
+        if (countryComboBox.getValue().equals("-")) {
+            return null;
+        } else {
+            return Util.getCountryFromName(countryComboBox.getValue());
+        }
+    }
+
+    private static String formatLocalizedLanguage(LocalizedLanguage localizedLanguage) {
+        return localizedLanguage.country != null ?
+                localizedLanguage.language.getName() + " (" + localizedLanguage.country.getName() + ")" :
+                localizedLanguage.language.getName();
+    }
+
+    /*public static List<LocalizedLanguage> getSelectedLocalizedLanguages(Pane pane) {
+        return getSelectedItems(pane, Util::getLanguageFromName);
+    }*/
+
+
+    private static <E> void buildCloseableLabelList(Pane pane, List<E> elements, Function<E, String> buildName, ContentDisplay contentDisplay, String labelClass, String buttonClass, Runnable rePaint) {
+        for (int i = 0; i < elements.size(); i++) {
+            E element = elements.get(i);
+            int finalIndex = i;
+            pane.getChildren().add(buildCloseableLabel(buildName.apply(element), contentDisplay, labelClass, buttonClass, () -> {
+                elements.remove(finalIndex);
+                rePaint.run();
+            }));
+        }
+    }
+
+    private static Label buildCloseableLabel(String value, ContentDisplay contentDisplay, String labelClass, String buttonClass, Runnable closeAction) {
+        Button closeButton = new Button("X");
+        closeButton.getStyleClass().add(buttonClass);
+        closeButton.setOnAction(event -> closeAction.run());
         Label label = new Label(value);
+        label.getStyleClass().add(labelClass);
         label.setGraphic(closeButton);
-        label.setContentDisplay(ContentDisplay.RIGHT);
+        label.setContentDisplay(contentDisplay);
         label.setMinWidth(label.getWidth());
         label.setMinHeight(label.getHeight());
         return label;
+    }
+
+    public static <T> ComboBox<T> buildComboBoxWithAction(List<T> items, double prefWidth, Consumer<T> onActionConsumer) {
+        ComboBox<T> comboBox = new ComboBox<>();
+        comboBox.setPrefWidth(prefWidth);
+        comboBox.getItems().addAll(FXCollections.observableList(items));
+        comboBox.valueProperty().addListener((observable, oldValue, newValue) -> onActionConsumer.accept(newValue));
+        return comboBox;
+    }
+
+    public static TextField buildTextFieldWithAction(double prefWidth, Consumer<String> onEnterConsumer) {
+        TextField textField = new TextField();
+        textField.setPrefWidth(prefWidth);
+        textField.setOnKeyPressed(key -> {
+            if (key.getCode().equals(KeyCode.ENTER) && !textField.getText().isEmpty()) {
+                onEnterConsumer.accept(textField.getText());
+                key.consume();
+            }
+        });
+        return textField;
     }
 
     public static <E> List<E> getSelectedItems(Pane pane, Function<String, E> mapper) {
@@ -177,7 +306,4 @@ public class Controls {
                 .collect(Collectors.toList());
     }
 
-    public static void populateFilesTreeView(TreeView<AnchorPane> filesTreeView, List<VideoFile> videoFiles) {
-
-    }
 }

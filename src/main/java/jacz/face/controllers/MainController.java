@@ -13,6 +13,7 @@ import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
+import jacz.util.concurrency.ThreadUtil;
 import jacz.util.lists.tuple.Duple;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
@@ -368,6 +369,38 @@ public class MainController extends GenericController {
 //        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP27"));
 //        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP28"));
 //        client.addBlockedPeer(new PeerId("Ga7Of_mN5U6W-xWK_e7No92a5pSsjpLikeauCKACP29"));
+
+
+
+
+
+        System.out.println("Files in movie 1:");
+        Movie integratedMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), 1);
+        Movie localMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), 1);
+
+//        VideoFile videoFile1 = new VideoFile(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), "hash1");
+//        VideoFile videoFile2 = new VideoFile(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), "hash2");
+//        VideoFile videoFile3 = new VideoFile(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), "hash3");
+//        VideoFile videoFile4 = new VideoFile(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), "hash4");
+//        VideoFile videoFile5 = new VideoFile(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), "hash5");
+//        localMovie.addVideoFile(videoFile1);
+//        localMovie.addVideoFile(videoFile2);
+//        localMovie.addVideoFile(videoFile3);
+//        localMovie.addVideoFile(videoFile4);
+//        localMovie.addVideoFile(videoFile5);
+//
+//        ClientAccessor.getInstance().getClient().localItemModified(videoFile1);
+//        ClientAccessor.getInstance().getClient().localItemModified(videoFile2);
+//        ClientAccessor.getInstance().getClient().localItemModified(videoFile3);
+//        ClientAccessor.getInstance().getClient().localItemModified(videoFile4);
+//        ClientAccessor.getInstance().getClient().localItemModified(videoFile5);
+//        ClientAccessor.getInstance().getClient().localItemModified(localMovie);
+//
+//        ThreadUtil.safeSleep(1000);
+
+        System.out.println(integratedMovie.getVideoFiles().size());
+        System.out.println(localMovie.getVideoFiles().size());
+
     }
 
     private static void setupLocal(String db, PeerEngineClient peerEngineClient) {
