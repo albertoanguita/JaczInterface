@@ -19,17 +19,18 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.util.Callback;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * Stores observable lists for the integrated database (movies and series)
- *
+ * <p>
  * todo add sortedlist, and filteredlist. Use filteredlist to filter remote content
- *
+ * <p>
  * todo add timer that allows marking items with new media content for some time (and for sorting)
- *
+ * <p>
  * todo add lowercase title to improve title filtering efficiency
  */
 public class MediaDatabaseProperties extends GenericStateProperties {
@@ -72,7 +73,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObjectProperty<Integer> minutes;
 
-        private final ObjectProperty<List<VideoFileModel>> videoFiles;
+        private final ObservableList<VideoFileModel> videoFiles;
 
         private MediaItem(CreationItem creationItem, MediaItemType type, String imagePath, List<String> productionCompanies, List<GenreCode> genres, Integer minutes, List<VideoFileModel> videoFiles) {
             this.type = type;
@@ -92,7 +93,19 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.genres = new SimpleObjectProperty<>(genres);
             this.language = new SimpleObjectProperty<>(creationItem.getLanguage());
             this.minutes = new SimpleObjectProperty<>(minutes);
-            this.videoFiles = new SimpleObjectProperty<>(videoFiles);
+            this.videoFiles = FXCollections.observableArrayList(new Callback<VideoFileModel, Observable[]>() {
+                @Override
+                public Observable[] call(VideoFileModel v) {
+                    return new Observable[]{
+                            v.getAdditionalSources(),
+                            v.minutesProperty(),
+                            v.resolutionProperty(),
+                            v.qualityProperty(),
+                            v.getSubtitleFiles(),
+                            v.getLanguages()};
+                }
+            });
+            this.videoFiles.addAll(videoFiles);
         }
 
         public MediaItem(ProducedCreationItem producedCreationItem, MediaItemType type, String imagePath, Integer minutes, List<VideoFileModel> videoFiles) {
@@ -105,7 +118,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
 
         public MediaItem(TVSeries tvSeries) {
-            this(tvSeries, MediaItemType.TV_SERIES, buildImagePath(tvSeries), null, null);
+            this(tvSeries, MediaItemType.TV_SERIES, buildImagePath(tvSeries), null, new ArrayList<>());
         }
 
         public MediaItem(Chapter chapter) {
@@ -171,6 +184,10 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         public void update(Movie movie, boolean setLater) {
             update((ProducedCreationItem) movie, setLater);
             Util.setLaterIf(this.minutes, movie.getMinutes(), setLater);
+            Util.runLaterIf(() -> {
+                this.videoFiles.clear();
+                this.videoFiles.addAll(VideoFileModel.buildVideoFileModelList(movie.getVideoFiles()));
+            }, setLater);
         }
 
         protected void update(TVSeries tvSeries, boolean setLater) {
@@ -311,11 +328,11 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return minutes;
         }
 
-        public List<VideoFileModel> getVideoFiles() {
-            return videoFiles.get();
-        }
+//        public List<VideoFileModel> getVideoFiles() {
+//            return videoFiles.get();
+//        }
 
-        public ObjectProperty<List<VideoFileModel>> videoFilesProperty() {
+        public ObservableList<VideoFileModel> videoFilesProperty() {
             return videoFiles;
         }
 

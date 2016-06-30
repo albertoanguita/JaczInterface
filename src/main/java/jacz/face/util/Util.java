@@ -4,6 +4,7 @@ import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.ProducedCreationItem;
 import jacz.database.util.GenreCode;
+import jacz.database.util.LocalizedLanguage;
 import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
 import javafx.application.Platform;
@@ -24,6 +25,20 @@ import java.util.stream.Stream;
  * utility Methods
  */
 public class Util {
+
+    public enum LocalizedLanguageFormat {
+        NORMAL,
+        SHORT,
+        VERY_SHORT;
+
+        public boolean languageIsShort() {
+            return this == VERY_SHORT;
+        }
+
+        public boolean countryIsShort() {
+            return this != NORMAL;
+        }
+    }
 
     public static <T> void setLater(final WritableObjectValue<T> property, final T value) {
         setLaterIf(property, value, false);
@@ -171,7 +186,27 @@ public class Util {
         }
     }
 
+    public static String formatLocalizedLanguageList(List<LocalizedLanguage> localizedLanguageList, LocalizedLanguageFormat format) {
+        StringBuilder result = new StringBuilder();
+        for (LocalizedLanguage localizedLanguage : localizedLanguageList) {
+            result.append(formatLocalizedLanguage(localizedLanguage, format)).append(", ");
+        }
+        return result.length() == 0 ? "" : result.substring(0, result.length() - 2);
+    }
 
+    public static String formatLocalizedLanguage(LocalizedLanguage localizedLanguage, LocalizedLanguageFormat format) {
+        return localizedLanguage.country != null ?
+                formatLanguage(localizedLanguage.language, format.languageIsShort()) + " (" + formatCountry(localizedLanguage.country, format.countryIsShort()) + ")" :
+                formatLanguage(localizedLanguage.language, format.languageIsShort());
+    }
+
+    public static String formatLanguage(LanguageCode languageCode, boolean _short) {
+        return _short ? languageCode.name() : languageCode.getName();
+    }
+
+    public static String formatCountry(CountryCode countryCode, boolean _short) {
+        return _short ? countryCode.name() : countryCode.getName();
+    }
 
     public static void displayImage(Pane pane, String imagePath) {
         if (imagePath != null) {

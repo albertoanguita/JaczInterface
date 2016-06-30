@@ -137,19 +137,19 @@ public class VideoFilesEditor {
         }
     }
 
-    public static class UpdateResult {
+    public static class UpdateResult<T> {
 
         public final boolean change;
 
-        public final List<VideoFile> videoFiles;
+        public final List<T> files;
 
-        public UpdateResult(boolean change, List<VideoFile> videoFiles) {
+        public UpdateResult(boolean change, List<T> files) {
             this.change = change;
-            this.videoFiles = videoFiles;
+            this.files = files;
         }
 
-        public static UpdateResult emptyResult() {
-            return new UpdateResult(false, new ArrayList<>());
+        public static <T> UpdateResult<T> emptyResult() {
+            return new UpdateResult<T>(false, new ArrayList<>());
         }
     }
 
@@ -251,9 +251,9 @@ public class VideoFilesEditor {
     private static void populateSubtitleFilesPaneData(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie, List<SubtitleFileData> subtitleFileDataList) {
         subtitlesVBox.getChildren().clear();
         for (SubtitleFileData subtitleFileData : subtitleFileDataList) {
-            subtitlesVBox.getChildren().add(buildSubtitleFileHBox(subtitleFileData, subtitleFileDataList, () -> populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, subtitleFileDataList)));
+            subtitlesVBox.getChildren().add(buildSubtitleFileHBox(subtitlesVBox, newSubtitleButton, subtitleFileData, main, movie));
         }
-        setupNewSubtitleButton(subtitlesVBox, newSubtitleButton, main, movie, subtitleFileDataList);
+        setupNewSubtitleButton(subtitlesVBox, newSubtitleButton, main, movie);
         // todo scroll
         //ScrollPane scrollPane = new ScrollPane(vBox, ScrollPane.SCROLLBARS_AS_NEEDED);
         //scrollPane.scroll
@@ -261,7 +261,7 @@ public class VideoFilesEditor {
     }
 
 
-    private static HBox buildSubtitleFileHBox(SubtitleFileData subtitleFileData, List<SubtitleFileData> subtitleFileDataList, Runnable rePaint) {
+    private static HBox buildSubtitleFileHBox(VBox subtitlesVBox, Button newSubtitleButton, SubtitleFileData subtitleFileData, Main main, Movie movie) {
         // for each video file we paint an VBox with two nodes. The first
         // one is an HBox with the basic info of the video file (name, hash, length...). The second one is another
         // VBox composed of HBoxes. Each HBox represents one subtitle file.
@@ -275,15 +275,14 @@ public class VideoFilesEditor {
         HBox localizedLanguageHBox = new HBox();
         Controls.localizedLanguageEditor(localizedLanguageHBox, subtitleFileData.localizedLanguage);
         localizedLanguageHBox.setSpacing(15d);
-//        Label localizedLanguageLabel = new Label(formatSize(subtitleFileData.length));
-//        sizeLabel.setMaxWidth(100d);
         Button removeButton = new Button("x");
         HBox basicInfo = new HBox(nameHash, sizeLabel, localizedLanguageHBox, removeButton);
         basicInfo.setAlignment(Pos.CENTER_LEFT);
         basicInfo.setSpacing(15d);
         removeButton.setOnAction(event -> {
-            subtitleFileDataList.remove(subtitleFileData);
-            rePaint.run();
+            List<SubtitleFileData> newSubtitleFileDataList = parseSubtitleFileDataList(subtitlesVBox);
+            newSubtitleFileDataList.remove(subtitleFileData);
+            populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, newSubtitleFileDataList);
         });
         return basicInfo;
     }
@@ -367,7 +366,7 @@ public class VideoFilesEditor {
         });
     }
 
-    private static void setupNewSubtitleButton(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie, List<SubtitleFileData> subtitleFileDataList) {
+    private static void setupNewSubtitleButton(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie) {
         newSubtitleButton.setOnAction(event -> {
             // open a file selector. When a file is selected, load it into the file hash database and use its
             // metadata to populate a new VideoFileModel object that is added to the existing ones
@@ -378,9 +377,10 @@ public class VideoFilesEditor {
                     new FileChooser.ExtensionFilter("All Files", "*.*"));
             java.io.File selectedSubtitleFile = fileChooser.showOpenDialog(main.getPrimaryStage());
             if (selectedSubtitleFile != null) {
+                List<SubtitleFileData> newSubtitleFileDataList = parseSubtitleFileDataList(subtitlesVBox);
                 SubtitleFileData subtitleFileData = addNewSubtitleFile(selectedSubtitleFile.toString(), movie);
-                subtitleFileDataList.add(subtitleFileData);
-                populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, subtitleFileDataList);
+                newSubtitleFileDataList.add(subtitleFileData);
+                populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, newSubtitleFileDataList);
             }
         });
     }
@@ -486,11 +486,11 @@ public class VideoFilesEditor {
     }
 
 
-    public static UpdateResult updateVideoFiles(VBox filesListVBox, List<VideoFile> oldVideoFiles, String dbPath) {
-        return updateVideoFiles(filesListVBox, oldVideoFiles, parseVideoFileDataList(filesListVBox), dbPath);
+    public static UpdateResult<VideoFile> updateVideoFiles(VBox filesListVBox, List<VideoFile> oldVideoFiles, String dbPath) {
+        return updateVideoFiles(oldVideoFiles, parseVideoFileDataList(filesListVBox), dbPath);
     }
 
-    public static UpdateResult updateVideoFiles(VBox filesListVBox, List<VideoFile> oldVideoFiles, List<VideoFileData> videoFileDataList, String dbPath) {
+    public static UpdateResult<VideoFile> updateVideoFiles(List<VideoFile> oldVideoFiles, List<VideoFileData> videoFileDataList, String dbPath) {
         System.out.println(videoFileDataList);
         if (videoFileDataList.isEmpty() && oldVideoFiles.isEmpty()) {
             // no items in any list -> no changes
@@ -501,11 +501,11 @@ public class VideoFilesEditor {
                 ClientAccessor.getInstance().getClient().removeLocalItem(videoFile);
             }
             // the list of video files has changed (the resulting list is an empty list)
-            return new UpdateResult(true, new ArrayList<>());
+            return new UpdateResult<>(true, new ArrayList<>());
         } else if (oldVideoFiles.isEmpty()) {
             // there are new files to add to the video file list
             List<VideoFile> newVideoFiles = videoFileDataList.stream().map(videoFileData -> createNewVideoFile(videoFileData, dbPath)).collect(Collectors.toList());
-            return new UpdateResult(true, newVideoFiles);
+            return new UpdateResult<>(true, newVideoFiles);
         } else {
             // both lists have remaining elements
             // pick the first video file and search it among the video file data list elements
@@ -518,16 +518,16 @@ public class VideoFilesEditor {
                 // there is no such video file -> remove
                 // keep searching recursively. Change will be true
                 ClientAccessor.getInstance().getClient().removeLocalItem(videoFile);
-                return new UpdateResult(true, updateVideoFiles(filesListVBox, oldVideoFiles, videoFileDataList, dbPath).videoFiles);
+                return new UpdateResult<>(true, updateVideoFiles(oldVideoFiles, videoFileDataList, dbPath).files);
             } else {
                 // there is such a file -> update the video file and keep searching
                 // the change will be true if this element is not at the beginning
                 VideoFileData videoFileData = videoFileDataList.remove(index);
                 updateVideoFile(videoFile, videoFileData);
-                UpdateResult updatedVideoFiles = updateVideoFiles(filesListVBox, oldVideoFiles, videoFileDataList, dbPath);
+                UpdateResult<VideoFile> updatedVideoFiles = updateVideoFiles(oldVideoFiles, videoFileDataList, dbPath);
                 // add the updated video file as first element again
-                updatedVideoFiles.videoFiles.add(0, videoFile);
-                return new UpdateResult(index != 0 || updatedVideoFiles.change, updatedVideoFiles.videoFiles);
+                updatedVideoFiles.files.add(0, videoFile);
+                return new UpdateResult<>(index != 0 || updatedVideoFiles.change, updatedVideoFiles.files);
             }
         }
     }
@@ -546,8 +546,8 @@ public class VideoFilesEditor {
         return filesListVBox.getChildren().stream().map(videoFileVBox -> parseVideoFileNode((VBox) videoFileVBox)).collect(Collectors.toList());
     }
 
-
     private static VideoFileData parseVideoFileNode(VBox videoFileVBox) {
+        // todo languages
         HBox basicInfoHBox = (HBox) videoFileVBox.getChildren().get(0);
         List<Node> nodeList = basicInfoHBox.getChildren();
         VBox nameHash = (VBox) nodeList.get(0);
@@ -563,9 +563,32 @@ public class VideoFilesEditor {
         Integer resolution = parseTextFieldPane(resolutionPane, VideoFilesEditor::parseResolution);
         Pane qualityPane = (Pane) nodeList.get(4);
         QualityCode quality = parseQualityPane(qualityPane);
-//        TextField resolutionTextField = (TextField) nodeList.get(3);
-//        Integer resolution = parseResolution(resolutionTextField.getText());
-        return new VideoFileData(hash, length, name, new ArrayList<>(), minutes, resolution, quality, new ArrayList<>(), new ArrayList<>());
+        AnchorPane subtitlesPane = (AnchorPane) videoFileVBox.getChildren().get(1);
+        VBox subtitlesContainer = (VBox) subtitlesPane.getChildren().get(0);
+        VBox subtitlesVBox = (VBox) subtitlesContainer.getChildren().get(0);
+        List<SubtitleFileData> subtitleFileDataList = parseSubtitleFileDataList(subtitlesVBox);
+        VBox languagesVBox = (VBox) nodeList.get(5);
+        List<LocalizedLanguage> localizedLanguageList = Controls.parseLocalizedLanguageList(languagesVBox);
+        return new VideoFileData(hash, length, name, new ArrayList<>(), minutes, resolution, quality, subtitleFileDataList, localizedLanguageList);
+    }
+
+    private static List<SubtitleFileData> parseSubtitleFileDataList(VBox subtitlesVBox) {
+        return subtitlesVBox.getChildren().stream().map(subtitleFileHBox -> parseSubtitleFileNode((HBox) subtitleFileHBox)).collect(Collectors.toList());
+    }
+
+    private static SubtitleFileData parseSubtitleFileNode(HBox subtitleFileHBox) {
+        //HBox basicInfoHBox = (HBox) videoFileVBox.getChildren().get(0);
+        List<Node> nodeList = subtitleFileHBox.getChildren();
+        VBox nameHash = (VBox) nodeList.get(0);
+        Label nameLabel = (Label) nameHash.getChildren().get(0);
+        Label hashLabel = (Label) nameHash.getChildren().get(1);
+        String name = parseName(nameLabel.getText());
+        String hash = parseHash(hashLabel.getText());
+        Label sizeLabel = (Label) nodeList.get(1);
+        Long length = parseSize(sizeLabel.getText());
+        HBox localizedLanguageHBox = (HBox) nodeList.get(2);
+        LocalizedLanguage localizedLanguage = Controls.parseLocalizedLanguage(localizedLanguageHBox);
+        return new SubtitleFileData(hash, length, name, new ArrayList<>(), localizedLanguage);
     }
 
     private static VideoFile createNewVideoFile(VideoFileData videoFileData, String dbPath) {
@@ -575,7 +598,7 @@ public class VideoFilesEditor {
     }
 
 
-    private static boolean updateVideoFile(VideoFile videoFile, VideoFileData videoFileData) {
+    private static void updateVideoFile(VideoFile videoFile, VideoFileData videoFileData) {
         // todo subtitles
         boolean changes = false;
         if (!jacz.util.objects.Util.equals(videoFile.getLength(), videoFileData.length)) {
@@ -602,6 +625,14 @@ public class VideoFilesEditor {
             videoFile.setQualityPostponed(videoFileData.quality);
             changes = true;
         }
+
+        UpdateResult<SubtitleFile> updatedSubtitleFiles = updateSubtitleFiles(videoFile.getSubtitleFiles(), videoFileData.subtitleFiles, ClientAccessor.getInstance().getClient().getDatabases().getLocalDB());
+        if (updatedSubtitleFiles.change) {
+            videoFile.setSubtitleFiles(updatedSubtitleFiles.files);
+            changes = true;
+        }
+
+
         if (!jacz.util.objects.Util.equals(videoFile.getLocalizedLanguages(), videoFileData.localizedLanguages)) {
             videoFile.setLocalizedLanguagesPostponed(videoFileData.localizedLanguages);
             changes = true;
@@ -610,44 +641,128 @@ public class VideoFilesEditor {
             videoFile.flushChanges();
             ClientAccessor.getInstance().getClient().localItemModified(videoFile);
         }
+    }
+
+
+
+
+
+//    private static UpdateResult<SubtitleFile> updateSubtitleFiles(VBox subtitlesVBox, List<SubtitleFile> oldSubtitleFiles, String dbPath) {
+//        return updateSubtitleFiles(oldSubtitleFiles, parseSubtitleFileDataList(subtitlesVBox), dbPath);
+//    }
+
+    private static UpdateResult<SubtitleFile> updateSubtitleFiles(List<SubtitleFile> oldSubtitleFiles, List<SubtitleFileData> subtitleFileDataList, String dbPath) {
+        System.out.println(subtitleFileDataList);
+        if (subtitleFileDataList.isEmpty() && oldSubtitleFiles.isEmpty()) {
+            // no items in any list -> no changes
+            return UpdateResult.emptyResult();
+        } else if (subtitleFileDataList.isEmpty()) {
+            // the remaining video files must be deleted
+            for (SubtitleFile subtitleFile : oldSubtitleFiles) {
+                ClientAccessor.getInstance().getClient().removeLocalItem(subtitleFile);
+            }
+            // the list of video files has changed (the resulting list is an empty list)
+            return new UpdateResult<>(true, new ArrayList<>());
+        } else if (oldSubtitleFiles.isEmpty()) {
+            // there are new files to add to the video file list
+            List<SubtitleFile> newSubtitleFiles = subtitleFileDataList.stream().map(subtitleFileData -> createNewSubtitleFile(subtitleFileData, dbPath)).collect(Collectors.toList());
+            return new UpdateResult<>(true, newSubtitleFiles);
+        } else {
+            // both lists have remaining elements
+            // pick the first video file and search it among the video file data list elements
+            // if it exists, update. If not, remove.
+            // Also check if the order is the same
+            SubtitleFile subtitleFile = oldSubtitleFiles.remove(0);
+            int index = subtitleFileDataList.indexOf(new SubtitleFileData(subtitleFile));
+//            int index = find(videoFile.getHash(), videoFileDataList);
+            if (index < 0) {
+                // there is no such video file -> remove
+                // keep searching recursively. Change will be true
+                ClientAccessor.getInstance().getClient().removeLocalItem(subtitleFile);
+                return new UpdateResult<>(true, updateSubtitleFiles(oldSubtitleFiles, subtitleFileDataList, dbPath).files);
+            } else {
+                // there is such a file -> update the video file and keep searching
+                // the change will be true if this element is not at the beginning
+                SubtitleFileData subtitleFileData = subtitleFileDataList.remove(index);
+                updateSubtitleFile(subtitleFile, subtitleFileData);
+                UpdateResult<SubtitleFile> updatedSubtitleFiles = updateSubtitleFiles(oldSubtitleFiles, subtitleFileDataList, dbPath);
+                // add the updated video file as first element again
+                updatedSubtitleFiles.files.add(0, subtitleFile);
+                return new UpdateResult<>(index != 0 || updatedSubtitleFiles.change, updatedSubtitleFiles.files);
+            }
+        }
+    }
+
+    private static SubtitleFile createNewSubtitleFile(SubtitleFileData subtitleFileData, String dbPath) {
+        SubtitleFile subtitleFile = new SubtitleFile(dbPath, subtitleFileData.hash);
+        updateSubtitleFile(subtitleFile, subtitleFileData);
+        return subtitleFile;
+    }
+
+    private static boolean updateSubtitleFile(SubtitleFile subtitleFile, SubtitleFileData subtitleFileData) {
+        boolean changes = false;
+        if (!jacz.util.objects.Util.equals(subtitleFile.getLength(), subtitleFileData.length)) {
+            subtitleFile.setLengthPostponed(subtitleFileData.length);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(subtitleFile.getName(), subtitleFileData.name)) {
+            subtitleFile.setNamePostponed(subtitleFileData.name);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(subtitleFile.getAdditionalSources(), subtitleFileData.additionalSources)) {
+            subtitleFile.setAdditionalSourcesPostponed(subtitleFileData.additionalSources);
+            changes = true;
+        }
+        if (!jacz.util.objects.Util.equals(subtitleFile.getLocalizedLanguage(), subtitleFileData.localizedLanguage)) {
+            subtitleFile.setLocalizedLanguagePostponed(subtitleFileData.localizedLanguage);
+            changes = true;
+        }
+        if (changes) {
+            subtitleFile.flushChanges();
+            ClientAccessor.getInstance().getClient().localItemModified(subtitleFile);
+        }
         return changes;
     }
 
 
-    public static List<VideoFile> updateVideoFiles(ListView<VBox> listView, List<VideoFile> oldVideoFiles, Consumer<List<VideoFile>> setVideoFiles, String dbPath) {
-        // the list of video files models will be checked against the given video files. The new video file models
-        // will produce a new video file. For those that already exist, we will check if there are changes, and
-        // update the found changes
-        // Finally, we will set the whole list of remaining and updated video files using the given consumer function
-        List<VideoFile> newVideoFiles = listView.getItems().stream()
-                .map(videoFileModelVBox -> buildVideoFile(videoFileModelVBox, oldVideoFiles, dbPath))
-                .collect(Collectors.toList());
-        setVideoFiles.accept(newVideoFiles);
-        return newVideoFiles;
-    }
 
-    private static VideoFile buildVideoFile(VBox videoFileModelVBox, List<VideoFile> oldVideoFiles, String dbPath) {
-        MediaDatabaseProperties.VideoFileModel videoFileModel = buildVideoFileModel(videoFileModelVBox);
-        VideoFile videoFile = findVideoFile(videoFileModel.hash, oldVideoFiles);
-        if (videoFile == null) {
-            // the video file model was not found in the given list of video files -> build a new Video File
-            videoFile = new VideoFile(dbPath, videoFileModel.hash);
-        }
-        //updateVideoFile(videoFile, videoFileModel);
-        return null;
-    }
 
-    private static MediaDatabaseProperties.VideoFileModel buildVideoFileModel(VBox videoFileModelVBox) {
-        return null;
-    }
 
-    private static VideoFile findVideoFile(String hash, List<VideoFile> videoFiles) {
-        for (VideoFile videoFile : videoFiles) {
-            if (hash.equals(videoFile.getHash())) {
-                return videoFile;
-            }
-        }
-        return null;
-    }
+
+//    public static List<VideoFile> updateVideoFiles(ListView<VBox> listView, List<VideoFile> oldVideoFiles, Consumer<List<VideoFile>> setVideoFiles, String dbPath) {
+//        // the list of video files models will be checked against the given video files. The new video file models
+//        // will produce a new video file. For those that already exist, we will check if there are changes, and
+//        // update the found changes
+//        // Finally, we will set the whole list of remaining and updated video files using the given consumer function
+//        List<VideoFile> newVideoFiles = listView.getItems().stream()
+//                .map(videoFileModelVBox -> buildVideoFile(videoFileModelVBox, oldVideoFiles, dbPath))
+//                .collect(Collectors.toList());
+//        setVideoFiles.accept(newVideoFiles);
+//        return newVideoFiles;
+//    }
+
+//    private static VideoFile buildVideoFile(VBox videoFileModelVBox, List<VideoFile> oldVideoFiles, String dbPath) {
+//        MediaDatabaseProperties.VideoFileModel videoFileModel = buildVideoFileModel(videoFileModelVBox);
+//        VideoFile videoFile = findVideoFile(videoFileModel.hash, oldVideoFiles);
+//        if (videoFile == null) {
+//            // the video file model was not found in the given list of video files -> build a new Video File
+//            videoFile = new VideoFile(dbPath, videoFileModel.hash);
+//        }
+//        //updateVideoFile(videoFile, videoFileModel);
+//        return null;
+//    }
+
+//    private static MediaDatabaseProperties.VideoFileModel buildVideoFileModel(VBox videoFileModelVBox) {
+//        return null;
+//    }
+
+//    private static VideoFile findVideoFile(String hash, List<VideoFile> videoFiles) {
+//        for (VideoFile videoFile : videoFiles) {
+//            if (hash.equals(videoFile.getHash())) {
+//                return videoFile;
+//            }
+//        }
+//        return null;
+//    }
 
 }

@@ -3,14 +3,9 @@ package jacz.face.controllers;
 import com.neovisionaries.i18n.CountryCode;
 import jacz.database.CreationItem;
 import jacz.database.DatabaseItem;
-import jacz.database.Movie;
-import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
-import jacz.face.state.MediaDatabaseProperties;
-import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Controls;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
@@ -24,7 +19,7 @@ import java.util.ResourceBundle;
 /**
  * Created by alberto on 6/20/16.
  */
-public abstract class EditCreationItemController extends GenericEditController {
+public abstract class EditCreationItemController extends GenericControllerWithItem {
 
     public static class MediaItemData {
 

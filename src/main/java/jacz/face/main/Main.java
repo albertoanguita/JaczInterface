@@ -3,10 +3,12 @@ package jacz.face.main;
 import jacz.database.DatabaseItem;
 import jacz.database.Movie;
 import jacz.database.TVSeries;
+import jacz.database.VideoFile;
 import jacz.face.controllers.*;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
+import jacz.face.util.VideoFilesEditor;
 import jacz.util.concurrency.task_executor.ThreadExecutor;
 import jacz.util.lists.tuple.Duple;
 import javafx.application.Application;
@@ -15,7 +17,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.TabPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -128,7 +130,7 @@ public class Main extends Application {
     }
 
     public Optional<EditMovieController.MovieData> editMovie(NavigationHistory.DialogIntention dialogIntention, Movie movie) {
-        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editItem(dialogIntention, movie, "/view/edit_movie_2.fxml", "new movie");
+        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editDialog(dialogIntention, movie, "/view/edit_movie_2.fxml", "new movie");
         dialogAndController.element1.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 return dialogAndController.element2.buildMovieData(movie);
@@ -139,9 +141,8 @@ public class Main extends Application {
         return dialogAndController.element1.showAndWait();
     }
 
-
     public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention, TVSeries tvSeries) {
-        Duple<Dialog<EditTVSeriesController.TVSeriesData>, EditTVSeriesController> dialogAndController = editItem(dialogIntention, tvSeries, "/view/edit_tvseries.fxml", "new tv series");
+        Duple<Dialog<EditTVSeriesController.TVSeriesData>, EditTVSeriesController> dialogAndController = editDialog(dialogIntention, tvSeries, "/view/edit_tvseries.fxml", "new tv series");
         dialogAndController.element1.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 return dialogAndController.element2.buildTVSeriesData();
@@ -152,11 +153,23 @@ public class Main extends Application {
         return dialogAndController.element1.showAndWait();
     }
 
-    public <T extends EditCreationItemController.MediaItemData, Y extends GenericEditController> Duple<Dialog<T>, Y> editItem(NavigationHistory.DialogIntention dialogIntention, DatabaseItem item, String fxmlPath, String title) {
+    public Optional<VideoFilesEditor.UpdateResult<VideoFile>> editMovieFiles(NavigationHistory.DialogIntention dialogIntention, Movie movie) {
+        Duple<Dialog<VideoFilesEditor.UpdateResult<VideoFile>>, EditFilesController> dialogAndController = editDialog(dialogIntention, movie, "/view/edit_files.fxml", "movie files");
+        dialogAndController.element1.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                return dialogAndController.element2.buildUpdatedVideoFiles(movie);
+            } else {
+                return null;
+            }
+        });
+        return dialogAndController.element1.showAndWait();
+    }
+
+    private  <T, Y extends GenericControllerWithItem> Duple<Dialog<T>, Y> editDialog(NavigationHistory.DialogIntention dialogIntention, DatabaseItem item, String fxmlPath, String title) {
         try {
             navigationHistory.setCurrentDialogIntention(dialogIntention);
             FXMLLoader fxmlLoader = new FXMLLoader();
-            TabPane newMoviePane = fxmlLoader.load(getClass().getResource(fxmlPath).openStream());
+            AnchorPane newMoviePane = fxmlLoader.load(getClass().getResource(fxmlPath).openStream());
 
             Dialog<T> newMovieDialog = new Dialog<>();
             newMovieDialog.setTitle(title);
@@ -172,7 +185,8 @@ public class Main extends Application {
             e.printStackTrace();
             return null;
         }
-
     }
+
+
 }
 

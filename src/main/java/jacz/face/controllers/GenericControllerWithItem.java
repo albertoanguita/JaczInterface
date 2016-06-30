@@ -6,7 +6,7 @@ import jacz.face.main.Main;
 /**
  * Created by Alberto on 26/06/2016.
  */
-public abstract class GenericEditController extends GenericController {
+public abstract class GenericControllerWithItem extends GenericController {
 
     protected DatabaseItem item;
 

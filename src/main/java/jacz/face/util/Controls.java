@@ -2,20 +2,19 @@ package jacz.face.util;
 
 import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
-import jacz.database.VideoFile;
 import jacz.database.util.GenreCode;
 import jacz.database.util.LocalizedLanguage;
 import jacz.util.lists.tuple.Duple;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -129,10 +128,6 @@ public class Controls {
     public static void localizedLanguageListPane(Pane pane, List<LocalizedLanguage> initialLanguages) {
         pane.getChildren().clear();
         buildCloseableLabelList(pane, initialLanguages, Controls::formatLocalizedLanguage, ContentDisplay.RIGHT, "", "", () -> localizedLanguageListPane(pane, initialLanguages));
-//        for (int i = 0; i < initialLanguages.size(); i++) {
-//            LocalizedLanguage localizedLanguage = initialLanguages.get(i);
-//            pane.getChildren().add(getListLabel(pane, initialLanguages, i, formatLocalizedLanguage(localizedLanguage), paneListDuple -> localizedLanguageListPane(paneListDuple.element1, paneListDuple.element2)));
-//        }
         HBox newHBox = new HBox();
         Duple<ComboBox<String>, ComboBox<String>>  languageCountryComboBoxes = localizedLanguageEditor(newHBox, null, null);
         Button addButton = new Button("Add");
@@ -144,31 +139,25 @@ public class Controls {
             localizedLanguageListPane(pane, initialLanguages);
         });
         newHBox.getChildren().add(addButton);
-
-
-
-
-//        ComboBox<String> addLanguage = new ComboBox<>();
-//        ComboBox<String> addCountry = new ComboBox<>();
-//        Button addButton = new Button("Add");
-//        addButton.setDisable(true);
-//        addLanguage.setPrefWidth(50d);
-//        addLanguage.getItems().addAll(FXCollections.observableList(Util.getLanguagesNames()));
-//        addCountry.setPrefWidth(50d);
-//        addCountry.getItems().addAll(FXCollections.observableList(Util.getCountriesNames()));
-//        addLanguage.valueProperty().addListener((observable, oldValue, newValue) -> {
-//            addButton.setDisable(false);
-//        });
-//        addButton.setOnAction(event -> {
-//            LanguageCode language = Util.getLanguageFromName(addLanguage.getValue());
-//            CountryCode country = Util.getCountryFromName(addCountry.getValue());
-//            pane.getChildren().clear();
-//            initialLanguages.add(new LocalizedLanguage(language, country));
-//            localizedLanguageListPane(pane, initialLanguages);
-//        });
-//        HBox newHBox = new HBox(addLanguage, addCountry, addButton);
-
         pane.getChildren().add(newHBox);
+    }
+
+    public static List<LocalizedLanguage> parseLocalizedLanguageList(Pane pane) {
+        return getSelectedItems(pane, Controls::parseLocalizedLanguage);
+    }
+
+    private static LocalizedLanguage parseLocalizedLanguage(String s) {
+        String languageName;
+        String countryName;
+        if (s.contains(" (")) {
+            String[] split = s.split(Pattern.quote(" ("));
+            languageName = split[0];
+            countryName = split[1].substring(0, split[1].length() - 1);
+        } else {
+            languageName = s;
+            countryName = null;
+        }
+        return new LocalizedLanguage(Util.getLanguageFromName(languageName), Util.getCountryFromName(countryName));
     }
 
     public static Duple<ComboBox<String>, ComboBox<String>> emptyLocalizedLanguageEditor(Pane pane) {
@@ -226,7 +215,7 @@ public class Controls {
     public static LocalizedLanguage parseLocalizedLanguage(Pane pane) {
         LanguageCode languageCode = parseLanguageEditor((HBox) pane.getChildren().get(0));
         CountryCode countryCode = parseCountryEditor((HBox) pane.getChildren().get(1));
-        return new LocalizedLanguage(languageCode, countryCode);
+        return languageCode != null ? new LocalizedLanguage(languageCode, countryCode) : null;
     }
 
     public static LanguageCode parseLanguageEditor(HBox hBox) {
@@ -236,11 +225,7 @@ public class Controls {
 
     public static CountryCode parseCountryEditor(HBox hBox) {
         ComboBox<String> countryComboBox = (ComboBox<String>) hBox.getChildren().get(1);
-        if (countryComboBox.getValue().equals("-")) {
-            return null;
-        } else {
-            return Util.getCountryFromName(countryComboBox.getValue());
-        }
+        return Util.getCountryFromName(countryComboBox.getValue());
     }
 
     private static String formatLocalizedLanguage(LocalizedLanguage localizedLanguage) {
