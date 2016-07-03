@@ -1,5 +1,6 @@
 package jacz.face.actions.ints;
 
+import jacz.face.state.FilesStateProperties;
 import jacz.face.state.TransferStatsProperties;
 import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.util.datatransfer.*;
@@ -13,8 +14,11 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
 
     private final TransferStatsProperties transferStatsProperties;
 
-    public ResourceTransferEventsImpl(TransferStatsProperties transferStatsProperties) {
+    private final FilesStateProperties filesStateProperties;
+
+    public ResourceTransferEventsImpl(TransferStatsProperties transferStatsProperties, FilesStateProperties filesStateProperties) {
         this.transferStatsProperties = transferStatsProperties;
+        this.filesStateProperties = filesStateProperties;
     }
 
     @Override
@@ -101,6 +105,7 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
             }
             System.out.println("Speed for " + downloadManager.getResourceID() + ": " + speed + "KB, downloaded part: " + part);
             transferStatsProperties.updateDownloadState(downloadManager);
+            filesStateProperties.updateFileDownload(downloadManager.getResourceID());
         }
     }
 

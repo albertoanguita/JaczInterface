@@ -7,6 +7,7 @@ import jacz.database.util.GenreCode;
 import jacz.database.util.LocalizedLanguage;
 import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
+import jacz.util.numeric.NumericUtil;
 import javafx.application.Platform;
 import javafx.beans.value.WritableBooleanValue;
 import javafx.beans.value.WritableNumberValue;
@@ -241,4 +242,10 @@ public class Util {
     public static Integer parseInteger(String text) {
         return text != null && !text.isEmpty() ? Integer.parseInt(text) : null;
     }
+
+    public static int calculatePerTenThousand(long downloadedSize, Long fileSize) {
+        return fileSize != null ? (int) NumericUtil.displaceInRange(downloadedSize, 0, fileSize, 0, 10000) : 0;
+    }
+
+
 }

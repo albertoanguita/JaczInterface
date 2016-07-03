@@ -351,7 +351,7 @@ public class MainController extends GenericController {
                 new ResourceTransferEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties()),
                 new TempFileManagerEventsImpl(),
                 new DatabaseSynchEventsImpl(),
-                new DownloadEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties()),
+                new DownloadEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties(), PropertiesAccessor.getInstance().getFilesStateProperties()),
                 new IntegrationEventsImpl(PropertiesAccessor.getInstance().getMediaDatabaseProperties()),
                 new ErrorEventsImpl());
         client = duple.element1;

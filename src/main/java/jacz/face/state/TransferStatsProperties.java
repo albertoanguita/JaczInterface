@@ -166,7 +166,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
             itemId = downloadInfo.itemId;
             downloadState = new SimpleObjectProperty<>(downloadManager.getState());
             fileSize = new SimpleObjectProperty<>(downloadManager.getLength());
-            perTenThousandDownloaded = new SimpleObjectProperty<>(calculatePerTenThousand(downloadManager.getStatistics().getDownloadedSizeThisResource(), downloadManager.getLength()));
+            perTenThousandDownloaded = new SimpleObjectProperty<>(Util.calculatePerTenThousand(downloadManager.getStatistics().getDownloadedSizeThisResource(), downloadManager.getLength()));
             priority = new SimpleFloatProperty(downloadManager.getPriority());
             streamingNeed = new SimpleDoubleProperty(downloadManager.getStreamingNeed());
             providersCount = new SimpleIntegerProperty(downloadManager.getStatistics().getProviders().size());
@@ -179,10 +179,6 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 //            } else {
 //                return title.chapterTitle;
 //            }
-        }
-
-        private Integer calculatePerTenThousand(long downloadedSize, Long fileSize) {
-            return fileSize != null ? (int) NumericUtil.displaceInRange(downloadedSize, 0, fileSize, 0, 10000) : null;
         }
 
         public DownloadManager getDownloadManager() {
@@ -249,7 +245,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
             super.update(newTransferredSize, newSpeed);
             Util.setLater(downloadState, newDownloadState);
             Util.setLater(fileSize, newLength);
-            Util.setLater(perTenThousandDownloaded, calculatePerTenThousand(getTransferredSize(), getFileSize()));
+            Util.setLater(perTenThousandDownloaded, Util.calculatePerTenThousand(getTransferredSize(), getFileSize()));
             Util.setLater(priority, newPriority);
             Util.setLater(streamingNeed, newStreamingNeed);
             Util.setLater(providersCount, newProvidersCount);

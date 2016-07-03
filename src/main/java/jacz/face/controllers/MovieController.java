@@ -4,16 +4,24 @@ import jacz.database.Movie;
 import jacz.database.VideoFile;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.main.Main;
+import jacz.face.state.FilesStateProperties;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
-import jacz.face.state.TransferStatsProperties;
 import jacz.face.util.Util;
 import jacz.face.util.VideoFilesEditor;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -28,7 +36,6 @@ public class MovieController extends ProducedMediaItemController {
     private static final String UNKNOWN_FILE_SIZE = "?";
 
     private static final String UNKNOWN = "?";
-
 
 
     @FXML
@@ -54,6 +61,27 @@ public class MovieController extends ProducedMediaItemController {
 
         filesTableView.setItems(mediaItem.videoFilesProperty());
 
+        // state column
+        TableColumn<MediaDatabaseProperties.VideoFileModel, VBox> stateColumn = new TableColumn<>("state");
+        stateColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<MediaDatabaseProperties.VideoFileModel, VBox>, ObservableValue<VBox>>() {
+            @Override
+            public ObservableValue<VBox> call(TableColumn.CellDataFeatures<MediaDatabaseProperties.VideoFileModel, VBox> p) {
+                ObjectProperty<VBox> op = new SimpleObjectProperty<>();
+                String hash = p.getValue().getHash();
+                FilesStateProperties.FileInfo fileInfo = PropertiesAccessor.getInstance().getFilesStateProperties().getFileInfo(hash);
+                op.bind(new ObjectBinding<VBox>() {
+                    {
+                        super.bind(fileInfo.stateProperty(), fileInfo.downloadProgressProperty(), fileInfo.speedProperty());
+                    }
+                    @Override
+                    protected VBox computeValue() {
+                        Label stateLabel = new Label(fileInfo.getState().toString());
+                        return new VBox(stateLabel);
+                    }
+                });
+                return op;
+            }
+        });
         // name column
         TableColumn<MediaDatabaseProperties.VideoFileModel, String> nameColumn = new TableColumn<>("name");
         nameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getName() != null ? p.getValue().getName() : UNKNOWN_FILE_NAME));
@@ -139,7 +167,7 @@ public class MovieController extends ProducedMediaItemController {
         });
 
         //noinspection unchecked
-        filesTableView.getColumns().setAll(nameColumn, sizeColumn, durationColumn, resolutionColumn, qualityColumn, localizedLanguagesColumn);
+        filesTableView.getColumns().setAll(stateColumn, nameColumn, sizeColumn, durationColumn, resolutionColumn, qualityColumn, localizedLanguagesColumn);
 
 //        filesTableView.setRowFactory(tableView -> {
 //            final TableRow<TransferStatsProperties.DownloadPropertyInfo> row = new TableRow<>();
@@ -212,4 +240,11 @@ public class MovieController extends ProducedMediaItemController {
         });
     }
 
+    public void clickAnchor() {
+        System.out.println("click anchor");
+    }
+
+    public void clickFiles() {
+        System.out.println("click files");
+    }
 }
