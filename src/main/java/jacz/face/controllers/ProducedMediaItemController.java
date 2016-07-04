@@ -30,7 +30,7 @@ public class ProducedMediaItemController extends MediaItemController {
 
 
     @Override
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         super.setMain(main);
 
         productionCompaniesLabel.textProperty().bind(new StringBinding() {

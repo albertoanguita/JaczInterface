@@ -33,7 +33,7 @@ public class EditFilesController extends GenericControllerWithItem {
     }
 
     @Override
-    public void setMainAndItem(Main main, DatabaseItem item) {
+    public void setMainAndItem(Main main, DatabaseItem item) throws ItemNoLongerExistsException {
         super.setMainAndItem(main, item);
 
         Movie movie = (Movie) item;

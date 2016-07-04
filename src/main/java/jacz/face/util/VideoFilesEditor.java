@@ -387,6 +387,7 @@ public class VideoFilesEditor {
 
     private static VideoFileData addNewVideoFile(String newMovieFile, Movie movie) {
         try {
+
             Duple<String, String> pathAndHash = ClientAccessor.getInstance().getClient().addLocalMovieFile(newMovieFile, movie, true);
             Long length = new java.io.File(pathAndHash.element1).length();
             System.out.println("new file length: " + length);

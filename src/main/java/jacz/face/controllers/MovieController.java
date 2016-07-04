@@ -11,6 +11,7 @@ import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Util;
 import jacz.face.util.VideoFilesEditor;
 import jacz.peerengineclient.DownloadInfo;
+import jacz.util.concurrency.task_executor.ThreadExecutor;
 import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
@@ -50,8 +51,20 @@ public class MovieController extends ProducedMediaItemController {
     private TableView<MediaDatabaseProperties.VideoFileModel> filesTableView;
 
     @Override
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         super.setMain(main);
+        if (mediaItem == null) {
+            // the item no longer exists -> go back instead
+            try {
+                System.out.println("auto back!!!");
+                main.navigateBackwards();
+            } catch (IOException e) {
+                // todo
+                e.printStackTrace();
+            }
+            return;
+        }
+
 
         durationLabel.textProperty().bind(new StringBinding() {
             {
@@ -235,17 +248,14 @@ public class MovieController extends ProducedMediaItemController {
         final MenuItem cancelItem = new MenuItem("Cancel");
         List<MenuItem> menuItems = new ArrayList<>();
         openItem.setOnAction(actionEvent -> {
-                System.out.println(fileInfo.getPath());
-                System.out.println(new File(fileInfo.getPath()).getParentFile());
-                Platform.runLater(() -> {
-                    try {
-                        java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
-                    } catch (IOException e) {
-                        // todo
-                        e.printStackTrace();
-                    }
-                });
-                //java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
+            ThreadExecutor.submit(() -> {
+                try {
+                    java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
+                } catch (IOException e) {
+                    // todo
+                    e.printStackTrace();
+                }
+            });
         });
         deleteItem.setOnAction(actionEvent -> {
             ClientAccessor.getInstance().getClient().removeLocalFile(fileInfo.getHash(), true);

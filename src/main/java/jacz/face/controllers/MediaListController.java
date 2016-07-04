@@ -211,7 +211,7 @@ public class MediaListController extends GenericController {
     }
 
     @Override
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         super.setMain(main);
         if (main.getNavigationHistory().getCurrentElement().mediaItemType == MediaItemType.MOVIE) {
             System.out.println("movies");

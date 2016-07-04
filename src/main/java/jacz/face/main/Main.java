@@ -74,7 +74,13 @@ public class Main extends Application {
     }
 
     public void displayCurrentNavigationWindow() throws IOException {
-        mainController.element1.moveToNavigationElement(navigationHistory.getCurrentElement());
+        try {
+            mainController.element1.moveToNavigationElement(navigationHistory.getCurrentElement());
+        } catch (ItemNoLongerExistsException e) {
+            System.out.println("auto back");
+            navigationHistory.destroyCurrentElementAndMoveBack();
+            displayCurrentNavigationWindow();
+        }
     }
 
     public void gotoCreateConfig() {
@@ -103,7 +109,11 @@ public class Main extends Application {
     private <T extends GenericController> Duple<T, Parent> loadController(String resourcePath) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
         Parent root = fxmlLoader.load(getClass().getResource(resourcePath).openStream());
-        ((GenericController) fxmlLoader.getController()).setMain(this);
+        try {
+            ((GenericController) fxmlLoader.getController()).setMain(this);
+        } catch (ItemNoLongerExistsException e) {
+            // ignore, cannot happen
+        }
         return new Duple<>(fxmlLoader.getController(), root);
     }
 
@@ -179,12 +189,27 @@ public class Main extends Application {
             newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
             Y controller = fxmlLoader.getController();
-            controller.setMainAndItem(this, item);
+            try {
+                controller.setMainAndItem(this, item);
+            } catch (ItemNoLongerExistsException e) {
+                // todo can happen???
+                e.printStackTrace();
+            }
             return new Duple<>(newMovieDialog, controller);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void navigateBackwards() throws IOException {
+        getNavigationHistory().backwards();
+        displayCurrentNavigationWindow();
+    }
+
+    public void navigateForward() throws IOException {
+        getNavigationHistory().forward();
+        displayCurrentNavigationWindow();
     }
 
 

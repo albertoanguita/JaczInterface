@@ -196,6 +196,7 @@ public class FilesStateProperties extends GenericStateProperties {
     }
 
     public synchronized void addToLocalRepo(String hash, String path) {
+        System.out.println("add to local");
         if (observedFiles.containsKey(hash)) {
             FileInfo fileInfo = getFileInfo(hash);
             fileInfo.addToLocalRepo(path);
@@ -203,6 +204,7 @@ public class FilesStateProperties extends GenericStateProperties {
     }
 
     public synchronized void removeFromLocalRepo(String hash) {
+        System.out.println("remove from local");
         if (observedFiles.containsKey(hash)) {
             FileInfo fileInfo = getFileInfo(hash);
             fileInfo.removeFromLocalRepo();

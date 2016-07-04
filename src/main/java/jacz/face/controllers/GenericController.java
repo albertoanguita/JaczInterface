@@ -10,7 +10,7 @@ public abstract class GenericController implements Initializable {
 
     protected Main main;
 
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         this.main = main;
     }
 }

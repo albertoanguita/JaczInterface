@@ -663,7 +663,11 @@ public class MediaDatabaseProperties extends GenericStateProperties {
     }
 
     public MediaItem getMediaItem(MediaItemType type, Integer id) {
-        return itemList.get(itemList.indexOf(new MediaItem(type, id)));
+        try {
+            return itemList.get(itemList.indexOf(new MediaItem(type, id)));
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     private int findMediaItem(MediaItemType type, Integer id) {

@@ -10,7 +10,7 @@ public abstract class GenericControllerWithItem extends GenericController {
 
     protected DatabaseItem item;
 
-    public void setMainAndItem(Main main, DatabaseItem item) {
+    public void setMainAndItem(Main main, DatabaseItem item) throws ItemNoLongerExistsException {
         setMain(main);
         this.item = item;
     }

@@ -33,7 +33,7 @@ public class EditMovieController extends EditProducedCreationItemController {
 //    private ListView<MediaDatabaseProperties.VideoFileModel> filesListView;
 
     @Override
-    public void setMainAndItem(Main main, DatabaseItem item) {
+    public void setMainAndItem(Main main, DatabaseItem item) throws ItemNoLongerExistsException {
         super.setMainAndItem(main, item);
 
         // todo get user intention from main

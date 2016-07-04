@@ -59,9 +59,14 @@ public class MediaItemController extends GenericController {
     }
 
     @Override
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         super.setMain(main);
         mediaItem = PropertiesAccessor.getInstance().getMediaDatabaseProperties().getMediaItem(main.getNavigationHistory().getCurrentElement().mediaItemType, main.getNavigationHistory().getCurrentElement().itemId);
+        if (mediaItem == null) {
+            // the item no longer exists
+            throw new ItemNoLongerExistsException();
+        }
+
         titleLabel.textProperty().bind(mediaItem.titleProperty());
         originalTitleLabel.textProperty().bind(mediaItem.originalTitleProperty());
         yearLabel.textProperty().bind(new StringBinding() {
@@ -144,8 +149,9 @@ public class MediaItemController extends GenericController {
         if (ClientAccessor.getInstance().getClient().removeLocalContent(mediaItem.getItem())) {
             // the integrated item is totally removed
             // todo this code is in main controller -> DRY
-            main.getNavigationHistory().backwards();
-            main.displayCurrentNavigationWindow();
+            main.navigateBackwards();
+            //main.getNavigationHistory().backwards();
+            //main.displayCurrentNavigationWindow();
         }
     }
 }

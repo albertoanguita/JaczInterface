@@ -280,7 +280,7 @@ public class MainController extends GenericController {
     }
 
     @Override
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         super.setMain(main);
         backwardsButton.disableProperty().bind(main.getNavigationHistory().canMoveBackwardsProperty().not());
         forwardButton.disableProperty().bind(main.getNavigationHistory().canMoveForwardProperty().not());
@@ -291,7 +291,7 @@ public class MainController extends GenericController {
         return NavigationHistory.Element.mediaList(MediaItemType.MOVIE);
     }
 
-    public void moveToNavigationElement(NavigationHistory.Element element) throws IOException {
+    public void moveToNavigationElement(NavigationHistory.Element element) throws IOException, ItemNoLongerExistsException {
         switch (element.window) {
 
             case MEDIA_LIST:
@@ -311,7 +311,11 @@ public class MainController extends GenericController {
                         selectLeftMenuSelector(favoritesSelector);
                         break;
                 }
-                replaceViewContainerContent("/view/media_list_view.fxml");
+                try {
+                    replaceViewContainerContent("/view/media_list_view.fxml");
+                } catch (ItemNoLongerExistsException e) {
+                    // ignore, cannot happen
+                }
                 break;
             case ITEM_DETAIL:
                 switch (element.mediaItemType) {
@@ -569,7 +573,7 @@ public class MainController extends GenericController {
         selector.getStyleClass().add("left_menu_selector");
     }
 
-    private void replaceViewContainerContent(String fxml) throws IOException {
+    private void replaceViewContainerContent(String fxml) throws IOException, ItemNoLongerExistsException {
 
         FXMLLoader fxmlLoader = new FXMLLoader();
         AnchorPane page = fxmlLoader.load(getClass().getResource(fxml).openStream());
@@ -606,7 +610,11 @@ public class MainController extends GenericController {
             AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("/view/settings.fxml").openStream());
             //AnchorPane settingsPane = fxmlLoader.load(getClass().getResource("view/settings.fxml").openStream());
             final SettingsController settingsController = fxmlLoader.getController();
-            settingsController.setMain(main);
+            try {
+                settingsController.setMain(main);
+            } catch (ItemNoLongerExistsException e) {
+                // ignore, cannot happen
+            }
 
             Dialog<SettingsController.SettingsValues> settingsDialog = new Dialog<>();
             settingsDialog.setTitle("settings");
@@ -646,13 +654,15 @@ public class MainController extends GenericController {
     }
 
     public void navigateBackwards() throws IOException {
-        main.getNavigationHistory().backwards();
-        main.displayCurrentNavigationWindow();
+        //main.getNavigationHistory().backwards();
+        //main.displayCurrentNavigationWindow();
+        main.navigateBackwards();
     }
 
     public void navigateForward() throws IOException {
-        main.getNavigationHistory().forward();
-        main.displayCurrentNavigationWindow();
+        //main.getNavigationHistory().forward();
+        //main.displayCurrentNavigationWindow();
+        main.navigateForward();
     }
 
     public void stop() {

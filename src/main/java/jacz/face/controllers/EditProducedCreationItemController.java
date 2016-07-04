@@ -54,7 +54,7 @@ public abstract class EditProducedCreationItemController extends EditCreationIte
 
 
     @Override
-    public void setMainAndItem(Main main, DatabaseItem item) {
+    public void setMainAndItem(Main main, DatabaseItem item) throws ItemNoLongerExistsException {
         super.setMainAndItem(main, item);
 
         //if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {

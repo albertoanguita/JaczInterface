@@ -13,7 +13,7 @@ import java.util.Optional;
 public class TVSeriesController extends ProducedMediaItemController {
 
     @Override
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         super.setMain(main);
     }
 

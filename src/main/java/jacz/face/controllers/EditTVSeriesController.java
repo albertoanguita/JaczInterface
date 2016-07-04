@@ -19,7 +19,7 @@ public class EditTVSeriesController extends EditProducedCreationItemController {
     }
 
     @Override
-    public void setMain(Main main) {
+    public void setMain(Main main) throws ItemNoLongerExistsException {
         System.out.println("open edit tv series controller");
         super.setMain(main);
     }

@@ -106,6 +106,11 @@ public class NavigationHistory {
         return historyElements.get(historyIndex.get());
     }
 
+    public void destroyCurrentElementAndMoveBack() {
+        historyElements.remove(historyIndex.get());
+        backwards();
+    }
+
     public Element navigate(Element element) {
         while (historyElements.size() > historyIndex.get() + 1) {
             historyElements.remove(historyIndex.get() + 1);
