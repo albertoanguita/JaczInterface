@@ -24,6 +24,8 @@ public class FilesStateProperties extends GenericStateProperties {
 
     public static class FileInfo {
 
+        private final String hash;
+
         private final ObjectProperty<FileState> state;
 
         private final StringProperty path;
@@ -36,7 +38,8 @@ public class FilesStateProperties extends GenericStateProperties {
 
         private final DoubleProperty speed;
 
-        private FileInfo(FileState state, String path, Set<PeerId> providers, DownloadManager downloadManager, int progress, double speed) {
+        private FileInfo(String hash, FileState state, String path, Set<PeerId> providers, DownloadManager downloadManager, int progress, double speed) {
+            this.hash = hash;
             this.state = new SimpleObjectProperty<>(state);
             this.path = new SimpleStringProperty(path);
             this.providers = new SimpleObjectProperty<>(providers);
@@ -45,24 +48,24 @@ public class FilesStateProperties extends GenericStateProperties {
             this.speed = new SimpleDoubleProperty(speed);
         }
 
-        private static FileInfo buildLocalFileInfo(String path, Set<PeerId> providers) {
-            return new FileInfo(FileState.LOCAL, path, providers, null, MAX_PROGRESS, 0d);
+        private static FileInfo buildLocalFileInfo(String hash, String path, Set<PeerId> providers) {
+            return new FileInfo(hash, FileState.LOCAL, path, providers, null, MAX_PROGRESS, 0d);
         }
 
-        private static FileInfo buildRemoteFileInfo(Set<PeerId> providers) {
-            return new FileInfo(FileState.REMOTE, null, providers, null, 0, 0d);
+        private static FileInfo buildRemoteFileInfo(String hash, Set<PeerId> providers) {
+            return new FileInfo(hash, FileState.REMOTE, null, providers, null, 0, 0d);
         }
 
-        private static FileInfo buildDownloadingFileInfo(Set<PeerId> providers, DownloadManager downloadManager, int progress, double speed) {
-            return new FileInfo(FileState.DOWNLOADING, null, providers, downloadManager, progress, speed);
+        private static FileInfo buildDownloadingFileInfo(String hash, Set<PeerId> providers, DownloadManager downloadManager, int progress, double speed) {
+            return new FileInfo(hash, FileState.DOWNLOADING, null, providers, downloadManager, progress, speed);
         }
 
-        private static FileInfo buildPausedFileInfo(Set<PeerId> providers, DownloadManager downloadManager, int progress) {
-            return new FileInfo(FileState.PAUSED, null, providers, downloadManager, progress, 0d);
+        private static FileInfo buildPausedFileInfo(String hash, Set<PeerId> providers, DownloadManager downloadManager, int progress) {
+            return new FileInfo(hash, FileState.PAUSED, null, providers, downloadManager, progress, 0d);
         }
 
-        private static FileInfo buildStoppedFileInfo(Set<PeerId> providers, int progress) {
-            return new FileInfo(FileState.DOWNLOADING, null, providers, null, progress, 0d);
+        private static FileInfo buildStoppedFileInfo(String hash, Set<PeerId> providers, int progress) {
+            return new FileInfo(hash, FileState.DOWNLOADING, null, providers, null, progress, 0d);
         }
 
         private void addToLocalRepo(String path) {
@@ -88,11 +91,16 @@ public class FilesStateProperties extends GenericStateProperties {
 
         private void resumeDownload() {
             updateState(FileState.DOWNLOADING);
+            updateSpeed();
         }
 
         private void stopDownloading() {
+            updateState(FileState.STOPPED);
+            updateSpeed();
+        }
+
+        private void cancelDownloading() {
             updateState(FileState.REMOTE);
-            updateDownloadManager(null);
         }
 
         private void updateState(FileState fileState) {
@@ -119,12 +127,24 @@ public class FilesStateProperties extends GenericStateProperties {
             Util.setLater(this.speed, downloadManager.getValue().getStatistics().getSpeed());
         }
 
+        public String getHash() {
+            return hash;
+        }
+
         public FileState getState() {
             return state.get();
         }
 
         public ObjectProperty<FileState> stateProperty() {
             return state;
+        }
+
+        public String getPath() {
+            return path.get();
+        }
+
+        public StringProperty pathProperty() {
+            return path;
         }
 
         public Set<PeerId> getProviders() {
@@ -175,14 +195,14 @@ public class FilesStateProperties extends GenericStateProperties {
         return observedFiles.get(hash);
     }
 
-    private synchronized void addToLocalRepo(String hash, String path) {
+    public synchronized void addToLocalRepo(String hash, String path) {
         if (observedFiles.containsKey(hash)) {
             FileInfo fileInfo = getFileInfo(hash);
             fileInfo.addToLocalRepo(path);
         }
     }
 
-    private synchronized void removeFromLocalRepo(String hash) {
+    public synchronized void removeFromLocalRepo(String hash) {
         if (observedFiles.containsKey(hash)) {
             FileInfo fileInfo = getFileInfo(hash);
             fileInfo.removeFromLocalRepo();
@@ -228,7 +248,7 @@ public class FilesStateProperties extends GenericStateProperties {
     public synchronized void cancelFileDownload(String hash) {
         if (observedFiles.containsKey(hash)) {
             FileInfo fileInfo = getFileInfo(hash);
-            fileInfo.stopDownloading();
+            fileInfo.cancelDownloading();
         }
     }
 
@@ -245,6 +265,7 @@ public class FilesStateProperties extends GenericStateProperties {
      * @param hash hash of the removed app
      */
     public synchronized void forgetFile(String hash) {
+        // todo use
         observedFiles.remove(hash);
     }
 
@@ -254,16 +275,16 @@ public class FilesStateProperties extends GenericStateProperties {
         if (client.containsFileByHash(hash)) {
             // available in the local file hash database
             String path = client.getFile(hash);
-            return FileInfo.buildLocalFileInfo(path, providers);
+            return FileInfo.buildLocalFileInfo(hash, path, providers);
         } else {
             // the file is remote (might be downloading)
             DownloadManager downloadManager = client.getFileAPI().getHashDownloadManager(hash);
             if (downloadManager != null) {
                 // the file is being downloaded now
-                return FileInfo.buildDownloadingFileInfo(providers, downloadManager, Util.calculatePerTenThousand(downloadManager.getStatistics().getDownloadedSizeThisResource(), downloadManager.getLength()), downloadManager.getStatistics().getSpeed());
+                return FileInfo.buildDownloadingFileInfo(hash, providers, downloadManager, Util.calculatePerTenThousand(downloadManager.getStatistics().getDownloadedSizeThisResource(), downloadManager.getLength()), downloadManager.getStatistics().getSpeed());
             } else {
                 // the file is remote
-                return FileInfo.buildRemoteFileInfo(providers);
+                return FileInfo.buildRemoteFileInfo(hash, providers);
             }
         }
     }

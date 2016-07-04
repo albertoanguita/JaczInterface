@@ -355,6 +355,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
     public static class FileModel {
 
+        public final int itemId;
+
         public final String hash;
 
         private final ObjectProperty<Long> length;
@@ -364,6 +366,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         private final ObservableList<String> additionalSources;
 
         public FileModel(File file) {
+            this.itemId = file.getId();
             hash = file.getHash();
             length = new SimpleObjectProperty<>(file.getLength());
             name = new SimpleStringProperty(file.getName());
@@ -371,10 +374,15 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
 
         public FileModel(String hash) {
+            this.itemId = -1;
             this.hash = hash;
             length = new SimpleObjectProperty<>(null);
             name = new SimpleStringProperty(null);
             additionalSources = FXCollections.emptyObservableList();
+        }
+
+        public int getItemId() {
+            return itemId;
         }
 
         public String getHash() {

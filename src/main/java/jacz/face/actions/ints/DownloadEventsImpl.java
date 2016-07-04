@@ -53,8 +53,7 @@ public class DownloadEventsImpl implements DownloadEvents {
     public void stopped(DownloadInfo downloadInfo, DownloadManager downloadManager) {
         System.out.println("Download stopped: " + downloadInfo);
         transferStatsProperties.updateDownloadState(downloadManager);
-        // todo cancel or update?
-        filesStateProperties.updateFileDownload(downloadInfo.fileHash);
+        filesStateProperties.stopFileDownload(downloadInfo.fileHash);
     }
 
     @Override

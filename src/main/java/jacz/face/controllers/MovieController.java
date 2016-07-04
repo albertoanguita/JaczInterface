@@ -1,5 +1,6 @@
 package jacz.face.controllers;
 
+import jacz.database.DatabaseMediator;
 import jacz.database.Movie;
 import jacz.database.VideoFile;
 import jacz.face.controllers.navigation.NavigationHistory;
@@ -9,6 +10,8 @@ import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Util;
 import jacz.face.util.VideoFilesEditor;
+import jacz.peerengineclient.DownloadInfo;
+import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
@@ -17,13 +20,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -76,7 +81,13 @@ public class MovieController extends ProducedMediaItemController {
                     @Override
                     protected VBox computeValue() {
                         Label stateLabel = new Label(fileInfo.getState().toString());
-                        return new VBox(stateLabel);
+                        if (fileInfo.getState() == FilesStateProperties.FileState.DOWNLOADING) {
+                            Label speedLabel = new Label(Util.formatSpeed(fileInfo.getSpeed()));
+                            Label percentageLabel = new Label(Util.formatPerTenThousand(fileInfo.getDownloadProgress(), null));
+                            return new VBox(stateLabel, speedLabel, percentageLabel);
+                        } else {
+                            return new VBox(stateLabel);
+                        }
                     }
                 });
                 return op;
@@ -169,6 +180,29 @@ public class MovieController extends ProducedMediaItemController {
         //noinspection unchecked
         filesTableView.getColumns().setAll(stateColumn, nameColumn, sizeColumn, durationColumn, resolutionColumn, qualityColumn, localizedLanguagesColumn);
 
+        filesTableView.setRowFactory(tableView -> {
+            final TableRow<MediaDatabaseProperties.VideoFileModel> row = new TableRow<>();
+            row.itemProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    final ContextMenu contextMenu = new ContextMenu();
+                    String hash = newValue.getHash();
+                    FilesStateProperties.FileInfo fileInfo = PropertiesAccessor.getInstance().getFilesStateProperties().getFileInfo(hash);
+                    contextMenu.getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId()));
+                    row.setContextMenu(contextMenu);
+                    fileInfo.stateProperty().addListener((observable1, oldValue1, newValue2) -> {
+                        // we are not in the javafx thread
+                        Platform.runLater(() -> {
+                            row.getContextMenu().getItems().clear();
+                            row.getContextMenu().getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId()));
+                        });
+                    });
+                }
+            });
+            return row;
+        });
+
+
+
 //        filesTableView.setRowFactory(tableView -> {
 //            final TableRow<TransferStatsProperties.DownloadPropertyInfo> row = new TableRow<>();
 //            final ContextMenu contextMenu = new ContextMenu();
@@ -186,6 +220,75 @@ public class MovieController extends ProducedMediaItemController {
 //            return row;
 //        });
 
+    }
+
+
+    private static Collection<MenuItem> getContextMenuItems(
+            MediaDatabaseProperties.VideoFileModel videoFileModel,
+            FilesStateProperties.FileInfo fileInfo,
+            int containerId) {
+        final MenuItem openItem = new MenuItem("Open");
+        final MenuItem deleteItem = new MenuItem("Delete");
+        final MenuItem downloadItem = new MenuItem("Download");
+        final MenuItem stopItem = new MenuItem("Stop");
+        final MenuItem resumeItem = new MenuItem("Resume");
+        final MenuItem cancelItem = new MenuItem("Cancel");
+        List<MenuItem> menuItems = new ArrayList<>();
+        openItem.setOnAction(actionEvent -> {
+                System.out.println(fileInfo.getPath());
+                System.out.println(new File(fileInfo.getPath()).getParentFile());
+                Platform.runLater(() -> {
+                    try {
+                        java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
+                    } catch (IOException e) {
+                        // todo
+                        e.printStackTrace();
+                    }
+                });
+                //java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
+        });
+        deleteItem.setOnAction(actionEvent -> {
+            ClientAccessor.getInstance().getClient().removeLocalFile(fileInfo.getHash(), true);
+        });
+        downloadItem.setOnAction(actionEvent -> {
+            try {
+                ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, containerId, null, videoFileModel.getItemId());
+            } catch (Exception e) {
+                // todo report to user
+                e.printStackTrace();
+            }
+        });
+        stopItem.setOnAction(actionEvent -> {
+            fileInfo.getDownloadManager().stop();
+        });
+        resumeItem.setOnAction(actionEvent -> {
+            fileInfo.getDownloadManager().resume();
+        });
+        cancelItem.setOnAction(actionEvent -> {
+            fileInfo.getDownloadManager().cancel();
+        });
+        switch (fileInfo.getState()) {
+
+            case LOCAL:
+                menuItems.add(openItem);
+                menuItems.add(deleteItem);
+                break;
+            case REMOTE:
+                menuItems.add(downloadItem);
+                break;
+            case DOWNLOADING:
+                menuItems.add(stopItem);
+                menuItems.add(cancelItem);
+                break;
+            case PAUSED:
+                // not used for now
+                break;
+            case STOPPED:
+                menuItems.add(resumeItem);
+                menuItems.add(cancelItem);
+                break;
+        }
+        return menuItems;
     }
 
 

@@ -3,6 +3,7 @@ package jacz.face.controllers;
 import jacz.database.DatabaseMediator;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.state.TransferStatsProperties;
+import jacz.face.util.Util;
 import jacz.peerengineclient.DownloadInfo;
 import jacz.peerengineservice.util.datatransfer.master.DownloadState;
 import javafx.beans.binding.StringBinding;
@@ -91,7 +92,7 @@ public class TransfersController extends GenericController {
                 @Override
                 protected String computeValue() {
                     Integer perTenThousand = p.getValue().getPerTenThousandDownloaded();
-                    return perTenThousand != null ? Long.toString(perTenThousand / 100) + "." + Long.toString(perTenThousand % 100) : UNKNOWN_PERCENTAGE;
+                    return Util.formatPerTenThousand(perTenThousand, UNKNOWN_PERCENTAGE);
                 }
             });
             return sp;
@@ -107,7 +108,7 @@ public class TransfersController extends GenericController {
 
                 @Override
                 protected String computeValue() {
-                    return Double.toString(p.getValue().getSpeed() / 1024) + "KB/s";
+                    return Util.formatSpeed(p.getValue().getSpeed());
                 }
             });
             return sp;

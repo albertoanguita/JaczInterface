@@ -348,11 +348,12 @@ public class MainController extends GenericController {
                 new GeneralEventsImpl(PropertiesAccessor.getInstance().getGeneralStateProperties()),
                 new ConnectionEventsImpl(connectionToServerStatus, PropertiesAccessor.getInstance().getConnectionStateProperties()),
                 new PeersEventsImpl(PropertiesAccessor.getInstance().getPeersStateProperties()),
-                new ResourceTransferEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties()),
+                new ResourceTransferEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties(), PropertiesAccessor.getInstance().getFilesStateProperties()),
                 new TempFileManagerEventsImpl(),
                 new DatabaseSynchEventsImpl(),
                 new DownloadEventsImpl(PropertiesAccessor.getInstance().getTransferStatsProperties(), PropertiesAccessor.getInstance().getFilesStateProperties()),
                 new IntegrationEventsImpl(PropertiesAccessor.getInstance().getMediaDatabaseProperties()),
+                new FileHashDatabaseEventsImpl(PropertiesAccessor.getInstance().getFilesStateProperties()),
                 new ErrorEventsImpl());
         client = duple.element1;
         ClientAccessor.setup(client);

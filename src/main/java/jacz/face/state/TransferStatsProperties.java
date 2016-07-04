@@ -10,7 +10,6 @@ import jacz.peerengineservice.util.datatransfer.master.DownloadState;
 import jacz.peerengineservice.util.datatransfer.slave.UploadManager;
 import jacz.util.concurrency.timer.Timer;
 import jacz.util.concurrency.timer.TimerAction;
-import jacz.util.numeric.NumericUtil;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -313,6 +312,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         this.transferStatistics = client.getTransferStatistics();
         checkSpeedTimer = new Timer(TransferStatistics.SPEED_MONITOR_FREQUENCY, this);
         updateProperties();
+        addInitialStoppedDownloads(client.getInitialStoppedDownloads());
     }
 
     public LongProperty totalUploadedBytesProperty() {
@@ -359,7 +359,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         }
     }
 
-    public synchronized void addInitialStoppedDownloads(Collection<DownloadManager> initialStoppedDownloads) {
+    private synchronized void addInitialStoppedDownloads(Collection<DownloadManager> initialStoppedDownloads) {
         for (DownloadManager downloadManager : initialStoppedDownloads) {
             addDownload(DownloadInfo.buildDownloadInfo(downloadManager.getResourceWriter().getUserDictionary()), downloadManager);
         }
@@ -375,6 +375,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
     }
 
     public synchronized void updateDownloadState(DownloadManager downloadManager) {
+        System.out.println("update download: " + downloadManager.getState());
         int index = getTransferPropertyInfoIndex(downloadManager.getId(), observedDownloads);
         if (index >= 0) {
             DownloadPropertyInfo downloadPropertyInfo = observedDownloads.get(index);
@@ -397,6 +398,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
     }
 
     public synchronized void removeDownload(DownloadManager downloadManager) {
+        System.out.println("remove download");
         int index = getTransferPropertyInfoIndex(downloadManager.getId(), observedDownloads);
         if (index >= 0) {
             observedDownloads.remove(index);

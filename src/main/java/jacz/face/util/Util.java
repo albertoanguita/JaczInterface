@@ -247,5 +247,11 @@ public class Util {
         return fileSize != null ? (int) NumericUtil.displaceInRange(downloadedSize, 0, fileSize, 0, 10000) : 0;
     }
 
+    public static String formatPerTenThousand(Integer perTenThousand, String unknown) {
+        return perTenThousand != null ? Long.toString(perTenThousand / 100) + "." + Long.toString(perTenThousand % 100) : unknown;
+    }
 
+    public static String formatSpeed(double speed) {
+        return Double.toString(speed / 1024) + " KB/s";
+    }
 }
