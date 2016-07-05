@@ -647,6 +647,7 @@ public class MainController extends GenericController {
                 client.setMaxRegularConnectionsForAdditionalCountries(newSettings.maxRegularConnectionsForAdditionalCountries);
                 client.setMainCountry(newSettings.mainCountry);
                 client.setAdditionalCountries(newSettings.additionalCountries);
+                PropertiesAccessor.getInstance().getMediaPlayerProperties().updateMediaPathProperty(newSettings.useVLC, newSettings.vlcPath);
             });
         } catch (IOException e) {
             e.printStackTrace();

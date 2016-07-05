@@ -1,6 +1,7 @@
 package jacz.face.controllers;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.Controls;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
@@ -9,12 +10,14 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.control.IndexedCheckModel;
 import org.controlsfx.validation.ValidationResult;
 import org.controlsfx.validation.ValidationSupport;
 import org.controlsfx.validation.Validator;
 
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -45,6 +48,10 @@ public class SettingsController extends GenericController {
 
         public final List<CountryCode> additionalCountries;
 
+        public final boolean useVLC;
+
+        public final String vlcPath;
+
         public SettingsValues(
                 int localPort,
                 int externalPort,
@@ -53,7 +60,7 @@ public class SettingsController extends GenericController {
                 boolean useRegularConnections,
                 int maxRegularConnections,
                 int maxRegularConnectionsForAdditionalCountries,
-                CountryCode mainCountry, List<CountryCode> additionalCountries) {
+                CountryCode mainCountry, List<CountryCode> additionalCountries, boolean useVLC, String vlcPath) {
             this.localPort = localPort;
             this.externalPort = externalPort;
             this.maxDownloadSpeed = maxDownloadSpeed;
@@ -63,6 +70,8 @@ public class SettingsController extends GenericController {
             this.maxRegularConnectionsForAdditionalCountries = maxRegularConnectionsForAdditionalCountries;
             this.mainCountry = mainCountry;
             this.additionalCountries = additionalCountries;
+            this.useVLC = useVLC;
+            this.vlcPath = vlcPath;
         }
 
         @Override
@@ -80,6 +89,7 @@ public class SettingsController extends GenericController {
                     '}';
         }
     }
+
 
     @FXML
     private TextField localPortTextField;
@@ -107,6 +117,15 @@ public class SettingsController extends GenericController {
 
     @FXML
     private HBox additionalCountriesHBox;
+
+    @FXML
+    private CheckBox useVLCCheckBox;
+
+    @FXML
+    private Button selectVLCPathButton;
+
+    @FXML
+    private Label VLCPathLabel;
 
     private ValidationSupport validationSupport;
 
@@ -136,6 +155,13 @@ public class SettingsController extends GenericController {
 //            int index = availableCountries.indexOf(countryName);
 //            cm.check(index);
 //        }
+
+        useVLCCheckBox.setSelected(PropertiesAccessor.getInstance().getMediaPlayerProperties().getUseVLC());
+        selectVLCPathButton.disableProperty().bind(useVLCCheckBox.selectedProperty().not());
+        VLCPathLabel.disableProperty().bind(useVLCCheckBox.selectedProperty().not());
+        String VLCPathValue = PropertiesAccessor.getInstance().getMediaPlayerProperties().getVLCPath();
+        VLCPathLabel.setText(VLCPathValue != null ? VLCPathValue : "not specified");
+
 
         validationSupport = new ValidationSupport();
         validationSupport.registerValidator(localPortTextField, false, new Validator<String>() {
@@ -184,6 +210,30 @@ public class SettingsController extends GenericController {
 
 
     }
+
+    public void selectVLCPath() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select path to VLC executable");
+        File selectedFile = fileChooser.showOpenDialog(main.getPrimaryStage());
+        if (selectedFile != null) {
+            VLCPathLabel.setText(selectedFile.toString());
+            //ClientAccessor.getInstance().getClient().getCustomStorage().setString(VLC_PATH_KEY, selectedFile.toString());
+
+        }
+    }
+
+//    private void updateMediaPathProperty() {
+//        if (useVLCCheckBox.isSelected() && new File(VLCPathLabel.getText()).isFile()) {
+//            PropertiesAccessor.getInstance().getMediaPlayerProperties().VLCPathProperty().setValue(VLCPathLabel.getText());
+//        } else {
+//            PropertiesAccessor.getInstance().getMediaPlayerProperties().VLCPathProperty().setValue(null);
+//        }
+//    }
+
+    public void downloadVLC() {
+        main.getHostServices().showDocument("http://www.videolan.org/vlc/");
+    }
+
 
     public ReadOnlyBooleanProperty invalidProperty() {
         return validationSupport.invalidProperty();
@@ -243,8 +293,9 @@ public class SettingsController extends GenericController {
                 parseMaxConnections(maxRegularConnectionsTextField.getText()),
                 parseMaxConnections(maxRegularConnectionsAddCountriesTextField.getText()),
                 Util.getCountryFromName(mainCountryComboBox.getValue()),
-                Controls.getSelectedCountries(additionalCountriesHBox));
-
+                Controls.getSelectedCountries(additionalCountriesHBox),
+                useVLCCheckBox.isSelected(),
+                VLCPathLabel.getText().equals("not specified") ? null : VLCPathLabel.getText());
     }
 
     private static String formatPort(int value) {

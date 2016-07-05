@@ -10,3 +10,27 @@
     -fx-border-width: 2px;
     -fx-border-color: black;
 }
+
+.item-list-item {
+    -fx-alignment: center;
+}
+
+.item-list-image-pane {
+    -fx-alignment: center;
+    -fx-min-width: 140;
+    -fx-max-width: 140;
+    -fx-min-height: 205;
+    -fx-max-height: 205;
+    -fx-background-color: black;
+    -fx-border-style: solid;
+    -fx-border-width: 3px;
+    -fx-border-color: black;
+}
+
+.item-list-title-label {
+    -fx-font-weight: bold;
+}
+
+.item-list-year-label {
+    -fx-font-style: italic;
+}

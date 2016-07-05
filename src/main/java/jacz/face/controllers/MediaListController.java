@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.GridCell;
 import org.controlsfx.control.GridView;
@@ -53,39 +54,32 @@ public class MediaListController extends GenericController {
 
         public MediaItemGridCell(Main main) {
             this.main = main;
-            Pane imagePane = new Pane();
-            imagePane.setPrefWidth(140);
-            imagePane.setPrefHeight(180);
+            StackPane imagePane = new StackPane();
             Label title = new Label();
             Label year = new Label();
 
-            imagePane.setStyle("-fx-background-color: red");
-            title.setStyle("-fx-background-color: aqua");
-            year.setStyle("-fx-background-color: blue");
+            imagePane.getStyleClass().add("item-list-image-pane");
+            //title.setStyle("-fx-background-color: aqua");
+            title.getStyleClass().add("item-list-title-label");
+            //year.setStyle("-fx-background-color: blue");
+            year.getStyleClass().add("item-list-year-label");
 
             VBox vBoxPane = new VBox(imagePane, title, year);
-            vBoxPane.setPrefWidth(160);
-            vBoxPane.setPrefHeight(210);
+//            vBoxPane.setPrefWidth(160);
+//            vBoxPane.setMinWidth(160);
+//            vBoxPane.setMaxWidth(160);
+//            vBoxPane.setPrefHeight(210);
+//            vBoxPane.setMinHeight(210);
+//            vBoxPane.setMaxHeight(210);
+            vBoxPane.getStyleClass().add("item-list-item");
 
             rootPane = new AnchorPane(vBoxPane);
             AnchorPane.setLeftAnchor(vBoxPane, 10d);
             AnchorPane.setTopAnchor(vBoxPane, 10d);
             AnchorPane.setRightAnchor(vBoxPane, 10d);
             AnchorPane.setBottomAnchor(vBoxPane, 10d);
-            rootPane.setPrefWidth(150);
-            rootPane.setPrefHeight(200);
-
-//            setOnMouseClicked(event -> {
-//                System.out.println("click on cell " + this.getItem().getTitle());
-//                main.getNavigationHistory().navigate(NavigationHistory.Element.itemDetail(NavigationHistory.MediaType.MOVIES, itemId));
-//                try {
-//                    main.displayCurrentNavigationWindow();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            });
-
-//            setOnMouseClicked(new MediaItemGridCellEventHandler(this.getItem().getType(), this.getItem().getId()));
+            //rootPane.setPrefWidth(150);
+            //rootPane.setPrefHeight(200);
         }
 
 
@@ -95,11 +89,11 @@ public class MediaListController extends GenericController {
                 this.setGraphic(null);
             } else {
                 VBox vBoxPane = (VBox) rootPane.getChildren().get(0);
-                Pane imagePane = (Pane) vBoxPane.getChildren().get(0);
+                StackPane imagePane = (StackPane) vBoxPane.getChildren().get(0);
                 //ImageView imageView = (ImageView) vBoxPane.getChildren().get(0);
                 Label title = (Label) vBoxPane.getChildren().get(1);
                 Label year = (Label) vBoxPane.getChildren().get(2);
-                Util.displayImage(imagePane, item.getImagePath());
+                Util.displayImage(imagePane, item.getImagePath(), 3, 3);
 //                if (item.getImagePath() != null) {
 //                    File imageFile = new File(item.getImagePath());
 //                    Image image = new Image(imageFile.toURI().toString(), 140, 180, true, true);
@@ -190,10 +184,10 @@ public class MediaListController extends GenericController {
         //moviesGridView.setStyle("-fx-border-color: black");
 
         //vBoxPane.getChildren().add(itemsGridView);
-        itemsGridView.setCellHeight(200);
-        itemsGridView.setCellWidth(150);
-        itemsGridView.setHorizontalCellSpacing(10);
-        itemsGridView.setVerticalCellSpacing(10);
+        itemsGridView.setCellHeight(225);
+        itemsGridView.setCellWidth(160);
+        itemsGridView.setHorizontalCellSpacing(15);
+        itemsGridView.setVerticalCellSpacing(15);
 
         filterTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             System.out.println("update filter with: " + newValue);

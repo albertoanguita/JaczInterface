@@ -196,7 +196,8 @@ public class Util {
     }
 
     public static String formatLocalizedLanguage(LocalizedLanguage localizedLanguage, LocalizedLanguageFormat format) {
-        return localizedLanguage.country != null ?
+        return localizedLanguage == null ? "" :
+                localizedLanguage.country != null ?
                 formatLanguage(localizedLanguage.language, format.languageIsShort()) + " (" + formatCountry(localizedLanguage.country, format.countryIsShort()) + ")" :
                 formatLanguage(localizedLanguage.language, format.languageIsShort());
     }
@@ -210,16 +211,20 @@ public class Util {
     }
 
     public static void displayImage(Pane pane, String imagePath) {
+        displayImage(pane, imagePath, 0, 0);
+    }
+
+    public static void displayImage(Pane pane, String imagePath, int xMargin, int yMargin) {
         if (imagePath != null) {
             ImageView imageView = new ImageView();
-            imageView.fitWidthProperty().bind(pane.widthProperty());
-            imageView.fitHeightProperty().bind(pane.heightProperty());
+            imageView.fitWidthProperty().bind(pane.widthProperty().subtract(xMargin * 2));
+            imageView.fitHeightProperty().bind(pane.heightProperty().subtract(yMargin * 2));
             Image image = new Image(new File(imagePath).toURI().toString());
             imageView.setImage(image);
             imageView.setPreserveRatio(true);
             imageView.setSmooth(true);
             // todo remove style, set elsewhere
-            imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px");
+            //imageView.setStyle("-fx-border-color: black; -fx-border-width: 2px; -fx-border-style: solid");
             pane.getChildren().addAll(imageView);
         } else {
             pane.getChildren().clear();

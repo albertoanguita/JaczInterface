@@ -20,8 +20,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
@@ -189,9 +192,38 @@ public class MovieController extends ProducedMediaItemController {
             });
             return sp;
         });
+        // subtitles column
+        TableColumn<MediaDatabaseProperties.VideoFileModel, Label> subtitlesColumn = new TableColumn<>("subs");
+        subtitlesColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<MediaDatabaseProperties.VideoFileModel, Label>, ObservableValue<Label>>() {
+            @Override
+            public ObservableValue<Label> call(TableColumn.CellDataFeatures<MediaDatabaseProperties.VideoFileModel, Label> p) {
+                ObjectProperty<Label> labelValue = new SimpleObjectProperty<>();
+                labelValue.bind(new ObjectBinding<Label>() {
+                    {
+                        super.bind(p.getValue().getSubtitleFiles());
+                    }
+                    @Override
+                    protected Label computeValue() {
+                        Label label = new Label(Integer.toString(p.getValue().getSubtitleFiles().size()));
+                        label.getStyleClass().add("subtitles-label");
+                        label.setOnMouseDragEntered(event -> label.getStyleClass().add("highlight"));
+                        label.setOnMouseDragExited(event -> label.getStyleClass().remove("highlight"));
+                        if (!p.getValue().getSubtitleFiles().isEmpty()) {
+                            addSubtitlesContextMenu(label, p.getValue().getSubtitleFiles(), p.getValue());
+                        }
+                        //label.setOnMouseClicked(event -> System.out.println("subs clicked for " + p.getValue().getName()));
+                        return label;
+                    }
+                });
+                return labelValue;
+            }
+        });
+
+
+
 
         //noinspection unchecked
-        filesTableView.getColumns().setAll(stateColumn, nameColumn, sizeColumn, durationColumn, resolutionColumn, qualityColumn, localizedLanguagesColumn);
+        filesTableView.getColumns().setAll(stateColumn, nameColumn, sizeColumn, durationColumn, resolutionColumn, qualityColumn, localizedLanguagesColumn, subtitlesColumn);
 
         filesTableView.setRowFactory(tableView -> {
             final TableRow<MediaDatabaseProperties.VideoFileModel> row = new TableRow<>();
@@ -200,13 +232,90 @@ public class MovieController extends ProducedMediaItemController {
                     final ContextMenu contextMenu = new ContextMenu();
                     String hash = newValue.getHash();
                     FilesStateProperties.FileInfo fileInfo = PropertiesAccessor.getInstance().getFilesStateProperties().getFileInfo(hash);
-                    contextMenu.getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId()));
+                    contextMenu.getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), null));
                     row.setContextMenu(contextMenu);
                     fileInfo.stateProperty().addListener((observable1, oldValue1, newValue2) -> {
                         // we are not in the javafx thread
                         Platform.runLater(() -> {
                             row.getContextMenu().getItems().clear();
-                            row.getContextMenu().getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId()));
+                            row.getContextMenu().getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), null));
+                        });
+                    });
+                }
+            });
+            return row;
+        });
+
+    }
+
+
+    private void addSubtitlesContextMenu(Label subtitlesLabel, ObservableList<MediaDatabaseProperties.SubtitleFileModel> subtitles, MediaDatabaseProperties.VideoFileModel parentVideoFile) {
+
+        TableView<MediaDatabaseProperties.SubtitleFileModel> subtitlesTableView = new TableView<>(subtitles);
+        // todo DRY
+        // state column
+        TableColumn<MediaDatabaseProperties.SubtitleFileModel, VBox> stateColumn = new TableColumn<>("state");
+        stateColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<MediaDatabaseProperties.SubtitleFileModel, VBox>, ObservableValue<VBox>>() {
+            @Override
+            public ObservableValue<VBox> call(TableColumn.CellDataFeatures<MediaDatabaseProperties.SubtitleFileModel, VBox> p) {
+                ObjectProperty<VBox> op = new SimpleObjectProperty<>();
+                String hash = p.getValue().getHash();
+                FilesStateProperties.FileInfo fileInfo = PropertiesAccessor.getInstance().getFilesStateProperties().getFileInfo(hash);
+                op.bind(new ObjectBinding<VBox>() {
+                    {
+                        super.bind(fileInfo.stateProperty(), fileInfo.downloadProgressProperty(), fileInfo.speedProperty());
+                    }
+                    @Override
+                    protected VBox computeValue() {
+                        Label stateLabel = new Label(fileInfo.getState().toString());
+                        if (fileInfo.getState() == FilesStateProperties.FileState.DOWNLOADING) {
+                            Label speedLabel = new Label(Util.formatSpeed(fileInfo.getSpeed()));
+                            Label percentageLabel = new Label(Util.formatPerTenThousand(fileInfo.getDownloadProgress(), null));
+                            return new VBox(stateLabel, speedLabel, percentageLabel);
+                        } else {
+                            return new VBox(stateLabel);
+                        }
+                    }
+                });
+                return op;
+            }
+        });
+        // name column
+        TableColumn<MediaDatabaseProperties.SubtitleFileModel, String> nameColumn = new TableColumn<>("name");
+        nameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getName() != null ? p.getValue().getName() : UNKNOWN_FILE_NAME));
+        // localized language column
+        TableColumn<MediaDatabaseProperties.SubtitleFileModel, String> localizedLanguageColumn = new TableColumn<>("language");
+        localizedLanguageColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().languageProperty());
+                }
+
+                @Override
+                protected String computeValue() {
+                    return Util.formatLocalizedLanguage(p.getValue().getLanguage(), Util.LocalizedLanguageFormat.SHORT);
+                }
+            });
+            return sp;
+        });
+        //noinspection unchecked
+        subtitlesTableView.getColumns().addAll(stateColumn, nameColumn, localizedLanguageColumn);
+
+        subtitlesTableView.setRowFactory(tableView -> {
+            final TableRow<MediaDatabaseProperties.SubtitleFileModel> row = new TableRow<>();
+            row.itemProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    final ContextMenu contextMenu = new ContextMenu();
+                    String hash = newValue.getHash();
+                    FilesStateProperties.FileInfo fileInfo = PropertiesAccessor.getInstance().getFilesStateProperties().getFileInfo(hash);
+                    contextMenu.getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), parentVideoFile.getgetPath()));
+                    row.setContextMenu(contextMenu);
+                    fileInfo.stateProperty().addListener((observable1, oldValue1, newValue2) -> {
+                        // we are not in the javafx thread
+                        Platform.runLater(() -> {
+                            row.getContextMenu().getItems().clear();
+                            row.getContextMenu().getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), parentVideoFile.getPath()));
                         });
                     });
                 }
@@ -215,31 +324,23 @@ public class MovieController extends ProducedMediaItemController {
         });
 
 
+        CustomMenuItem customMenuItem = new CustomMenuItem(subtitlesTableView);
+        customMenuItem.setHideOnClick(false);
+        ContextMenu contextMenu = new ContextMenu(customMenuItem);
 
-//        filesTableView.setRowFactory(tableView -> {
-//            final TableRow<TransferStatsProperties.DownloadPropertyInfo> row = new TableRow<>();
-//            final ContextMenu contextMenu = new ContextMenu();
-//            final MenuItem resumeMenuItem = new MenuItem("Resume");
-//            resumeMenuItem.setOnAction(event -> resume(row.getItem()));
-//            final MenuItem pauseMenuItem = new MenuItem("Pause");
-//            pauseMenuItem.setOnAction(event -> pause(row.getItem()));
-//            final MenuItem stopMenuItem = new MenuItem("Stop");
-//            stopMenuItem.setOnAction(event -> stop(row.getItem()));
-//            final MenuItem cancelMenuItem = new MenuItem("Cancel");
-//            cancelMenuItem.setOnAction(event -> cancel(row.getItem()));
-//
-//            contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
-//            row.setContextMenu(contextMenu);
-//            return row;
-//        });
-
+        subtitlesLabel.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                contextMenu.show(subtitlesLabel, Side.LEFT, 0d, 0d);
+            }
+        });
     }
 
 
     private static Collection<MenuItem> getContextMenuItems(
-            MediaDatabaseProperties.VideoFileModel videoFileModel,
+            MediaDatabaseProperties.FileModel fileModel,
             FilesStateProperties.FileInfo fileInfo,
-            int containerId) {
+            int containerId,
+            String parentFilePath) {
         final MenuItem playItem = new MenuItem("Play");
         final MenuItem openItem = new MenuItem("Open");
         final MenuItem deleteItem = new MenuItem("Delete");
@@ -258,7 +359,7 @@ public class MovieController extends ProducedMediaItemController {
                 }
             });
         });
-        playItem.disableProperty().bind(PropertiesAccessor.getInstance().getMediaPlayerProperties().VLCPathProperty().isNull());
+        playItem.disableProperty().bind(PropertiesAccessor.getInstance().getMediaPlayerProperties().useVLCProperty().not().or(PropertiesAccessor.getInstance().getMediaPlayerProperties().VLCPathProperty().isNull()));
         openItem.setOnAction(actionEvent -> {
             ThreadExecutor.submit(() -> {
                 try {
@@ -274,7 +375,7 @@ public class MovieController extends ProducedMediaItemController {
         });
         downloadItem.setOnAction(actionEvent -> {
             try {
-                ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, containerId, null, videoFileModel.getItemId());
+                ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, containerId, null, fileModel.getItemId());
             } catch (Exception e) {
                 // todo report to user
                 e.printStackTrace();
@@ -364,13 +465,5 @@ public class MovieController extends ProducedMediaItemController {
                 e.printStackTrace();
             }
         });
-    }
-
-    public void clickAnchor() {
-        System.out.println("click anchor");
-    }
-
-    public void clickFiles() {
-        System.out.println("click files");
     }
 }
