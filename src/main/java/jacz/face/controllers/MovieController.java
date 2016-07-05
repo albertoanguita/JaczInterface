@@ -240,6 +240,7 @@ public class MovieController extends ProducedMediaItemController {
             MediaDatabaseProperties.VideoFileModel videoFileModel,
             FilesStateProperties.FileInfo fileInfo,
             int containerId) {
+        final MenuItem playItem = new MenuItem("Play");
         final MenuItem openItem = new MenuItem("Open");
         final MenuItem deleteItem = new MenuItem("Delete");
         final MenuItem downloadItem = new MenuItem("Download");
@@ -247,6 +248,17 @@ public class MovieController extends ProducedMediaItemController {
         final MenuItem resumeItem = new MenuItem("Resume");
         final MenuItem cancelItem = new MenuItem("Cancel");
         List<MenuItem> menuItems = new ArrayList<>();
+        playItem.setOnAction(actionEvent -> {
+            ThreadExecutor.submit(() -> {
+                try {
+                    java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
+                } catch (IOException e) {
+                    // todo
+                    e.printStackTrace();
+                }
+            });
+        });
+        playItem.disableProperty().bind(PropertiesAccessor.getInstance().getMediaPlayerProperties().VLCPathProperty().isNull());
         openItem.setOnAction(actionEvent -> {
             ThreadExecutor.submit(() -> {
                 try {
@@ -280,6 +292,7 @@ public class MovieController extends ProducedMediaItemController {
         switch (fileInfo.getState()) {
 
             case LOCAL:
+                menuItems.add(playItem);
                 menuItems.add(openItem);
                 menuItems.add(deleteItem);
                 break;
