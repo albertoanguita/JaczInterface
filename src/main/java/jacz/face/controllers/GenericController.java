@@ -2,6 +2,7 @@ package jacz.face.controllers;
 
 import jacz.face.main.Main;
 import javafx.fxml.Initializable;
+import org.controlsfx.control.MaskerPane;
 
 /**
  * Created by alberto on 6/3/16.

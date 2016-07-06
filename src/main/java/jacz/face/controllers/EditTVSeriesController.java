@@ -3,6 +3,8 @@ package jacz.face.controllers;
 import jacz.database.DatabaseItem;
 import jacz.database.TVSeries;
 import jacz.face.main.Main;
+import javafx.scene.layout.Pane;
+import org.controlsfx.control.MaskerPane;
 
 import java.io.IOException;
 
@@ -19,9 +21,8 @@ public class EditTVSeriesController extends EditProducedCreationItemController {
     }
 
     @Override
-    public void setMain(Main main) throws ItemNoLongerExistsException {
-        System.out.println("open edit tv series controller");
-        super.setMain(main);
+    public void setMainItemAndMasker(Main main, DatabaseItem item, Pane rootPane) throws ItemNoLongerExistsException {
+        super.setMainItemAndMasker(main, item, rootPane);
     }
 
     public TVSeriesData buildTVSeriesData() {

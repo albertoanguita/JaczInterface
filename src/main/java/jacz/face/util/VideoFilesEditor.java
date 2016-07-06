@@ -1,5 +1,6 @@
 package jacz.face.util;
 
+import com.neovisionaries.i18n.CountryCode;
 import jacz.database.Movie;
 import jacz.database.SubtitleFile;
 import jacz.database.VideoFile;
@@ -8,8 +9,15 @@ import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
 import jacz.face.main.Main;
 import jacz.face.state.MediaDatabaseProperties;
+import jacz.peerengineclient.SessionManager;
+import jacz.peerengineservice.PeerId;
 import jacz.util.lists.tuple.Duple;
+import jacz.util.lists.tuple.Triple;
+import javafx.application.Platform;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -18,6 +26,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import org.controlsfx.control.MaskerPane;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -153,34 +162,55 @@ public class VideoFilesEditor {
         }
     }
 
-    private static class VideoFileModelCellFactory extends ListCell<MediaDatabaseProperties.VideoFileModel> {
+    private static class AddLocalMovieFileService<T extends FileData> extends Service<T> {
 
-        public VideoFileModelCellFactory() {
+        private final StringProperty path;
+
+        private final ObjectProperty<Movie> movie;
+
+        private final ObjectProperty<Function<Duple<Duple<String, String>, Long>, T>> resultCreator;
+
+        public AddLocalMovieFileService(String path, Movie movie, Function<Duple<Duple<String, String>, Long>, T> resultCreator) {
+            this.path = new ReadOnlyStringWrapper(path);
+            this.movie = new ReadOnlyObjectWrapper<>(movie);
+            this.resultCreator = new ReadOnlyObjectWrapper<>(resultCreator);
         }
 
         @Override
-        protected void updateItem(MediaDatabaseProperties.VideoFileModel videoFileModel, boolean empty) {
-            // calling super here is very important - don't skip this!
-            super.updateItem(videoFileModel, empty);
+        protected Task<T> createTask() {
+            return new Task<T>() {
+                @Override
+                protected T call()
+                        throws IOException {
+                    try {
+                        Duple<String, String> pathAndHash = ClientAccessor.getInstance().getClient().addLocalMovieFile(path.get(), movie.getValue(), true);
+                        Long length = new java.io.File(pathAndHash.element1).length();
+                        System.out.println("new file length: " + length);
+                        return resultCreator.get().apply(new Duple<>(pathAndHash, length));
 
-            if (videoFileModel == null || empty) {
-                setGraphic(null);
-            } else {
-                // for each video file model (representing one video file), we paint an VBox with two nodes. The first
-                // one is an HBox with the basic info of the video file (name, hash, length...). The second one is a
-                // list view in which each element represents one subtitle file.
-                // todo add a list view above subtitles for the additional sources
-                Label nameLabel = new Label(formatName(videoFileModel.getName()));
-                Label hashLabel = new Label(formatHash(videoFileModel.getHash()));
-                Label sizeLabel = new Label(formatSize(videoFileModel.getLength()));
-                VBox nameHash = new VBox(nameLabel, hashLabel);
-                HBox basicInfo = new HBox(nameHash, sizeLabel);
-                basicInfo.setAlignment(Pos.CENTER_LEFT);
-                basicInfo.setSpacing(3d);
-                setGraphic(new VBox(basicInfo));
-            }
+                        //return new VideoFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null, null, null, new ArrayList<>(), new ArrayList<>());
+                        // todo update automatic metadata (did not find a suitable api for this, skipping...)
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            };
         }
     }
+
+//    private static class AddLocalMovieVideoFileService extends AddLocalMovieFileService<VideoFileData> {
+//
+//        public AddLocalMovieVideoFileService(String path, Movie movie) {
+//            super(path, movie);
+//        }
+//
+//        @Override
+//        protected VideoFileData createResult(Duple<String, String> pathAndHash, Long length) {
+//            return new VideoFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null, null, null, new ArrayList<>(), new ArrayList<>());
+//        }
+//    }
+
 
 
 
@@ -188,28 +218,29 @@ public class VideoFilesEditor {
 
 
 
-    public static void populateVideoFilesPane(VBox filesListVBox, Button newMovieButton, Main main, Movie movie, List<VideoFile> videoFiles) {
-        populateVideoFilesPaneData(filesListVBox, newMovieButton, main, movie, videoFiles.stream().map(VideoFileData::new).collect(Collectors.toList()));
+    public static void populateVideoFilesPane(VBox filesListVBox, Button newMovieButton, Pane rootPane, Main main, Movie movie, List<VideoFile> videoFiles) {
+        populateVideoFilesPaneData(filesListVBox, newMovieButton, rootPane, main, movie, videoFiles.stream().map(VideoFileData::new).collect(Collectors.toList()));
         // todo scroll
         //ScrollPane scrollPane = new ScrollPane(vBox, ScrollPane.SCROLLBARS_AS_NEEDED);
         //scrollPane.scroll
         //pane.getChildren().add(filesListVBox);
     }
 
-    private static void populateVideoFilesPaneData(VBox filesListVBox, Button newMovieButton, Main main, Movie movie, List<VideoFileData> videoFileDataList) {
+    private static void populateVideoFilesPaneData(VBox filesListVBox, Button newMovieButton, Pane rootPane, Main main, Movie movie, List<VideoFileData> videoFileDataList) {
         filesListVBox.getChildren().clear();
         for (int i = 0; i < videoFileDataList.size(); i++) {
             VideoFileData videoFileData = videoFileDataList.get(i);
-            filesListVBox.getChildren().add(buildVideoFileVBox(filesListVBox, newMovieButton, videoFileData, i, main, movie));
+            filesListVBox.getChildren().add(buildVideoFileVBox(filesListVBox, newMovieButton, rootPane, videoFileData, i, main, movie));
         }
-        setupNewFileButton(filesListVBox, newMovieButton, main, movie);
+        setupNewFileButton(filesListVBox, newMovieButton, rootPane, main, movie);
+
         // todo scroll
         //ScrollPane scrollPane = new ScrollPane(vBox, ScrollPane.SCROLLBARS_AS_NEEDED);
         //scrollPane.scroll
         //pane.getChildren().add(filesListVBox);
     }
 
-    private static VBox buildVideoFileVBox(VBox filesListVBox, Button newMovieButton, VideoFileData videoFileData, int index, Main main, Movie movie) {
+    private static VBox buildVideoFileVBox(VBox filesListVBox, Button newMovieButton, Pane rootPane, VideoFileData videoFileData, int index, Main main, Movie movie) {
         // for each video file we paint an VBox with two nodes. The first
         // one is an HBox with the basic info of the video file (name, hash, length...). The second one is another
         // VBox composed of HBoxes. Each HBox represents one subtitle file.
@@ -239,7 +270,7 @@ public class VideoFilesEditor {
         removeButton.setOnAction(event -> {
             List<VideoFileData> newVideoFileDataList = parseVideoFileDataList(filesListVBox);
             newVideoFileDataList.remove(index);
-            populateVideoFilesPaneData(filesListVBox, newMovieButton, main, movie, newVideoFileDataList);
+            populateVideoFilesPaneData(filesListVBox, newMovieButton, rootPane, main, movie, newVideoFileDataList);
         });
         return videoFileVBox;
     }
@@ -257,6 +288,7 @@ public class VideoFilesEditor {
         // todo scroll
         //ScrollPane scrollPane = new ScrollPane(vBox, ScrollPane.SCROLLBARS_AS_NEEDED);
         //scrollPane.scroll
+        //pane.getChildren().add(filesListVBox);
         //pane.getChildren().add(filesListVBox);
     }
 
@@ -347,7 +379,7 @@ public class VideoFilesEditor {
         return Util.getQualityFromName(qualityChoiceBox.getValue());
     }
 
-    private static void setupNewFileButton(VBox filesListVBox, Button newMovieButton, Main main, Movie movie) {
+    private static void setupNewFileButton(VBox filesListVBox, Button newMovieButton, Pane rootPane, Main main, Movie movie) {
         newMovieButton.setOnAction(event -> {
             // open a file selector. When a file is selected, load it into the file hash database and use its
             // metadata to populate a new VideoFileModel object that is added to the existing ones
@@ -359,9 +391,31 @@ public class VideoFilesEditor {
             java.io.File selectedMovieFile = fileChooser.showOpenDialog(main.getPrimaryStage());
             if (selectedMovieFile != null) {
                 List<VideoFileData> newVideoFileDataList = parseVideoFileDataList(filesListVBox);
-                VideoFileData videoFileData = addNewVideoFile(selectedMovieFile.toString(), movie);
-                newVideoFileDataList.add(videoFileData);
-                populateVideoFilesPaneData(filesListVBox, newMovieButton, main, movie, newVideoFileDataList);
+
+                MaskerPane maskerPane = new MaskerPane();
+                maskerPane.setText("Processing file...");
+                maskerPane.setPrefWidth(rootPane.getWidth());
+                maskerPane.setPrefHeight(rootPane.getHeight());
+                rootPane.getChildren().add(maskerPane);
+
+
+                maskerPane.setVisible(true);
+                AddLocalMovieFileService<VideoFileData> addLocalMovieFileService = new AddLocalMovieFileService<>(
+                        selectedMovieFile.toString(),
+                        movie,
+                        o -> {
+                            Duple<String, String> pathAndHash = o.element1;
+                            Long length = o.element2;
+                            return new VideoFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null, null, null, new ArrayList<>(), new ArrayList<>());
+                        });
+                addLocalMovieFileService.setOnSucceeded(t -> {
+                    VideoFileData videoFileData = (VideoFileData) t.getSource().getValue();
+                    newVideoFileDataList.add(videoFileData);
+                    Platform.runLater(() -> populateVideoFilesPaneData(filesListVBox, newMovieButton, rootPane, main, movie, newVideoFileDataList));
+                    maskerPane.setVisible(false);
+                    rootPane.getChildren().remove(rootPane.getChildren().size() - 1);
+                });
+                addLocalMovieFileService.start();
             }
         });
     }
@@ -377,6 +431,7 @@ public class VideoFilesEditor {
                     new FileChooser.ExtensionFilter("All Files", "*.*"));
             java.io.File selectedSubtitleFile = fileChooser.showOpenDialog(main.getPrimaryStage());
             if (selectedSubtitleFile != null) {
+                // todo use service
                 List<SubtitleFileData> newSubtitleFileDataList = parseSubtitleFileDataList(subtitlesVBox);
                 SubtitleFileData subtitleFileData = addNewSubtitleFile(selectedSubtitleFile.toString(), movie);
                 newSubtitleFileDataList.add(subtitleFileData);
@@ -387,10 +442,22 @@ public class VideoFilesEditor {
 
     private static VideoFileData addNewVideoFile(String newMovieFile, Movie movie) {
         try {
+//            AddLocalMovieFileService addLocalMovieFileService = new AddLocalMovieFileService(newMovieFile, movie, true);
+//            addLocalMovieFileService.setOnSucceeded(t -> {
+//                Duple<String, String> pathAndHash = (Duple<String, String>) t.getSource().getValue();
+//                masker.setVisible(false);
+//                Long length = new java.io.File(pathAndHash.element1).length();
+//                System.out.println("new file length: " + length);
+//                return new VideoFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null, null, null, new ArrayList<>(), new ArrayList<>());
+//            });
+//            addLocalMovieFileService.
+//            addLocalMovieFileService.start();
+
 
             Duple<String, String> pathAndHash = ClientAccessor.getInstance().getClient().addLocalMovieFile(newMovieFile, movie, true);
             Long length = new java.io.File(pathAndHash.element1).length();
             System.out.println("new file length: " + length);
+
             return new VideoFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null, null, null, new ArrayList<>(), new ArrayList<>());
             // todo update automatic metadata (did not find a suitable api for this, skipping...)
         } catch (IOException e) {

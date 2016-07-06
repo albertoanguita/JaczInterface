@@ -13,6 +13,7 @@ import jacz.util.concurrency.task_executor.ThreadExecutor;
 import jacz.util.lists.tuple.Duple;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
@@ -148,7 +149,10 @@ public class Main extends Application {
                 return null;
             }
         });
-        return dialogAndController.element1.showAndWait();
+        //dialogAndController.element2.registerValidators();
+        Optional<EditMovieController.MovieData> result = dialogAndController.element1.showAndWait();
+        //dialogAndController.element2.registerValidators();
+        return result;
     }
 
     public Optional<EditTVSeriesController.TVSeriesData> editTVSeries(NavigationHistory.DialogIntention dialogIntention, TVSeries tvSeries) {
@@ -175,7 +179,7 @@ public class Main extends Application {
         return dialogAndController.element1.showAndWait();
     }
 
-    private  <T, Y extends GenericControllerWithItem> Duple<Dialog<T>, Y> editDialog(NavigationHistory.DialogIntention dialogIntention, DatabaseItem item, String fxmlPath, String title) {
+    private  <T, Y extends GenericEditDialogController> Duple<Dialog<T>, Y> editDialog(NavigationHistory.DialogIntention dialogIntention, DatabaseItem item, String fxmlPath, String title) {
         try {
             navigationHistory.setCurrentDialogIntention(dialogIntention);
             FXMLLoader fxmlLoader = new FXMLLoader();
@@ -187,10 +191,13 @@ public class Main extends Application {
 
             // Set the button types.
             newMovieDialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+            Node okButton = newMovieDialog.getDialogPane().lookupButton(ButtonType.OK);
+
 
             Y controller = fxmlLoader.getController();
             try {
-                controller.setMainAndItem(this, item);
+                controller.setMainItemAndMasker(this, item, newMoviePane);
+                okButton.disableProperty().bind(controller.invalidProperty());
             } catch (ItemNoLongerExistsException e) {
                 // todo can happen???
                 e.printStackTrace();

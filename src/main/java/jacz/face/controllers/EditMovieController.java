@@ -3,8 +3,14 @@ package jacz.face.controllers;
 import jacz.database.DatabaseItem;
 import jacz.database.Movie;
 import jacz.face.main.Main;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Control;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
+import org.controlsfx.control.MaskerPane;
+import org.controlsfx.validation.ValidationResult;
+import org.controlsfx.validation.Validator;
 
 import java.io.IOException;
 
@@ -33,8 +39,8 @@ public class EditMovieController extends EditProducedCreationItemController {
 //    private ListView<MediaDatabaseProperties.VideoFileModel> filesListView;
 
     @Override
-    public void setMainAndItem(Main main, DatabaseItem item) throws ItemNoLongerExistsException {
-        super.setMainAndItem(main, item);
+    public void setMainItemAndMasker(Main main, DatabaseItem item, Pane rootPane) throws ItemNoLongerExistsException {
+        super.setMainItemAndMasker(main, item, rootPane);
 
         // todo get user intention from main
         //if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
@@ -52,6 +58,33 @@ public class EditMovieController extends EditProducedCreationItemController {
             //Movie movie = Movie.getMovieById(Cl)
 
 //            VideoFilesEditor.populateVideoFilesPane(filesListVBox, newVideoFileButton, main, movie, movie.getVideoFiles());
+        }
+
+    }
+
+    @Override
+    public void registerValidators() {
+        super.registerValidators();
+        Platform.runLater(() -> {
+            validationSupport.registerValidator(minutesTextField, false, new Validator<String>() {
+                @Override
+                public ValidationResult apply(Control control, String newValue) {
+                    return ValidationResult.fromErrorIf(control, "Empty for unknown, number above 0 otherwise", !durationIsCorrect(newValue));
+                }
+            });
+        });
+    }
+
+    private boolean durationIsCorrect(String text) {
+        if (text.isEmpty()) {
+            return true;
+        } else {
+            try {
+                int port = Integer.parseInt(text);
+                return port > 0;
+            } catch (NumberFormatException e) {
+                return false;
+            }
         }
     }
 

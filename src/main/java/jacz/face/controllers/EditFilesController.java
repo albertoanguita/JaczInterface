@@ -7,7 +7,9 @@ import jacz.face.main.Main;
 import jacz.face.util.VideoFilesEditor;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import org.controlsfx.control.MaskerPane;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +20,7 @@ import java.util.ResourceBundle;
 /**
  * Created by Alberto on 30/06/2016.
  */
-public class EditFilesController extends GenericControllerWithItem {
+public class EditFilesController extends GenericEditDialogController {
 
 
     @FXML
@@ -28,16 +30,12 @@ public class EditFilesController extends GenericControllerWithItem {
     private VBox filesListVBox;
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-
-    }
-
-    @Override
-    public void setMainAndItem(Main main, DatabaseItem item) throws ItemNoLongerExistsException {
-        super.setMainAndItem(main, item);
+    public void setMainItemAndMasker(Main main, DatabaseItem item, Pane rootPane) throws ItemNoLongerExistsException {
+        super.setMainItemAndMasker(main, item, rootPane);
 
         Movie movie = (Movie) item;
-        VideoFilesEditor.populateVideoFilesPane(filesListVBox, newVideoFileButton, main, movie, movie.getVideoFiles());
+        //maskerPane.setText("Processing file...");
+        VideoFilesEditor.populateVideoFilesPane(filesListVBox, newVideoFileButton, rootPane, main, movie, movie.getVideoFiles());
     }
 
     public VideoFilesEditor.UpdateResult<VideoFile> buildUpdatedVideoFiles(Movie movie) {

@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import org.controlsfx.control.MaskerPane;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,8 +55,8 @@ public abstract class EditProducedCreationItemController extends EditCreationIte
 
 
     @Override
-    public void setMainAndItem(Main main, DatabaseItem item) throws ItemNoLongerExistsException {
-        super.setMainAndItem(main, item);
+    public void setMainItemAndMasker(Main main, DatabaseItem item, Pane rootPane) throws ItemNoLongerExistsException {
+        super.setMainItemAndMasker(main, item, rootPane);
 
         //if (main.getNavigationHistory().getCurrentDialogIntention() == NavigationHistory.DialogIntention.EDIT) {
         if (item != null) {
