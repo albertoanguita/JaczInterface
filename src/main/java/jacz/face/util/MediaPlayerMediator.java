@@ -17,10 +17,11 @@ public class MediaPlayerMediator {
         switch (mediaPlayer) {
             case VLC:
                 String vlcPath = PropertiesAccessor.getInstance().getMediaPlayerProperties().getVLCPath();
-                StringBuilder command = new StringBuilder(vlcPath).append(" ").append(videoPath);
+                StringBuilder command = new StringBuilder(vlcPath).append(" \"").append(videoPath).append("\"");
                 if (subtitlePath != null) {
                     command.append(" --sub-file=").append(subtitlePath);
                 }
+                System.out.println(command.toString());
                 Runtime.getRuntime().exec(command.toString());
         }
     }

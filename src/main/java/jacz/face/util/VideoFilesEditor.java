@@ -262,7 +262,7 @@ public class VideoFilesEditor {
         basicInfo.setSpacing(15d);
         VBox subtitlesVBox = new VBox();
         Button newSubtitleButton = new Button("Add subtitle");
-        populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, videoFileData.subtitleFiles);
+        populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, rootPane, main, movie, videoFileData.subtitleFiles);
         VBox subtitlesContainer = new VBox(subtitlesVBox, newSubtitleButton);
         AnchorPane subtitlesPane = new AnchorPane(subtitlesContainer);
         AnchorPane.setLeftAnchor(subtitlesContainer, 30d);
@@ -279,12 +279,12 @@ public class VideoFilesEditor {
 //        populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, subtitleFiles.stream().map(SubtitleFileData::new).collect(Collectors.toList()));
 //    }
 
-    private static void populateSubtitleFilesPaneData(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie, List<SubtitleFileData> subtitleFileDataList) {
+    private static void populateSubtitleFilesPaneData(VBox subtitlesVBox, Button newSubtitleButton, Pane rootPane, Main main, Movie movie, List<SubtitleFileData> subtitleFileDataList) {
         subtitlesVBox.getChildren().clear();
         for (SubtitleFileData subtitleFileData : subtitleFileDataList) {
-            subtitlesVBox.getChildren().add(buildSubtitleFileHBox(subtitlesVBox, newSubtitleButton, subtitleFileData, main, movie));
+            subtitlesVBox.getChildren().add(buildSubtitleFileHBox(subtitlesVBox, newSubtitleButton, rootPane, subtitleFileData, main, movie));
         }
-        setupNewSubtitleButton(subtitlesVBox, newSubtitleButton, main, movie);
+        setupNewSubtitleButton(subtitlesVBox, newSubtitleButton, rootPane, main, movie);
         // todo scroll
         //ScrollPane scrollPane = new ScrollPane(vBox, ScrollPane.SCROLLBARS_AS_NEEDED);
         //scrollPane.scroll
@@ -293,7 +293,7 @@ public class VideoFilesEditor {
     }
 
 
-    private static HBox buildSubtitleFileHBox(VBox subtitlesVBox, Button newSubtitleButton, SubtitleFileData subtitleFileData, Main main, Movie movie) {
+    private static HBox buildSubtitleFileHBox(VBox subtitlesVBox, Button newSubtitleButton, Pane rootPane, SubtitleFileData subtitleFileData, Main main, Movie movie) {
         // for each video file we paint an VBox with two nodes. The first
         // one is an HBox with the basic info of the video file (name, hash, length...). The second one is another
         // VBox composed of HBoxes. Each HBox represents one subtitle file.
@@ -314,7 +314,7 @@ public class VideoFilesEditor {
         removeButton.setOnAction(event -> {
             List<SubtitleFileData> newSubtitleFileDataList = parseSubtitleFileDataList(subtitlesVBox);
             newSubtitleFileDataList.remove(subtitleFileData);
-            populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, newSubtitleFileDataList);
+            populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, rootPane, main, movie, newSubtitleFileDataList);
         });
         return basicInfo;
     }
@@ -420,7 +420,7 @@ public class VideoFilesEditor {
         });
     }
 
-    private static void setupNewSubtitleButton(VBox subtitlesVBox, Button newSubtitleButton, Main main, Movie movie) {
+    private static void setupNewSubtitleButton(VBox subtitlesVBox, Button newSubtitleButton, Pane rootPane, Main main, Movie movie) {
         newSubtitleButton.setOnAction(event -> {
             // open a file selector. When a file is selected, load it into the file hash database and use its
             // metadata to populate a new VideoFileModel object that is added to the existing ones
@@ -433,9 +433,38 @@ public class VideoFilesEditor {
             if (selectedSubtitleFile != null) {
                 // todo use service
                 List<SubtitleFileData> newSubtitleFileDataList = parseSubtitleFileDataList(subtitlesVBox);
-                SubtitleFileData subtitleFileData = addNewSubtitleFile(selectedSubtitleFile.toString(), movie);
-                newSubtitleFileDataList.add(subtitleFileData);
-                populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, newSubtitleFileDataList);
+
+                MaskerPane maskerPane = new MaskerPane();
+                maskerPane.setText("Processing file...");
+                maskerPane.setPrefWidth(rootPane.getWidth());
+                maskerPane.setPrefHeight(rootPane.getHeight());
+                rootPane.getChildren().add(maskerPane);
+
+
+                maskerPane.setVisible(true);
+                AddLocalMovieFileService<SubtitleFileData> addLocalMovieFileService = new AddLocalMovieFileService<>(
+                        selectedSubtitleFile.toString(),
+                        movie,
+                        o -> {
+                            Duple<String, String> pathAndHash = o.element1;
+                            Long length = o.element2;
+                            return new SubtitleFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null);
+                        });
+                addLocalMovieFileService.setOnSucceeded(t -> {
+                    SubtitleFileData subtitleFileData = addNewSubtitleFile(selectedSubtitleFile.toString(), movie);
+                    newSubtitleFileDataList.add(subtitleFileData);
+                    Platform.runLater(() -> populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, rootPane, main, movie, newSubtitleFileDataList));
+                    maskerPane.setVisible(false);
+                    rootPane.getChildren().remove(rootPane.getChildren().size() - 1);
+                });
+                addLocalMovieFileService.start();
+
+
+
+
+                //SubtitleFileData subtitleFileData = addNewSubtitleFile(selectedSubtitleFile.toString(), movie);
+                //newSubtitleFileDataList.add(subtitleFileData);
+                //populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, main, movie, newSubtitleFileDataList);
             }
         });
     }
