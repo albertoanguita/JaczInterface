@@ -8,6 +8,7 @@ import jacz.face.main.Main;
 import jacz.face.state.FilesStateProperties;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
+import jacz.face.util.MediaPlayerMediator;
 import jacz.face.util.Util;
 import jacz.face.util.VideoFilesEditor;
 import jacz.peerengineclient.DownloadInfo;
@@ -309,13 +310,15 @@ public class MovieController extends ProducedMediaItemController {
                     final ContextMenu contextMenu = new ContextMenu();
                     String hash = newValue.getHash();
                     FilesStateProperties.FileInfo fileInfo = PropertiesAccessor.getInstance().getFilesStateProperties().getFileInfo(hash);
-                    contextMenu.getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), parentVideoFile.getgetPath()));
+                    String videoFileHash = parentVideoFile.getHash();
+                    FilesStateProperties.FileInfo videoFileInfo = PropertiesAccessor.getInstance().getFilesStateProperties().getFileInfo(videoFileHash);
+                    contextMenu.getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), videoFileInfo));
                     row.setContextMenu(contextMenu);
                     fileInfo.stateProperty().addListener((observable1, oldValue1, newValue2) -> {
                         // we are not in the javafx thread
                         Platform.runLater(() -> {
                             row.getContextMenu().getItems().clear();
-                            row.getContextMenu().getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), parentVideoFile.getPath()));
+                            row.getContextMenu().getItems().addAll(getContextMenuItems(newValue, fileInfo, mediaItem.getId(), videoFileInfo));
                         });
                     });
                 }
@@ -340,9 +343,9 @@ public class MovieController extends ProducedMediaItemController {
             MediaDatabaseProperties.FileModel fileModel,
             FilesStateProperties.FileInfo fileInfo,
             int containerId,
-            String parentFilePath) {
+            FilesStateProperties.FileInfo videoFileInfo) {
         final MenuItem playItem = new MenuItem("Play");
-        final MenuItem openItem = new MenuItem("Open");
+        final MenuItem browseItem = new MenuItem("Browse");
         final MenuItem deleteItem = new MenuItem("Delete");
         final MenuItem downloadItem = new MenuItem("Download");
         final MenuItem stopItem = new MenuItem("Stop");
@@ -350,17 +353,21 @@ public class MovieController extends ProducedMediaItemController {
         final MenuItem cancelItem = new MenuItem("Cancel");
         List<MenuItem> menuItems = new ArrayList<>();
         playItem.setOnAction(actionEvent -> {
-            ThreadExecutor.submit(() -> {
-                try {
-                    java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
-                } catch (IOException e) {
-                    // todo
-                    e.printStackTrace();
+            try {
+                if (videoFileInfo == null) {
+                    System.out.println("play video: " + fileInfo.getPath());
+                    MediaPlayerMediator.play(MediaPlayerMediator.MediaPlayer.VLC, fileInfo.getPath(), null);
+                } else {
+                    System.out.println("play video with subs: " + videoFileInfo.getPath() + ", " + fileInfo.getPath());
+                    MediaPlayerMediator.play(MediaPlayerMediator.MediaPlayer.VLC, videoFileInfo.getPath(), fileInfo.getPath());
                 }
-            });
+            } catch (IOException e) {
+                // todo
+                e.printStackTrace();
+            }
         });
         playItem.disableProperty().bind(PropertiesAccessor.getInstance().getMediaPlayerProperties().useVLCProperty().not().or(PropertiesAccessor.getInstance().getMediaPlayerProperties().VLCPathProperty().isNull()));
-        openItem.setOnAction(actionEvent -> {
+        browseItem.setOnAction(actionEvent -> {
             ThreadExecutor.submit(() -> {
                 try {
                     java.awt.Desktop.getDesktop().open(new File(fileInfo.getPath()).getParentFile());
@@ -394,7 +401,7 @@ public class MovieController extends ProducedMediaItemController {
 
             case LOCAL:
                 menuItems.add(playItem);
-                menuItems.add(openItem);
+                menuItems.add(browseItem);
                 menuItems.add(deleteItem);
                 break;
             case REMOTE:

@@ -48,7 +48,7 @@ public class MediaPlayerProperties extends GenericStateProperties {
     }
 
     public void updateMediaPathProperty(boolean useVLC, String VLCPath) {
-        client.getCustomStorage().setBoolean(VLC_PATH_KEY, useVLC);
+        client.getCustomStorage().setBoolean(USE_VLC_KEY, useVLC);
         client.getCustomStorage().setString(VLC_PATH_KEY, VLCPath);
         this.useVLC.setValue(useVLC);
         this.VLCPath.setValue(VLCPath);
