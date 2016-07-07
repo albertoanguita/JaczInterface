@@ -379,9 +379,9 @@ public class MainController extends GenericController {
 
 
 
-        System.out.println("Files in movie 1:");
-        Movie integratedMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), 1);
-        Movie localMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), 1);
+//        System.out.println("Files in movie 1:");
+//        Movie integratedMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getIntegratedDB(), 1);
+//        Movie localMovie = Movie.getMovieById(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), 1);
 
 //        VideoFile videoFile1 = new VideoFile(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), "hash1");
 //        VideoFile videoFile2 = new VideoFile(ClientAccessor.getInstance().getClient().getDatabases().getLocalDB(), "hash2");
@@ -403,8 +403,8 @@ public class MainController extends GenericController {
 //
 //        ThreadUtil.safeSleep(1000);
 
-        System.out.println(integratedMovie.getVideoFiles().size());
-        System.out.println(localMovie.getVideoFiles().size());
+//        System.out.println(integratedMovie.getVideoFiles().size());
+//        System.out.println(localMovie.getVideoFiles().size());
 
     }
 
