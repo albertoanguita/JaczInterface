@@ -51,6 +51,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final StringProperty title;
 
+        private final ObjectProperty<LocalizedLanguage> titleLocalizedLanguage;
+
         private final StringProperty originalTitle;
 
         private final StringProperty imagePath;
@@ -58,6 +60,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         private final ObjectProperty<Integer> year;
 
         private final StringProperty synopsis;
+
+        private final ObjectProperty<LocalizedLanguage> synopsisLocalizedLanguage;
 
         private final ObjectProperty<List<CountryCode>> countries;
 
@@ -69,7 +73,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObjectProperty<List<GenreCode>> genres;
 
-        private final ObjectProperty<LanguageCode> language;
+        //private final ObjectProperty<LanguageCode> language;
 
         private final ObjectProperty<Integer> minutes;
 
@@ -82,16 +86,18 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.remoteIds = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToRemote().get(type.parse(), creationItem.getId()));
             this.deletedId = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToDeleted().get(type.parse(), creationItem.getId()));
             this.title = new SimpleStringProperty(creationItem.getTitle());
+            this.titleLocalizedLanguage = new SimpleObjectProperty<>(creationItem.getTitleLocalizedLanguage());
             this.originalTitle = new SimpleStringProperty(creationItem.getOriginalTitle());
             this.imagePath = new SimpleStringProperty(imagePath);
             this.year = new SimpleObjectProperty<>(creationItem.getYear());
             this.synopsis = new SimpleStringProperty(creationItem.getSynopsis());
+            this.synopsisLocalizedLanguage = new SimpleObjectProperty<>(creationItem.getSynopsisLocalizedLanguage());
             this.countries = new SimpleObjectProperty<>(creationItem.getCountries());
             this.creators = new SimpleObjectProperty<>(creationItem.getCreators());
             this.actors = new SimpleObjectProperty<>(creationItem.getActors());
             this.productionCompanies = new SimpleObjectProperty<>(productionCompanies);
             this.genres = new SimpleObjectProperty<>(genres);
-            this.language = new SimpleObjectProperty<>(creationItem.getLanguage());
+            //this.language = new SimpleObjectProperty<>(creationItem.getLanguage());
             this.minutes = new SimpleObjectProperty<>(minutes);
             this.videoFiles = FXCollections.observableArrayList(new Callback<VideoFileModel, Observable[]>() {
                 @Override
@@ -133,16 +139,18 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             this.remoteIds = null;
             this.deletedId = null;
             this.title = null;
+            this.titleLocalizedLanguage = null;
             this.originalTitle = null;
             this.imagePath = null;
             this.year = null;
             this.synopsis = null;
+            this.synopsisLocalizedLanguage = null;
             this.countries = null;
             this.creators = null;
             this.actors = null;
             this.productionCompanies = null;
             this.genres = null;
-            this.language = null;
+            //this.language = null;
             this.minutes = null;
             this.videoFiles = null;
         }
@@ -172,7 +180,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             Util.setLaterIf(this.creators, creationItem.getCreators(), setLater);
             Util.setLaterIf(this.actors, creationItem.getActors(), setLater);
             Util.setLaterIf(this.productionCompanies, creationItem.getActors(), setLater);
-            Util.setLaterIf(this.language, creationItem.getLanguage(), setLater);
+            //Util.setLaterIf(this.language, creationItem.getLanguage(), setLater);
         }
 
         public void update(ProducedCreationItem producedCreationItem, boolean setLater) {
@@ -240,6 +248,14 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return title;
         }
 
+        public LocalizedLanguage getTitleLocalizedLanguage() {
+            return titleLocalizedLanguage.get();
+        }
+
+        public ObjectProperty<LocalizedLanguage> titleLocalizedLanguageProperty() {
+            return titleLocalizedLanguage;
+        }
+
         public String getOriginalTitle() {
             return originalTitle.get();
         }
@@ -270,6 +286,14 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public StringProperty synopsisProperty() {
             return synopsis;
+        }
+
+        public LocalizedLanguage getSynopsisLocalizedLanguage() {
+            return synopsisLocalizedLanguage.get();
+        }
+
+        public ObjectProperty<LocalizedLanguage> synopsisLocalizedLanguageProperty() {
+            return synopsisLocalizedLanguage;
         }
 
         public List<CountryCode> getCountries() {
@@ -312,13 +336,13 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             return genres;
         }
 
-        public LanguageCode getLanguage() {
-            return language.get();
-        }
-
-        public ObjectProperty<LanguageCode> languageProperty() {
-            return language;
-        }
+//        public LanguageCode getLanguage() {
+//            return language.get();
+//        }
+//
+//        public ObjectProperty<LanguageCode> languageProperty() {
+//            return language;
+//        }
 
         public Integer getMinutes() {
             return minutes.get();
@@ -438,6 +462,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObjectProperty<Integer> minutes;
         private final ObjectProperty<Integer> resolution;
+        private final ObjectProperty<Integer> bitrate;
         private final ObjectProperty<QualityCode> quality;
         private final ObservableList<SubtitleFileModel> subtitleFiles;
         private final ObservableList<LocalizedLanguage> languages;
@@ -446,6 +471,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             super(videoFile);
             minutes = new SimpleObjectProperty<>(videoFile.getMinutes());
             resolution = new SimpleObjectProperty<>(videoFile.getResolution());
+            bitrate = new SimpleObjectProperty<>(videoFile.getBitrate());
             quality = new SimpleObjectProperty<>(videoFile.getQuality());
             subtitleFiles = FXCollections.observableList(SubtitleFileModel.buildSubtitleFileModelList(videoFile.getSubtitleFiles()));
             languages = FXCollections.observableList(videoFile.getLocalizedLanguages());
@@ -455,6 +481,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             super(hash);
             minutes = new SimpleObjectProperty<>(null);
             resolution = new SimpleObjectProperty<>(null);
+            bitrate = new SimpleObjectProperty<>(null);
             quality = new SimpleObjectProperty<>(null);
             subtitleFiles = FXCollections.emptyObservableList();
             languages = FXCollections.emptyObservableList();
@@ -486,6 +513,18 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public ObjectProperty<Integer> resolutionProperty() {
             return resolution;
+        }
+
+        public Integer getBitrate() {
+            return bitrate.get();
+        }
+
+        public ObjectProperty<Integer> bitrateProperty() {
+            return bitrate;
+        }
+
+        public void setBitrate(Integer bitrate) {
+            this.bitrate.set(bitrate);
         }
 
         public QualityCode getQuality() {
@@ -557,15 +596,17 @@ public class MediaDatabaseProperties extends GenericStateProperties {
                 // todo add rest of properties
                 return new Observable[]{
                         p.titleProperty(),
+                        p.titleLocalizedLanguageProperty(),
                         p.originalTitleProperty(),
                         p.imagePathProperty(),
                         p.yearProperty(),
                         p.synopsisProperty(),
+                        p.synopsisLocalizedLanguageProperty(),
                         p.countriesProperty(),
                         p.creatorsProperty(),
                         p.actorsProperty(),
                         p.productionCompaniesProperty(),
-                        p.languageProperty(),
+                        //p.languageProperty(),
                         p.minutesProperty()};
             }
         });
