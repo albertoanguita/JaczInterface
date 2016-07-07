@@ -3,9 +3,11 @@ package jacz.face.util;
 import jacz.face.state.PropertiesAccessor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by alberto on 7/6/16.
+ * Mediator for launching media player processes
  */
 public class MediaPlayerMediator {
 
@@ -17,12 +19,14 @@ public class MediaPlayerMediator {
         switch (mediaPlayer) {
             case VLC:
                 String vlcPath = PropertiesAccessor.getInstance().getMediaPlayerProperties().getVLCPath();
-                StringBuilder command = new StringBuilder(vlcPath).append(" \"").append(videoPath).append("\"");
+                List<String> args = new ArrayList<>();
+                args.add(vlcPath);
+                args.add(videoPath);
                 if (subtitlePath != null) {
-                    command.append(" --sub-file=").append(subtitlePath);
+                    args.add("--sub-file=" + subtitlePath);
                 }
-                System.out.println(command.toString());
-                Runtime.getRuntime().exec(command.toString());
+                ProcessBuilder processBuilder = new ProcessBuilder(args);
+                processBuilder.start();
         }
     }
 }

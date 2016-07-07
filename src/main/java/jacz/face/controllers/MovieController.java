@@ -12,6 +12,7 @@ import jacz.face.util.MediaPlayerMediator;
 import jacz.face.util.Util;
 import jacz.face.util.VideoFilesEditor;
 import jacz.peerengineclient.DownloadInfo;
+import jacz.util.concurrency.ThreadUtil;
 import jacz.util.concurrency.task_executor.ThreadExecutor;
 import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
@@ -21,6 +22,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
@@ -97,6 +99,8 @@ public class MovieController extends ProducedMediaItemController {
                     }
                     @Override
                     protected VBox computeValue() {
+                        // this "hack" is necessary so the cell properly resizes upon change in its contents
+                        Platform.runLater(filesTableView::refresh);
                         Label stateLabel = new Label(fileInfo.getState().toString());
                         if (fileInfo.getState() == FilesStateProperties.FileState.DOWNLOADING) {
                             Label speedLabel = new Label(Util.formatSpeed(fileInfo.getSpeed()));
@@ -225,6 +229,7 @@ public class MovieController extends ProducedMediaItemController {
 
         //noinspection unchecked
         filesTableView.getColumns().setAll(stateColumn, nameColumn, sizeColumn, durationColumn, resolutionColumn, qualityColumn, localizedLanguagesColumn, subtitlesColumn);
+
 
         filesTableView.setRowFactory(tableView -> {
             final TableRow<MediaDatabaseProperties.VideoFileModel> row = new TableRow<>();
