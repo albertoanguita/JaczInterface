@@ -42,7 +42,7 @@ public class Util {
     }
 
     public static <T> void setLater(final WritableObjectValue<T> property, final T value) {
-        setLaterIf(property, value, false);
+        setLaterIf(property, value, true);
     }
 
     public static <T> void setLaterIf(final WritableObjectValue<T> property, final T value, boolean setLater) {
@@ -50,7 +50,7 @@ public class Util {
     }
 
     public static <T> void setLater(final WritableBooleanValue property, final boolean value) {
-        setLaterIf(property, value, false);
+        setLaterIf(property, value, true);
     }
 
     public static <T> void setLaterIf(final WritableBooleanValue property, final boolean value, boolean setLater) {
@@ -58,7 +58,7 @@ public class Util {
     }
 
     public static <T> void setLater(final WritableNumberValue property, final Number value) {
-        setLaterIf(property, value, false);
+        setLaterIf(property, value, true);
     }
 
     public static <T> void setLaterIf(final WritableNumberValue property, final Number value, boolean setLater) {
