@@ -32,6 +32,8 @@ public class Main extends Application {
         FAVORITES
     }
 
+    public static final String APP_VERSION = "0.1.0";
+
     private static final String BASE_DIR = "./etc";
 
     private Stage primaryStage;
