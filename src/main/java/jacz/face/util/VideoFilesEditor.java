@@ -1,6 +1,5 @@
 package jacz.face.util;
 
-import com.neovisionaries.i18n.CountryCode;
 import jacz.database.Movie;
 import jacz.database.SubtitleFile;
 import jacz.database.VideoFile;
@@ -8,13 +7,12 @@ import jacz.database.util.LocalizedLanguage;
 import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
 import jacz.face.main.Main;
-import jacz.face.state.MediaDatabaseProperties;
-import jacz.peerengineclient.SessionManager;
-import jacz.peerengineservice.PeerId;
 import jacz.util.lists.tuple.Duple;
-import jacz.util.lists.tuple.Triple;
 import javafx.application.Platform;
-import javafx.beans.property.*;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -31,8 +29,9 @@ import org.controlsfx.control.MaskerPane;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -451,7 +450,7 @@ public class VideoFilesEditor {
                             return new SubtitleFileData(pathAndHash.element2, length, Paths.get(pathAndHash.element1).getFileName().toString(), new ArrayList<>(), null);
                         });
                 addLocalMovieFileService.setOnSucceeded(t -> {
-                    SubtitleFileData subtitleFileData = addNewSubtitleFile(selectedSubtitleFile.toString(), movie);
+                    SubtitleFileData subtitleFileData = (SubtitleFileData) t.getSource().getValue();
                     newSubtitleFileDataList.add(subtitleFileData);
                     Platform.runLater(() -> populateSubtitleFilesPaneData(subtitlesVBox, newSubtitleButton, rootPane, main, movie, newSubtitleFileDataList));
                     maskerPane.setVisible(false);
@@ -587,7 +586,7 @@ public class VideoFilesEditor {
         return updateVideoFiles(oldVideoFiles, parseVideoFileDataList(filesListVBox), dbPath);
     }
 
-    public static UpdateResult<VideoFile> updateVideoFiles(List<VideoFile> oldVideoFiles, List<VideoFileData> videoFileDataList, String dbPath) {
+    private static UpdateResult<VideoFile> updateVideoFiles(List<VideoFile> oldVideoFiles, List<VideoFileData> videoFileDataList, String dbPath) {
         System.out.println(videoFileDataList);
         if (videoFileDataList.isEmpty() && oldVideoFiles.isEmpty()) {
             // no items in any list -> no changes
