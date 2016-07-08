@@ -3,7 +3,7 @@ package jacz.face.messages;
 
 import jacz.face.state.ConnectionStateProperties;
 import jacz.peerengineservice.client.connection.ConnectionState;
-import jacz.util.network.IP4Port;
+import org.aanguita.jacuzzi.network.IP4Port;
 
 /**
  * Text messages to display in the GUI

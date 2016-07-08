@@ -7,7 +7,7 @@ import jacz.database.util.LocalizedLanguage;
 import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
 import jacz.face.main.Main;
-import jacz.util.lists.tuple.Duple;
+import org.aanguita.jacuzzi.lists.tuple.Duple;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;

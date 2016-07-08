@@ -11,7 +11,7 @@ import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineservice.PeerId;
-import jacz.util.lists.tuple.Duple;
+import org.aanguita.jacuzzi.lists.tuple.Duple;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;

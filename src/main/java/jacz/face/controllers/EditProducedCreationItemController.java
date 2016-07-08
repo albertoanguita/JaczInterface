@@ -8,7 +8,7 @@ import jacz.database.util.ImageHash;
 import jacz.face.main.Main;
 import jacz.face.util.Controls;
 import jacz.face.util.Util;
-import jacz.util.lists.tuple.Duple;
+import org.aanguita.jacuzzi.lists.tuple.Duple;
 import javafx.fxml.FXML;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;

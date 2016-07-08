@@ -7,7 +7,7 @@ import jacz.database.util.GenreCode;
 import jacz.database.util.LocalizedLanguage;
 import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
-import jacz.util.numeric.NumericUtil;
+import org.aanguita.jacuzzi.numeric.NumericUtil;
 import javafx.application.Platform;
 import javafx.beans.value.WritableBooleanValue;
 import javafx.beans.value.WritableNumberValue;

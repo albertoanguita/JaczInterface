@@ -4,7 +4,7 @@ import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.util.GenreCode;
 import jacz.database.util.LocalizedLanguage;
-import jacz.util.lists.tuple.Duple;
+import org.aanguita.jacuzzi.lists.tuple.Duple;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;

@@ -1,7 +1,7 @@
 package jacz.face.actions;
 
 import jacz.face.controllers.MainController;
-import jacz.util.concurrency.task_executor.ThreadExecutor;
+import org.aanguita.jacuzzi.concurrency.task_executor.ThreadExecutor;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
