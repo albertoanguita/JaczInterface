@@ -1,6 +1,6 @@
 package jacz.face.controllers;
 
-import afu.org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FilenameUtils;
 import jacz.database.DatabaseItem;
 import jacz.database.ProducedCreationItem;
 import jacz.database.util.GenreCode;
