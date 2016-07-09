@@ -7,7 +7,6 @@ import jacz.database.util.LocalizedLanguage;
 import jacz.database.util.QualityCode;
 import jacz.face.controllers.ClientAccessor;
 import jacz.face.main.Main;
-import org.aanguita.jacuzzi.lists.tuple.Duple;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -24,14 +23,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import org.aanguita.jacuzzi.lists.tuple.Duple;
 import org.controlsfx.control.MaskerPane;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -697,27 +695,27 @@ public class VideoFilesEditor {
     private static void updateVideoFile(VideoFile videoFile, VideoFileData videoFileData) {
         // todo subtitles
         boolean changes = false;
-        if (!jacz.util.objects.Util.equals(videoFile.getLength(), videoFileData.length)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(videoFile.getLength(), videoFileData.length)) {
             videoFile.setLengthPostponed(videoFileData.length);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(videoFile.getName(), videoFileData.name)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(videoFile.getName(), videoFileData.name)) {
             videoFile.setNamePostponed(videoFileData.name);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(videoFile.getAdditionalSources(), videoFileData.additionalSources)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(videoFile.getAdditionalSources(), videoFileData.additionalSources)) {
             videoFile.setAdditionalSourcesPostponed(videoFileData.additionalSources);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(videoFile.getMinutes(), videoFileData.minutes)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(videoFile.getMinutes(), videoFileData.minutes)) {
             videoFile.setMinutesPostponed(videoFileData.minutes);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(videoFile.getResolution(), videoFileData.resolution)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(videoFile.getResolution(), videoFileData.resolution)) {
             videoFile.setResolutionPostponed(videoFileData.resolution);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(videoFile.getQuality(), videoFileData.quality)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(videoFile.getQuality(), videoFileData.quality)) {
             videoFile.setQualityPostponed(videoFileData.quality);
             changes = true;
         }
@@ -729,7 +727,7 @@ public class VideoFilesEditor {
         }
 
 
-        if (!jacz.util.objects.Util.equals(videoFile.getLocalizedLanguages(), videoFileData.localizedLanguages)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(videoFile.getLocalizedLanguages(), videoFileData.localizedLanguages)) {
             videoFile.setLocalizedLanguagesPostponed(videoFileData.localizedLanguages);
             changes = true;
         }
@@ -797,19 +795,19 @@ public class VideoFilesEditor {
 
     private static boolean updateSubtitleFile(SubtitleFile subtitleFile, SubtitleFileData subtitleFileData) {
         boolean changes = false;
-        if (!jacz.util.objects.Util.equals(subtitleFile.getLength(), subtitleFileData.length)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(subtitleFile.getLength(), subtitleFileData.length)) {
             subtitleFile.setLengthPostponed(subtitleFileData.length);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(subtitleFile.getName(), subtitleFileData.name)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(subtitleFile.getName(), subtitleFileData.name)) {
             subtitleFile.setNamePostponed(subtitleFileData.name);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(subtitleFile.getAdditionalSources(), subtitleFileData.additionalSources)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(subtitleFile.getAdditionalSources(), subtitleFileData.additionalSources)) {
             subtitleFile.setAdditionalSourcesPostponed(subtitleFileData.additionalSources);
             changes = true;
         }
-        if (!jacz.util.objects.Util.equals(subtitleFile.getLocalizedLanguage(), subtitleFileData.localizedLanguage)) {
+        if (!org.aanguita.jacuzzi.objects.Util.equals(subtitleFile.getLocalizedLanguage(), subtitleFileData.localizedLanguage)) {
             subtitleFile.setLocalizedLanguagePostponed(subtitleFileData.localizedLanguage);
             changes = true;
         }
