@@ -44,7 +44,7 @@ public class DownloadEventsImpl implements DownloadEvents {
 
     @Override
     public void cancelled(DownloadInfo downloadInfo, DownloadManager downloadManager, DownloadProgressNotificationHandler.CancellationReason reason) {
-        System.out.println("Download cancelled: " + downloadInfo);
+        System.out.println("Download cancelled: " + downloadInfo + ". Reason: " + reason);
         transferStatsProperties.removeDownload(downloadManager);
         filesStateProperties.cancelFileDownload(downloadInfo.fileHash);
     }
