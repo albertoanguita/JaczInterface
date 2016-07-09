@@ -134,6 +134,7 @@ public class Main extends Application {
         PropertiesAccessor.getInstance().stop();
         System.out.println("Properties stopped");
 
+        System.out.println("Number of remaining registered clients: " + ThreadExecutor.getRegisteredClients().size());
         System.out.println(ThreadExecutor.getRegisteredClients());
     }
 
