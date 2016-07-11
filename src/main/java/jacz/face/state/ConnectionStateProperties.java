@@ -90,6 +90,11 @@ public class ConnectionStateProperties extends GenericStateProperties {
         });
     }
 
+    @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
     public final void updateState(ConnectionState connectionState) {
         System.out.println(connectionState);
         Util.setLater(isWishForConnectionProperty, connectionState.isWishForConnection());

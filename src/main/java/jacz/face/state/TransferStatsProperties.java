@@ -315,6 +315,11 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         addInitialStoppedDownloads(client.getInitialStoppedDownloads());
     }
 
+    @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
     public LongProperty totalUploadedBytesProperty() {
         return totalUploadedBytes;
     }
@@ -439,7 +444,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
     public void stop() {
         if (checkSpeedTimer != null) {
-            checkSpeedTimer.kill();
+            checkSpeedTimer.stop();
         }
     }
 }

@@ -623,6 +623,11 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         Chapter.getChapters(integratedDB).stream().forEach(chapter -> newChapter(chapter, true));
     }
 
+    @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
     public ObservableList<MediaItem> getItemList() {
         return itemList;
     }

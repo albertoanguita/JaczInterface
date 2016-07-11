@@ -21,6 +21,11 @@ public class GeneralStateProperties extends GenericStateProperties {
         updateOwnNick(client.getOwnNick());
     }
 
+    @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
     public void updateOwnNick(String ownNick) {
         Util.setLater(ownNickProperty, ownNick);
     }

@@ -188,6 +188,11 @@ public class FilesStateProperties extends GenericStateProperties {
         observedFiles = new HashMap<>();
     }
 
+    @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
     public synchronized FileInfo getFileInfo(String hash) {
         if (!observedFiles.containsKey(hash)) {
             observedFiles.put(hash, fetchFileInfo(hash));

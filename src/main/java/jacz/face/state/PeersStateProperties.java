@@ -185,6 +185,11 @@ public class PeersStateProperties extends GenericStateProperties {
                 .collect(Collectors.toList()));
     }
 
+    @Override
+    public String getName() {
+        return this.getClass().getName();
+    }
+
     public ObservableList<PeerPropertyInfo> observedPeers() {
         return observedPeers;
     }
