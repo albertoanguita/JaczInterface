@@ -183,6 +183,8 @@ public class PeersStateProperties extends GenericStateProperties {
                 .map(client::getPeerInfo)
                 .map(PeerPropertyInfo::new)
                 .collect(Collectors.toList()));
+
+        updateConnectionNumbers();
     }
 
     @Override
