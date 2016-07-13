@@ -126,5 +126,6 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
             System.out.println("Speed for " + uploadManager.getResourceID() + ": " + speed + "KB, uploaded size: " + size);
             System.out.println("Assigned size: " + uploadManager.getStatistics().getAssignedPart().size());
         }
+        transferStatsProperties.updateUploads(uploadsManager.getAllUploads());
     }
 }

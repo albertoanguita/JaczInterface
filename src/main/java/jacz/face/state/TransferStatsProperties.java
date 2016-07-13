@@ -242,6 +242,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         protected void update(long newTransferredSize, double newSpeed, DownloadState newDownloadState, Long newLength, float newPriority, double newStreamingNeed, int newProvidersCount) {
             super.update(newTransferredSize, newSpeed);
+            System.out.println("new download state: " + newDownloadState);
             Util.setLater(downloadState, newDownloadState);
             Util.setLater(fileSize, newLength);
             Util.setLater(perTenThousandDownloaded, Util.calculatePerTenThousand(getTransferredSize(), getFileSize()));
@@ -286,8 +287,9 @@ public class TransferStatsProperties extends GenericStateProperties implements T
             @Override
             public Observable[] call(DownloadPropertyInfo d) {
                 return new Observable[]{
-                        d.transferredSize,
-                        d.speed,
+                        d.downloadStateProperty(),
+                        d.transferredSizeProperty(),
+                        d.speedProperty(),
                         d.downloadStateProperty(),
                         d.fileSizeProperty(),
                         d.priorityProperty(),
@@ -311,6 +313,8 @@ public class TransferStatsProperties extends GenericStateProperties implements T
         super.setClient(client);
         this.transferStatistics = client.getTransferStatistics();
         checkSpeedTimer = new Timer(TransferStatistics.SPEED_MONITOR_FREQUENCY, this);
+        client.setVisibleDownloadsTimer(1000L);
+        client.setVisibleUploadsManagerTimer(1000L);
         updateProperties();
         addInitialStoppedDownloads(client.getInitialStoppedDownloads());
     }

@@ -263,6 +263,12 @@ public class PeersController extends GenericController {
             final TableRow<PeersStateProperties.PeerPropertyInfo> row = new TableRow<>();
             row.itemProperty().addListener((observable, oldValue, newValue) -> {
                 if (newValue != null) {
+                    row.getStyleClass().removeAll();
+                    if (newValue.getConnected()) {
+                        row.getStyleClass().add("connected");
+                    } else {
+                        row.getStyleClass().add("disconnected");
+                    }
                     final ContextMenu contextMenu = new ContextMenu();
                     contextMenu.getItems().addAll(getContextMenuItems(newValue));
                     row.setContextMenu(contextMenu);

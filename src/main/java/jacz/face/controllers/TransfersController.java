@@ -1,14 +1,12 @@
 package jacz.face.controllers;
 
-import jacz.database.DatabaseMediator;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.state.TransferStatsProperties;
 import jacz.face.util.Util;
-import jacz.peerengineclient.DownloadInfo;
-import jacz.peerengineservice.util.datatransfer.master.DownloadState;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -40,6 +38,14 @@ public class TransfersController extends GenericController {
 
 
         downloadsTableView.setItems(PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedDownloads());
+
+        PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedDownloads().addListener(new ListChangeListener<TransferStatsProperties.DownloadPropertyInfo>() {
+            @Override
+            public void onChanged(Change<? extends TransferStatsProperties.DownloadPropertyInfo> c) {
+                System.out.println("transfers list changed!!!");
+                downloadsTableView.refresh();
+            }
+        });
 
         // downloads table
         // title column
@@ -167,8 +173,44 @@ public class TransfersController extends GenericController {
 
         //noinspection unchecked
         downloadsTableView.getColumns().setAll(titleColumn, fileNameColumn, fileSizeColumn, downloadedSizeColumn, percentageColumn, speedColumn, etaColumn, providersColumn);
-
         downloadsTableView.setRowFactory(tableView -> {
+            TableRow<TransferStatsProperties.DownloadPropertyInfo> row2 = new TableRow<TransferStatsProperties.DownloadPropertyInfo>() {
+
+                @Override
+                protected void updateItem(TransferStatsProperties.DownloadPropertyInfo item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (!empty) {
+                        System.out.println("Updating row. State: " + getItem().downloadStateProperty().getValue());
+                        final ContextMenu contextMenu = new ContextMenu();
+                        final MenuItem resumeMenuItem = new MenuItem("Resume");
+                        resumeMenuItem.setOnAction(event -> resume(getItem()));
+                        final MenuItem pauseMenuItem = new MenuItem("Pause");
+                        pauseMenuItem.setOnAction(event -> pause(getItem()));
+                        final MenuItem stopMenuItem = new MenuItem("Stop");
+                        stopMenuItem.setOnAction(event -> stop(getItem()));
+                        final MenuItem cancelMenuItem = new MenuItem("Cancel");
+                        cancelMenuItem.setOnAction(event -> cancel(getItem()));
+
+                        switch (getItem().downloadStateProperty().getValue()) {
+
+                            case RUNNING:
+                                contextMenu.getItems().addAll(pauseMenuItem, stopMenuItem, cancelMenuItem);
+                                break;
+                            case PAUSED:
+                                contextMenu.getItems().addAll(resumeMenuItem, stopMenuItem, cancelMenuItem);
+                                break;
+                            case STOPPED:
+                                contextMenu.getItems().addAll(resumeMenuItem, cancelMenuItem);
+                                break;
+                        }
+
+
+                        //contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
+                        setContextMenu(contextMenu);
+                    }
+                }
+            };
+
             final TableRow<TransferStatsProperties.DownloadPropertyInfo> row = new TableRow<>();
             final ContextMenu contextMenu = new ContextMenu();
             final MenuItem resumeMenuItem = new MenuItem("Resume");
@@ -201,28 +243,12 @@ public class TransfersController extends GenericController {
 //                            .otherwise(contextMenu)
 //            );
             row.setContextMenu(contextMenu);
-            return row;
+            return row2;
         });
-
-        try {
-            //System.out.println("download files!");
-            //ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 1);
-//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 2);
-//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 3);
-//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 4);
-//            ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, 2, null, 5);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void resume(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {
-        if (downloadPropertyInfo.downloadStateProperty().get() != DownloadState.STOPPED) {
-            downloadPropertyInfo.getDownloadManager().resume();
-        } else {
-            // a new download is created, and the existing one is deleted
-            // todo
-        }
+        downloadPropertyInfo.getDownloadManager().resume();
     }
 
     private void pause(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {
