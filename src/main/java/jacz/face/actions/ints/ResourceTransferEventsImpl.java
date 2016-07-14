@@ -100,7 +100,6 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
 
     @Override
     public void periodicDownloadsNotification(DownloadsManager downloadsManager) {
-        System.out.println("PERIODIC DOWNLOADS: " + downloadsManager.getAllDownloads().size());
         for (DownloadManager downloadManager : downloadsManager.getAllDownloads()) {
             Double speed = downloadManager.getStatistics().getSpeed();
             speed /= 1024d;
@@ -118,7 +117,6 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
 
     @Override
     public void periodicUploadsNotification(UploadsManager uploadsManager) {
-        System.out.println("PERIODIC UPLOADS: " + uploadsManager.getAllUploads().size());
         for (UploadManager uploadManager : uploadsManager.getAllUploads()) {
             Double speed = uploadManager.getStatistics().getSpeed();
             speed /= 1024d;

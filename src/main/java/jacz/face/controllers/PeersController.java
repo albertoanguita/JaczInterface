@@ -3,9 +3,11 @@ package jacz.face.controllers;
 import com.neovisionaries.i18n.CountryCode;
 import jacz.face.state.PeersStateProperties;
 import jacz.face.state.PropertiesAccessor;
+import jacz.face.state.TransferStatsProperties;
 import jacz.peerengineservice.PeerId;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.*;
+import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -258,26 +260,51 @@ public class PeersController extends GenericController {
         //noinspection unchecked
         peersTableView.getColumns().setAll(relationColumn, nickColumn, idColumn, countryColumn, affinityColumn);
 
+        sortedPeers.addListener(new ListChangeListener<PeersStateProperties.PeerPropertyInfo>() {
+            @Override
+            public void onChanged(Change<? extends PeersStateProperties.PeerPropertyInfo> c) {
+                peersTableView.refresh();
+            }
+        });
 
         peersTableView.setRowFactory(tableView -> {
-            final TableRow<PeersStateProperties.PeerPropertyInfo> row = new TableRow<>();
-            row.itemProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue != null) {
-                    row.getStyleClass().removeAll();
-                    if (newValue.getConnected()) {
-                        row.getStyleClass().add("connected");
-                    } else {
-                        row.getStyleClass().add("disconnected");
+            final TableRow<PeersStateProperties.PeerPropertyInfo> row = new TableRow<PeersStateProperties.PeerPropertyInfo>() {
+
+                @Override
+                protected void updateItem(PeersStateProperties.PeerPropertyInfo item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (!empty) {
+                        getStyleClass().removeAll();
+                        if (item.getConnected()) {
+                            getStyleClass().add("connected");
+                        } else {
+                            getStyleClass().add("disconnected");
+                        }
+                        final ContextMenu contextMenu = new ContextMenu();
+                        contextMenu.getItems().addAll(getContextMenuItems(item));
+                        setContextMenu(contextMenu);
                     }
-                    final ContextMenu contextMenu = new ContextMenu();
-                    contextMenu.getItems().addAll(getContextMenuItems(newValue));
-                    row.setContextMenu(contextMenu);
-                    newValue.relationProperty().addListener((observable1, oldValue1, newValue2) -> {
-                        row.getContextMenu().getItems().clear();
-                        row.getContextMenu().getItems().addAll(getContextMenuItems(newValue));
-                    });
                 }
-            });
+            };
+
+
+//            row.itemProperty().addListener((observable, oldValue, newValue) -> {
+//                if (newValue != null) {
+//                    row.getStyleClass().removeAll();
+//                    if (newValue.getConnected()) {
+//                        row.getStyleClass().add("connected");
+//                    } else {
+//                        row.getStyleClass().add("disconnected");
+//                    }
+//                    final ContextMenu contextMenu = new ContextMenu();
+//                    contextMenu.getItems().addAll(getContextMenuItems(newValue));
+//                    row.setContextMenu(contextMenu);
+//                    newValue.relationProperty().addListener((observable1, oldValue1, newValue2) -> {
+//                        row.getContextMenu().getItems().clear();
+//                        row.getContextMenu().getItems().addAll(getContextMenuItems(newValue));
+//                    });
+//                }
+//            });
             return row;
         });
 
