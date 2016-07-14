@@ -42,7 +42,6 @@ public class TransfersController extends GenericController {
         PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedDownloads().addListener(new ListChangeListener<TransferStatsProperties.DownloadPropertyInfo>() {
             @Override
             public void onChanged(Change<? extends TransferStatsProperties.DownloadPropertyInfo> c) {
-                System.out.println("transfers list changed!!!");
                 downloadsTableView.refresh();
             }
         });
@@ -173,77 +172,40 @@ public class TransfersController extends GenericController {
 
         //noinspection unchecked
         downloadsTableView.getColumns().setAll(titleColumn, fileNameColumn, fileSizeColumn, downloadedSizeColumn, percentageColumn, speedColumn, etaColumn, providersColumn);
-        downloadsTableView.setRowFactory(tableView -> {
-            TableRow<TransferStatsProperties.DownloadPropertyInfo> row2 = new TableRow<TransferStatsProperties.DownloadPropertyInfo>() {
+        downloadsTableView.setRowFactory(tableView -> new TableRow<TransferStatsProperties.DownloadPropertyInfo>() {
 
-                @Override
-                protected void updateItem(TransferStatsProperties.DownloadPropertyInfo item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (!empty) {
-                        System.out.println("Updating row. State: " + getItem().downloadStateProperty().getValue());
-                        final ContextMenu contextMenu = new ContextMenu();
-                        final MenuItem resumeMenuItem = new MenuItem("Resume");
-                        resumeMenuItem.setOnAction(event -> resume(getItem()));
-                        final MenuItem pauseMenuItem = new MenuItem("Pause");
-                        pauseMenuItem.setOnAction(event -> pause(getItem()));
-                        final MenuItem stopMenuItem = new MenuItem("Stop");
-                        stopMenuItem.setOnAction(event -> stop(getItem()));
-                        final MenuItem cancelMenuItem = new MenuItem("Cancel");
-                        cancelMenuItem.setOnAction(event -> cancel(getItem()));
+            @Override
+            protected void updateItem(TransferStatsProperties.DownloadPropertyInfo item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty) {
+                    final ContextMenu contextMenu = new ContextMenu();
+                    final MenuItem resumeMenuItem = new MenuItem("Resume");
+                    resumeMenuItem.setOnAction(event -> resume(item));
+                    final MenuItem pauseMenuItem = new MenuItem("Pause");
+                    pauseMenuItem.setOnAction(event -> pause(item));
+                    final MenuItem stopMenuItem = new MenuItem("Stop");
+                    stopMenuItem.setOnAction(event -> stop(item));
+                    final MenuItem cancelMenuItem = new MenuItem("Cancel");
+                    cancelMenuItem.setOnAction(event -> cancel(item));
 
-                        switch (getItem().downloadStateProperty().getValue()) {
+                    switch (item.downloadStateProperty().getValue()) {
 
-                            case RUNNING:
-                                contextMenu.getItems().addAll(pauseMenuItem, stopMenuItem, cancelMenuItem);
-                                break;
-                            case PAUSED:
-                                contextMenu.getItems().addAll(resumeMenuItem, stopMenuItem, cancelMenuItem);
-                                break;
-                            case STOPPED:
-                                contextMenu.getItems().addAll(resumeMenuItem, cancelMenuItem);
-                                break;
-                        }
-
-
-                        //contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
-                        setContextMenu(contextMenu);
+                        case RUNNING:
+                            contextMenu.getItems().addAll(pauseMenuItem, stopMenuItem, cancelMenuItem);
+                            break;
+                        case PAUSED:
+                            contextMenu.getItems().addAll(resumeMenuItem, stopMenuItem, cancelMenuItem);
+                            break;
+                        case STOPPED:
+                            contextMenu.getItems().addAll(resumeMenuItem, cancelMenuItem);
+                            break;
                     }
+
+
+                    //contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
+                    setContextMenu(contextMenu);
                 }
-            };
-
-            final TableRow<TransferStatsProperties.DownloadPropertyInfo> row = new TableRow<>();
-            final ContextMenu contextMenu = new ContextMenu();
-            final MenuItem resumeMenuItem = new MenuItem("Resume");
-            resumeMenuItem.setOnAction(event -> resume(row.getItem()));
-            final MenuItem pauseMenuItem = new MenuItem("Pause");
-            pauseMenuItem.setOnAction(event -> pause(row.getItem()));
-            final MenuItem stopMenuItem = new MenuItem("Stop");
-            stopMenuItem.setOnAction(event -> stop(row.getItem()));
-            final MenuItem cancelMenuItem = new MenuItem("Cancel");
-            cancelMenuItem.setOnAction(event -> cancel(row.getItem()));
-
-//            TransferStatsProperties.DownloadPropertyInfo item = row.getItem();
-//            switch (row.getItem().downloadStateProperty().getValue()) {
-//
-//                case RUNNING:
-//                    contextMenu.getItems().addAll(pauseMenuItem, stopMenuItem, cancelMenuItem);
-//                    break;
-//                case PAUSED:
-//                    contextMenu.getItems().addAll(resumeMenuItem, stopMenuItem, cancelMenuItem);
-//                    break;
-//                case STOPPED:
-//                    contextMenu.getItems().addAll(resumeMenuItem, cancelMenuItem);
-//                    break;
-//            }
-            contextMenu.getItems().addAll(resumeMenuItem, pauseMenuItem, stopMenuItem, cancelMenuItem);
-            // Set context menu on row, but use a binding to make it only show for non-empty rows:
-//            row.contextMenuProperty().bind(
-//                    Bindings.when(row.emptyProperty())
-//                            .then((ContextMenu) null)
-//                            .otherwise(contextMenu)
-//            );
-            row.setContextMenu(contextMenu);
-            return row2;
+            }
         });
     }
 
