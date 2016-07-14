@@ -8,10 +8,12 @@ import jacz.face.main.Main;
 import jacz.face.state.FilesStateProperties;
 import jacz.face.state.MediaDatabaseProperties;
 import jacz.face.state.PropertiesAccessor;
+import jacz.face.state.TransferStatsProperties;
 import jacz.face.util.MediaPlayerMediator;
 import jacz.face.util.Util;
 import jacz.face.util.VideoFilesEditor;
 import jacz.peerengineclient.DownloadInfo;
+import javafx.beans.value.ChangeListener;
 import org.aanguita.jacuzzi.concurrency.ThreadUtil;
 import org.aanguita.jacuzzi.concurrency.task_executor.ThreadExecutor;
 import javafx.application.Platform;
@@ -85,6 +87,14 @@ public class MovieController extends ProducedMediaItemController {
 
         filesTableView.setItems(mediaItem.videoFilesProperty());
 
+        mediaItem.videoFilesProperty().addListener(new ListChangeListener<MediaDatabaseProperties.VideoFileModel>() {
+            @Override
+            public void onChanged(Change<? extends MediaDatabaseProperties.VideoFileModel> c) {
+                filesTableView.refresh();
+            }
+        });
+
+
         // state column
         TableColumn<MediaDatabaseProperties.VideoFileModel, VBox> stateColumn = new TableColumn<>("state");
         stateColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<MediaDatabaseProperties.VideoFileModel, VBox>, ObservableValue<VBox>>() {
@@ -96,11 +106,17 @@ public class MovieController extends ProducedMediaItemController {
                 op.bind(new ObjectBinding<VBox>() {
                     {
                         super.bind(fileInfo.stateProperty(), fileInfo.downloadProgressProperty(), fileInfo.speedProperty());
+                        fileInfo.stateProperty().addListener(new ChangeListener<FilesStateProperties.FileState>() {
+                            @Override
+                            public void changed(ObservableValue<? extends FilesStateProperties.FileState> observable, FilesStateProperties.FileState oldValue, FilesStateProperties.FileState newValue) {
+                                filesTableView.refresh();
+                            }
+                        });
                     }
                     @Override
                     protected VBox computeValue() {
                         // this "hack" is necessary so the cell properly resizes upon change in its contents
-                        Platform.runLater(filesTableView::refresh);
+                        //Platform.runLater(filesTableView::refresh);
                         Label stateLabel = new Label(fileInfo.getState().toString());
                         if (fileInfo.getState() == FilesStateProperties.FileState.DOWNLOADING) {
                             Label speedLabel = new Label(Util.formatSpeed(fileInfo.getSpeed()));
