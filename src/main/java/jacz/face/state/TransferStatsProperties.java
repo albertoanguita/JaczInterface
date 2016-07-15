@@ -261,7 +261,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
     private TransferStatistics transferStatistics;
 
-    private Timer checkSpeedTimer;
+    private final Timer checkSpeedTimer;
 
     private final LongProperty totalUploadedBytes;
 
@@ -277,7 +277,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
 
     public TransferStatsProperties() {
-        checkSpeedTimer = null;
+        checkSpeedTimer = new Timer(TransferStatistics.SPEED_MONITOR_FREQUENCY, this, false, "CheckTransferStatsTimer");
         totalUploadedBytes = new SimpleLongProperty(0L);
         totalDownloadedBytes = new SimpleLongProperty(0L);
         currentUploadSpeed = new SimpleDoubleProperty(0d);
@@ -312,7 +312,7 @@ public class TransferStatsProperties extends GenericStateProperties implements T
     public void setClient(PeerEngineClient client) {
         super.setClient(client);
         this.transferStatistics = client.getTransferStatistics();
-        checkSpeedTimer = new Timer(TransferStatistics.SPEED_MONITOR_FREQUENCY, this);
+        checkSpeedTimer.reset();
         client.setVisibleDownloadsTimer(1000L);
         client.setVisibleUploadsManagerTimer(1000L);
         updateProperties();
@@ -447,8 +447,6 @@ public class TransferStatsProperties extends GenericStateProperties implements T
     }
 
     public void stop() {
-        if (checkSpeedTimer != null) {
-            checkSpeedTimer.stop();
-        }
+        checkSpeedTimer.stop();
     }
 }
