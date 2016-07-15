@@ -281,7 +281,7 @@ public class FilesStateProperties extends GenericStateProperties {
         // check in the local file hash database first
         if (client.containsFileByHash(hash)) {
             // available in the local file hash database
-            String path = client.getFile(hash);
+            String path = client.getFilePath(hash);
             return FileInfo.buildLocalFileInfo(hash, path, providers);
         } else {
             // the file is remote (might be downloading)

@@ -4,6 +4,7 @@ import jacz.database.DatabaseMediator;
 import jacz.face.util.Util;
 import jacz.peerengineclient.DownloadInfo;
 import jacz.peerengineclient.PeerEngineClient;
+import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.util.datatransfer.TransferStatistics;
 import jacz.peerengineservice.util.datatransfer.master.DownloadManager;
 import jacz.peerengineservice.util.datatransfer.master.DownloadState;
@@ -16,6 +17,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
 
+import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -139,22 +141,6 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
         private final IntegerProperty providersCount;
 
-        public DownloadPropertyInfo(String transferId) {
-            super(transferId);
-            downloadManager = null;
-            containerTitle = null;
-            containerType = null;
-            containerId = null;
-            superContainerId = null;
-            itemId = null;
-            downloadState = null;
-            fileSize = null;
-            perTenThousandDownloaded = null;
-            priority = null;
-            streamingNeed = null;
-            providersCount = null;
-        }
-
         public DownloadPropertyInfo(DownloadInfo downloadInfo, DownloadManager downloadManager, PeerEngineClient client) {
             super(downloadManager.getId(), downloadInfo.fileHash, downloadInfo.fileName, downloadManager.getStatistics().getCreationDate(), downloadManager.getStatistics().getDownloadedSizeThisResource());
             this.downloadManager = downloadManager;
@@ -254,8 +240,15 @@ public class TransferStatsProperties extends GenericStateProperties implements T
 
     public static class UploadPropertyInfo extends TransferPropertyInfo {
 
-        public UploadPropertyInfo(String transferId) {
-            super(transferId);
+        private final PeerId requestingPeer;
+
+        public UploadPropertyInfo(UploadManager uploadManager, String fileName) {
+            super(uploadManager.getId(), uploadManager.getResourceID(), fileName, uploadManager.getStatistics().getCreationDate(), uploadManager.getStatistics().getUploadedSizeThisResource());
+            this.requestingPeer = uploadManager.getRequestingPeer();
+        }
+
+        public PeerId getRequestingPeer() {
+            return requestingPeer;
         }
     }
 
@@ -436,8 +429,12 @@ public class TransferStatsProperties extends GenericStateProperties implements T
                     uploadManager.getStatistics().getSpeed());
         } else {
             // new upload
-            UploadPropertyInfo uploadPropertyInfo = new UploadPropertyInfo(uploadManager.getId());
-            observedUploads.add(uploadPropertyInfo);
+            try {
+                UploadPropertyInfo uploadPropertyInfo = new UploadPropertyInfo(uploadManager, client.getFile(uploadManager.getResourceID()).getName());
+                observedUploads.add(uploadPropertyInfo);
+            } catch (FileNotFoundException e) {
+                // file not found in file hash database -> ignoe upload
+            }
         }
     }
 

@@ -101,15 +101,15 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
     @Override
     public void periodicDownloadsNotification(DownloadsManager downloadsManager) {
         for (DownloadManager downloadManager : downloadsManager.getAllDownloads()) {
-            Double speed = downloadManager.getStatistics().getSpeed();
-            speed /= 1024d;
-            long size = downloadManager.getStatistics().getDownloadedSizeThisResource();
-            Long length = downloadManager.getLength();
-            Double part = null;
-            if (length != null) {
-                part = (double) size / (double) length * 100d;
-            }
-            System.out.println("Speed for " + downloadManager.getResourceID() + ": " + speed + "KB, downloaded part: " + part);
+//            Double speed = downloadManager.getStatistics().getSpeed();
+//            speed /= 1024d;
+//            long size = downloadManager.getStatistics().getDownloadedSizeThisResource();
+//            Long length = downloadManager.getLength();
+//            Double part = null;
+//            if (length != null) {
+//                part = (double) size / (double) length * 100d;
+//            }
+//            System.out.println("Speed for " + downloadManager.getResourceID() + ": " + speed + "KB, downloaded part: " + part);
             transferStatsProperties.updateDownloadState(downloadManager);
             filesStateProperties.updateFileDownload(downloadManager.getResourceID());
         }
@@ -117,13 +117,13 @@ public class ResourceTransferEventsImpl implements ResourceTransferEvents {
 
     @Override
     public void periodicUploadsNotification(UploadsManager uploadsManager) {
-        for (UploadManager uploadManager : uploadsManager.getAllUploads()) {
-            Double speed = uploadManager.getStatistics().getSpeed();
-            speed /= 1024d;
-            long size = uploadManager.getStatistics().getUploadedSizeThisResource();
-            System.out.println("Speed for " + uploadManager.getResourceID() + ": " + speed + "KB, uploaded size: " + size);
-            System.out.println("Assigned size: " + uploadManager.getStatistics().getAssignedPart().size());
-        }
+//        for (UploadManager uploadManager : uploadsManager.getAllUploads()) {
+//            Double speed = uploadManager.getStatistics().getSpeed();
+//            speed /= 1024d;
+//            long size = uploadManager.getStatistics().getUploadedSizeThisResource();
+//            System.out.println("Speed for " + uploadManager.getResourceID() + ": " + speed + "KB, uploaded size: " + size);
+//            System.out.println("Assigned size: " + uploadManager.getStatistics().getAssignedPart().size());
+//        }
         transferStatsProperties.updateUploads(uploadsManager.getAllUploads());
     }
 }

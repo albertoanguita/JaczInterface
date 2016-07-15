@@ -207,6 +207,8 @@ public class TransfersController extends GenericController {
                 }
             }
         });
+
+
     }
 
     private void resume(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {

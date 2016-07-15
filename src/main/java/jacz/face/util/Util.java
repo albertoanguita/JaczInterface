@@ -238,7 +238,7 @@ public class Util {
     public static String buildImagePath(ProducedCreationItem producedCreationItem) {
         String hash = producedCreationItem.getImageHash() != null ? producedCreationItem.getImageHash().getHash() : null;
         if (hash != null) {
-            return ClientAccessor.getInstance().getClient().getFile(hash);
+            return ClientAccessor.getInstance().getClient().getFilePath(hash);
         } else {
             return null;
         }
