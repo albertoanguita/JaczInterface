@@ -115,7 +115,7 @@ public class CreateConfigController extends GenericController {
             }
         });
 
-        mouseToRandom = new MouseToRandom(100);
+        mouseToRandom = new MouseToRandom(1024);
 
 
         nickQuestion.setGraphic(Glyph.create("FontAwesome|" + FontAwesome.Glyph.QUESTION_CIRCLE));
