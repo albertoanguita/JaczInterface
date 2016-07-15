@@ -14,6 +14,7 @@ import jacz.face.util.Util;
 import jacz.face.util.VideoFilesEditor;
 import jacz.peerengineclient.DownloadInfo;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.WeakListChangeListener;
 import org.aanguita.jacuzzi.concurrency.ThreadUtil;
 import org.aanguita.jacuzzi.concurrency.task_executor.ThreadExecutor;
 import javafx.application.Platform;
@@ -58,6 +59,9 @@ public class MovieController extends ProducedMediaItemController {
     @FXML
     private TableView<MediaDatabaseProperties.VideoFileModel> filesTableView;
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private ListChangeListener<MediaDatabaseProperties.VideoFileModel> filesTableViewChangeListener = null;
+
     @Override
     public void setMain(Main main) throws ItemNoLongerExistsException {
         super.setMain(main);
@@ -87,12 +91,8 @@ public class MovieController extends ProducedMediaItemController {
 
         filesTableView.setItems(mediaItem.videoFilesProperty());
 
-        mediaItem.videoFilesProperty().addListener(new ListChangeListener<MediaDatabaseProperties.VideoFileModel>() {
-            @Override
-            public void onChanged(Change<? extends MediaDatabaseProperties.VideoFileModel> c) {
-                filesTableView.refresh();
-            }
-        });
+        filesTableViewChangeListener = new WeakListChangeListener<>(c -> filesTableView.refresh());
+        mediaItem.videoFilesProperty().addListener(filesTableViewChangeListener);
 
 
         // state column

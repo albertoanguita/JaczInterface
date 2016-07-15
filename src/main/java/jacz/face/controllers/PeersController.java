@@ -3,11 +3,11 @@ package jacz.face.controllers;
 import com.neovisionaries.i18n.CountryCode;
 import jacz.face.state.PeersStateProperties;
 import jacz.face.state.PropertiesAccessor;
-import jacz.face.state.TransferStatsProperties;
 import jacz.peerengineservice.PeerId;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.*;
 import javafx.collections.ListChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -148,6 +148,9 @@ public class PeersController extends GenericController {
     @FXML
     private Button addFavoriteButton;
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private ListChangeListener<PeersStateProperties.PeerPropertyInfo> peersTableViewChangeListener = null;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         nickLabel.textProperty().bind(PropertiesAccessor.getInstance().getGeneralStateProperties().ownNickPropertyProperty());
@@ -260,15 +263,11 @@ public class PeersController extends GenericController {
         //noinspection unchecked
         peersTableView.getColumns().setAll(relationColumn, nickColumn, idColumn, countryColumn, affinityColumn);
 
-        sortedPeers.addListener(new ListChangeListener<PeersStateProperties.PeerPropertyInfo>() {
-            @Override
-            public void onChanged(Change<? extends PeersStateProperties.PeerPropertyInfo> c) {
-                peersTableView.refresh();
-            }
-        });
+        peersTableViewChangeListener = new WeakListChangeListener<>(c -> peersTableView.refresh());
+        sortedPeers.addListener(peersTableViewChangeListener);
 
         peersTableView.setRowFactory(tableView -> {
-            final TableRow<PeersStateProperties.PeerPropertyInfo> row = new TableRow<PeersStateProperties.PeerPropertyInfo>() {
+            return new TableRow<PeersStateProperties.PeerPropertyInfo>() {
 
                 @Override
                 protected void updateItem(PeersStateProperties.PeerPropertyInfo item, boolean empty) {
@@ -305,7 +304,7 @@ public class PeersController extends GenericController {
 //                    });
 //                }
 //            });
-            return row;
+//            return row;
         });
 
 

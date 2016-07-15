@@ -7,6 +7,7 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
+import javafx.collections.WeakListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -31,6 +32,9 @@ public class TransfersController extends GenericController {
     @FXML
     private TableView<TransferStatsProperties.DownloadPropertyInfo> downloadsTableView;
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private ListChangeListener<TransferStatsProperties.DownloadPropertyInfo> downloadsTableViewChangeListener = null;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -39,12 +43,8 @@ public class TransfersController extends GenericController {
 
         downloadsTableView.setItems(PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedDownloads());
 
-        PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedDownloads().addListener(new ListChangeListener<TransferStatsProperties.DownloadPropertyInfo>() {
-            @Override
-            public void onChanged(Change<? extends TransferStatsProperties.DownloadPropertyInfo> c) {
-                downloadsTableView.refresh();
-            }
-        });
+        downloadsTableViewChangeListener = new WeakListChangeListener<>(c -> downloadsTableView.refresh());
+        PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedDownloads().addListener(downloadsTableViewChangeListener);
 
         // downloads table
         // title column
