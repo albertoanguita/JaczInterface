@@ -70,8 +70,8 @@
                <children>
                   <HBox alignment="CENTER_LEFT" prefHeight="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <Label text="UP:" />
-                        <Label text="0">
+                        <Label text="DOWN:" />
+                        <Label fx:id="totalDownloadSpeedLabel" text="0">
                            <padding>
                               <Insets left="5.0" />
                            </padding>
@@ -82,7 +82,7 @@
                               <Insets left="5.0" />
                            </padding>
                         </Label>
-                        <Label text="0">
+                        <Label fx:id="totalUploadSpeedLabel" text="0">
                            <padding>
                               <Insets left="5.0" />
                            </padding>
@@ -93,7 +93,7 @@
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Label text="FAVORITES:" />
-                        <Label fx:id="connectedFavoritePeersLabel" text="0">
+                        <Label fx:id="connectedFavoritePeersLabel" text="UP:">
                            <padding>
                               <Insets left="5.0" />
                            </padding>

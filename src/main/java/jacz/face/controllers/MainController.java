@@ -61,6 +61,12 @@ public class MainController extends GenericController {
     private AnchorPane viewContainer;
 
     @FXML
+    private Label totalDownloadSpeedLabel;
+
+    @FXML
+    private Label totalUploadSpeedLabel;
+
+    @FXML
     private Label connectedFavoritePeersLabel;
 
     @FXML
@@ -234,6 +240,26 @@ public class MainController extends GenericController {
                 client.connect();
             } else {
                 client.disconnect();
+            }
+        });
+
+        totalDownloadSpeedLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(PropertiesAccessor.getInstance().getTransferStatsProperties().currentDownloadSpeedProperty());
+            }
+            @Override
+            protected String computeValue() {
+                return Double.toString(PropertiesAccessor.getInstance().getTransferStatsProperties().currentDownloadSpeedProperty().getValue());
+            }
+        });
+
+        totalUploadSpeedLabel.textProperty().bind(new StringBinding() {
+            {
+                super.bind(PropertiesAccessor.getInstance().getTransferStatsProperties().currentUploadSpeedProperty());
+            }
+            @Override
+            protected String computeValue() {
+                return Double.toString(PropertiesAccessor.getInstance().getTransferStatsProperties().currentUploadSpeedProperty().getValue());
             }
         });
 

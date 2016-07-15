@@ -403,7 +403,12 @@ public class MovieController extends ProducedMediaItemController {
         });
         downloadItem.setOnAction(actionEvent -> {
             try {
-                ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, containerId, null, fileModel.getItemId());
+                if (fileModel instanceof MediaDatabaseProperties.VideoFileModel) {
+                    ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.VIDEO_FILE, DatabaseMediator.ItemType.MOVIE, containerId, null, fileModel.getItemId());
+                } else {
+                    // subtitle
+                    ClientAccessor.getInstance().getClient().downloadMediaFile(DownloadInfo.Type.SUBTITLE_FILE, DatabaseMediator.ItemType.MOVIE, containerId, null, fileModel.getItemId());
+                }
             } catch (Exception e) {
                 // todo report to user
                 e.printStackTrace();
