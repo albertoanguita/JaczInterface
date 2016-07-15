@@ -149,7 +149,7 @@ public class PeersController extends GenericController {
     private Button addFavoriteButton;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private ListChangeListener<PeersStateProperties.PeerPropertyInfo> peersTableViewChangeListener = null;
+    private ListChangeListener<PeersStateProperties.PeerPropertyInfo> peersTableViewChangeListener;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

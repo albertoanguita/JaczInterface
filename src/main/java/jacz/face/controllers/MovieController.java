@@ -60,7 +60,7 @@ public class MovieController extends ProducedMediaItemController {
     private TableView<MediaDatabaseProperties.VideoFileModel> filesTableView;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private ListChangeListener<MediaDatabaseProperties.VideoFileModel> filesTableViewChangeListener = null;
+    private ListChangeListener<MediaDatabaseProperties.VideoFileModel> filesTableViewChangeListener;
 
     @Override
     public void setMain(Main main) throws ItemNoLongerExistsException {

@@ -32,8 +32,14 @@ public class TransfersController extends GenericController {
     @FXML
     private TableView<TransferStatsProperties.DownloadPropertyInfo> downloadsTableView;
 
+    @FXML
+    private TableView<TransferStatsProperties.UploadPropertyInfo> uploadsTableView;
+
     @SuppressWarnings("FieldCanBeLocal")
-    private ListChangeListener<TransferStatsProperties.DownloadPropertyInfo> downloadsTableViewChangeListener = null;
+    private ListChangeListener<TransferStatsProperties.DownloadPropertyInfo> downloadsTableViewChangeListener;
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private ListChangeListener<TransferStatsProperties.UploadPropertyInfo> uploadsTableViewChangeListener;
 
 
     @Override
@@ -207,6 +213,11 @@ public class TransfersController extends GenericController {
                 }
             }
         });
+
+        uploadsTableView.setItems(PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedUploads());
+
+        uploadsTableViewChangeListener = new WeakListChangeListener<>(c -> uploadsTableView.refresh());
+        PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedUploads().addListener(uploadsTableViewChangeListener);
 
 
     }
