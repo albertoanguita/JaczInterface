@@ -105,9 +105,13 @@ public class MainController extends GenericController {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // initialize controller
-        // todo
 
         System.out.println("Controller initialized");
+
+
+        // todo remove to enable these controls
+        seriesSelector.setDisable(true);
+        favoritesSelector.setDisable(true);
 
 
         connectionToServerStatus = new ConnectionToServerStatus();
