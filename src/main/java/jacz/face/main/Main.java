@@ -144,7 +144,7 @@ public class Main extends Application {
     }
 
     public Optional<EditMovieController.MovieData> editMovie(NavigationHistory.DialogIntention dialogIntention, Movie movie) {
-        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editDialog(dialogIntention, movie, "/view/edit_movie_2.fxml", "new movie");
+        Duple<Dialog<EditMovieController.MovieData>, EditMovieController> dialogAndController = editDialog(dialogIntention, movie, "/view/edit_movie.fxml", "new movie");
         dialogAndController.element1.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 return dialogAndController.element2.buildMovieData(movie);
