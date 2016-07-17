@@ -89,11 +89,11 @@ public abstract class EditCreationItemController extends GenericEditDialogContro
             System.out.println(creationItem.getItemType());
             System.out.println(creationItem.getTitle());
 
-            titleTextField.setText(creationItem.getTitle());
+            titleTextField.setText(creationItem.getTitle() != null ? creationItem.getTitle() : "");
             titleTextField.setEditable(false);
-            originalTitleTextField.setText(creationItem.getOriginalTitle());
-            yearTextField.setText(creationItem.getYear() != null ? creationItem.getYear().toString() : null);
-            synopsisTextArea.setText(creationItem.getSynopsis() != null ? creationItem.getSynopsis() : null);
+            originalTitleTextField.setText(creationItem.getOriginalTitle() != null ? creationItem.getOriginalTitle() : "");
+            yearTextField.setText(creationItem.getYear() != null ? creationItem.getYear().toString() : "");
+            synopsisTextArea.setText(creationItem.getSynopsis() != null ? creationItem.getSynopsis() : "");
             Controls.countryListPane(countriesHBox, creationItem.getCountries());
             Controls.stringListPane(creatorsFlowPane, creationItem.getCreators());
             Controls.stringListPane(actorsFlowPane, creationItem.getActors());
