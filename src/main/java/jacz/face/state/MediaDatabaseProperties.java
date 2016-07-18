@@ -1,7 +1,6 @@
 package jacz.face.state;
 
 import com.neovisionaries.i18n.CountryCode;
-import com.neovisionaries.i18n.LanguageCode;
 import jacz.database.*;
 import jacz.database.util.GenreCode;
 import jacz.database.util.LocalizedLanguage;
@@ -11,13 +10,13 @@ import jacz.face.util.MediaItemType;
 import jacz.face.util.Util;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineservice.PeerId;
-import org.aanguita.jacuzzi.lists.tuple.Duple;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.util.Callback;
+import org.aanguita.jacuzzi.lists.tuple.Duple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,8 @@ import java.util.stream.Collectors;
  * todo add timer that allows marking items with new media content for some time (and for sorting)
  * <p>
  * todo add lowercase title to improve title filtering efficiency
+ *
+ * todo update code flow is a bit weird, can DRY
  */
 public class MediaDatabaseProperties extends GenericStateProperties {
 
@@ -79,6 +80,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         private final ObservableList<VideoFileModel> videoFiles;
 
+        private final BooleanProperty newMediaAvailable;
+
         private MediaItem(CreationItem creationItem, MediaItemType type, String imagePath, List<String> productionCompanies, List<GenreCode> genres, Integer minutes, List<VideoFileModel> videoFiles) {
             this.type = type;
             this.id = creationItem.getId();
@@ -112,6 +115,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
                 }
             });
             this.videoFiles.addAll(videoFiles);
+            this.newMediaAvailable = new SimpleBooleanProperty(false);
         }
 
         public MediaItem(ProducedCreationItem producedCreationItem, MediaItemType type, String imagePath, Integer minutes, List<VideoFileModel> videoFiles) {
@@ -153,6 +157,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             //this.language = null;
             this.minutes = null;
             this.videoFiles = null;
+            this.newMediaAvailable = null;
         }
 
         public DatabaseItem getItem() {
@@ -206,6 +211,11 @@ public class MediaDatabaseProperties extends GenericStateProperties {
             update((CreationItem) chapter, setLater);
             Util.setLaterIf(this.imagePath, buildImagePath(chapter), setLater);
             Util.setLaterIf(this.minutes, chapter.getMinutes(), setLater);
+        }
+
+        public void newMediaAvailable(boolean setLater) {
+            boolean newValue = !newMediaAvailable.get();
+            Util.setLaterIf(newMediaAvailable, newValue, setLater);
         }
 
         public MediaItemType getType() {
@@ -358,6 +368,10 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public ObservableList<VideoFileModel> videoFilesProperty() {
             return videoFiles;
+        }
+
+        public BooleanProperty newMediaAvailableProperty() {
+            return newMediaAvailable;
         }
 
         @Override
@@ -607,7 +621,8 @@ public class MediaDatabaseProperties extends GenericStateProperties {
                         p.actorsProperty(),
                         p.productionCompaniesProperty(),
                         //p.languageProperty(),
-                        p.minutesProperty()};
+                        p.minutesProperty(),
+                        p.newMediaAvailableProperty()};
             }
         });
         movieList = new FilteredList<>(itemList, moviesFilter);
@@ -654,6 +669,24 @@ public class MediaDatabaseProperties extends GenericStateProperties {
                 Chapter chapter = Chapter.getChapterById(integratedDB, id);
                 updateMediaItem(chapter, inJavaFXThread);
                 break;
+        }
+    }
+
+    public synchronized void itemHasNewMedia(DatabaseMediator.ItemType type, Integer id, boolean inJavaFXThread) {
+        int index = findMediaItem(MediaItemType.buildType(type), id);
+        if (index >= 0) {
+            // the item already exists -> update
+            switch (MediaItemType.buildType(type)) {
+                case MOVIE:
+                    itemList.get(index).newMediaAvailable(!inJavaFXThread);
+                    break;
+                case TV_SERIES:
+                    itemList.get(index).newMediaAvailable(!inJavaFXThread);
+                    break;
+                case CHAPTER:
+                    itemList.get(index).newMediaAvailable(!inJavaFXThread);
+                    break;
+            }
         }
     }
 

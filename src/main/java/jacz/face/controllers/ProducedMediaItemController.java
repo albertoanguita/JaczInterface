@@ -56,8 +56,13 @@ public class ProducedMediaItemController extends MediaItemController {
         if (mediaItem.getImagePath() != null) {
             Util.displayImage(imagePane, mediaItem.getImagePath());
         }
+
+        // todo check memory leaks
         mediaItem.imagePathProperty().addListener((observable, oldValue, newValue) -> {
             Util.displayImage(imagePane, newValue);
+        });
+        mediaItem.newMediaAvailableProperty().addListener((observable, oldValue, newValue) -> {
+            Util.displayImage(imagePane, mediaItem.getImagePath());
         });
     }
 
