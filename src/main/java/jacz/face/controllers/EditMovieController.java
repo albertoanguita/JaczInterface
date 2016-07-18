@@ -52,7 +52,7 @@ public class EditMovieController extends EditProducedCreationItemController {
 //            titleTextField.setText(movie.getTitle());
 //            titleTextField.setEditable(false);
 //            originalTitleTextField.setText(movie.getOriginalTitle());
-            minutesTextField.setText(movie.getMinutes() != null ? movie.getMinutes().toString() : null);
+            minutesTextField.setText(movie.getMinutes() != null ? movie.getMinutes().toString() : "");
 
             // retrieve movie object for populating the video files editor pane
             //Movie movie = Movie.getMovieById(Cl)

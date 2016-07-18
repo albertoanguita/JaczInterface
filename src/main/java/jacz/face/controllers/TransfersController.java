@@ -81,7 +81,7 @@ public class TransfersController extends GenericController {
             StringProperty sp = new SimpleStringProperty();
             sp.bind(new StringBinding() {
                 {
-                    super.bind(p.getValue().downloadStateProperty());
+                    super.bind(p.getValue().transferredSizeProperty());
                 }
 
                 @Override
@@ -219,7 +219,47 @@ public class TransfersController extends GenericController {
         uploadsTableViewChangeListener = new WeakListChangeListener<>(c -> uploadsTableView.refresh());
         PropertiesAccessor.getInstance().getTransferStatsProperties().getObservedUploads().addListener(uploadsTableViewChangeListener);
 
+        // requesting peer name column
+        // file name column
+        TableColumn<TransferStatsProperties.UploadPropertyInfo, String> requestingPeerColumn = new TableColumn<>("peer");
+        requestingPeerColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getRequestingPeer().toString()));
+        TableColumn<TransferStatsProperties.UploadPropertyInfo, String> uploadFileNameColumn = new TableColumn<>("file");
+        uploadFileNameColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getFileName() != null ? p.getValue().getFileName() : UNKNOWN_FILE_NAME));
+        // uploaded size column
+        TableColumn<TransferStatsProperties.UploadPropertyInfo, String> uploadedSizeColumn = new TableColumn<>("uploaded size");
+        uploadedSizeColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().transferredSizeProperty());
+                }
 
+                @Override
+                protected String computeValue() {
+                    return Long.toString(p.getValue().getTransferredSize() / 1024) + "KB";
+                }
+            });
+            return sp;
+        });
+        // speed column
+        TableColumn<TransferStatsProperties.UploadPropertyInfo, String> uploadSpeedColumn = new TableColumn<>("speed");
+        uploadSpeedColumn.setCellValueFactory(p -> {
+            StringProperty sp = new SimpleStringProperty();
+            sp.bind(new StringBinding() {
+                {
+                    super.bind(p.getValue().speedProperty());
+                }
+
+                @Override
+                protected String computeValue() {
+                    return Util.formatSpeed(p.getValue().getSpeed());
+                }
+            });
+            return sp;
+        });
+
+        //noinspection unchecked
+        uploadsTableView.getColumns().setAll(requestingPeerColumn, uploadFileNameColumn, uploadedSizeColumn, uploadSpeedColumn);
     }
 
     private void resume(TransferStatsProperties.DownloadPropertyInfo downloadPropertyInfo) {
