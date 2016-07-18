@@ -1,6 +1,6 @@
 package jacz.face.actions.ints;
 
-import jacz.commengine.communication.CommError;
+import org.aanguita.jtcpserver.communication.CommError;
 import jacz.face.state.PeersStateProperties;
 import jacz.peerengineservice.PeerId;
 import jacz.peerengineservice.client.connection.peers.PeerInfo;
