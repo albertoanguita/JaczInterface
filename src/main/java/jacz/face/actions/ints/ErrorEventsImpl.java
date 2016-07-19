@@ -15,11 +15,6 @@ public class ErrorEventsImpl implements ErrorEvents {
     }
 
     @Override
-    public void sessionDataCouldNotBeSaved() {
-        System.err.println("Session could not be saved");
-    }
-
-    @Override
     public void downloadedFileCouldNotBeLoaded(String path, String expectedFileName, IOException e) {
         System.err.println("Downloaded file could not be loaded, path: " + path + ", expectedFileName: " + expectedFileName);
         e.printStackTrace();
