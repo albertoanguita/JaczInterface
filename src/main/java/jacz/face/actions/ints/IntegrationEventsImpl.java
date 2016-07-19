@@ -30,7 +30,7 @@ public class IntegrationEventsImpl implements IntegrationEvents {
     @Override
     public void integratedItemHasNewMedia(DatabaseMediator.ItemType type, Integer id) {
         System.out.println("Integrated item has new media. Type: " + type + ", id: " + id);
-        mediaDatabaseProperties.itemHasNewMedia(type, id, false);
+        mediaDatabaseProperties.updateMediaItem(type, id, false);
     }
 
     @Override

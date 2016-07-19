@@ -53,15 +53,18 @@ public class ProducedMediaItemController extends MediaItemController {
                 return formatGenres(mediaItem.getGenres());
             }
         });
+        System.out.println("image: " + mediaItem.getImagePath());
         if (mediaItem.getImagePath() != null) {
             Util.displayImage(imagePane, mediaItem.getImagePath());
         }
 
         // todo check memory leaks
         mediaItem.imagePathProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("image path changed: " + newValue);
             Util.displayImage(imagePane, newValue);
         });
         mediaItem.newMediaAvailableProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("new media property fired: " + newValue);
             Util.displayImage(imagePane, mediaItem.getImagePath());
         });
     }
