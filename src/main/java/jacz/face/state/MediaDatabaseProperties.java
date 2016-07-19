@@ -85,9 +85,9 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         private MediaItem(CreationItem creationItem, MediaItemType type, String imagePath, List<String> productionCompanies, List<GenreCode> genres, Integer minutes, List<VideoFileModel> videoFiles) {
             this.type = type;
             this.id = creationItem.getId();
-            this.localId = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToLocal().get(type.parse(), creationItem.getId()));
+            this.localId = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getLocalToIntegrated().getReverse(type.parse(), creationItem.getId()));
             this.remoteIds = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToRemote().get(type.parse(), creationItem.getId()));
-            this.deletedId = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToDeleted().get(type.parse(), creationItem.getId()));
+            this.deletedId = new SimpleObjectProperty<>(ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getDeletedToIntegrated().getReverse(type.parse(), creationItem.getId()));
             this.title = new SimpleStringProperty(creationItem.getTitle());
             this.titleLocalizedLanguage = new SimpleObjectProperty<>(creationItem.getTitleLocalizedLanguage());
             this.originalTitle = new SimpleStringProperty(creationItem.getOriginalTitle());
@@ -124,7 +124,7 @@ public class MediaDatabaseProperties extends GenericStateProperties {
 
         public MediaItem(Movie movie) {
             this(movie, MediaItemType.MOVIE, buildImagePath(movie), movie.getMinutes(), VideoFileModel.buildVideoFileModelList(movie.getVideoFiles()));
-            ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToLocal().get(DatabaseMediator.ItemType.MOVIE, movie.getId());
+            ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getLocalToIntegrated().getReverse(DatabaseMediator.ItemType.MOVIE, movie.getId());
         }
 
         public MediaItem(TVSeries tvSeries) {
@@ -174,9 +174,9 @@ public class MediaDatabaseProperties extends GenericStateProperties {
         }
 
         private void update(CreationItem creationItem, boolean setLater) {
-            Util.setLaterIf(this.localId, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToLocal().get(type.parse(), creationItem.getId()), setLater);
+            Util.setLaterIf(this.localId, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getLocalToIntegrated().getReverse(type.parse(), creationItem.getId()), setLater);
             Util.setLaterIf(this.remoteIds, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToRemote().get(type.parse(), creationItem.getId()), setLater);
-            Util.setLaterIf(this.deletedId, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getIntegratedToDeleted().get(type.parse(), creationItem.getId()), setLater);
+            Util.setLaterIf(this.deletedId, ClientAccessor.getInstance().getClient().getDatabases().getItemRelations().getDeletedToIntegrated().getReverse(type.parse(), creationItem.getId()), setLater);
             Util.setLaterIf(this.title, creationItem.getTitle(), setLater);
             Util.setLaterIf(this.originalTitle, creationItem.getOriginalTitle(), setLater);
             Util.setLaterIf(this.year, creationItem.getYear(), setLater);
