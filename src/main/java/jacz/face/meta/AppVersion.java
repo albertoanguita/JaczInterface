@@ -7,5 +7,5 @@ public class AppVersion {
 
     public static String VERSION = "v0.01a";
 
-    public static String BUILD = "00001";
+    public static String BUILD = "00536";
 }

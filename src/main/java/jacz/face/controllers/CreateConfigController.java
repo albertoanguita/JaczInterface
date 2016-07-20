@@ -1,6 +1,7 @@
 package jacz.face.controllers;
 
 import com.neovisionaries.i18n.CountryCode;
+import jacz.face.meta.Paths;
 import jacz.face.util.Util;
 import jacz.peerengineclient.SessionManager;
 import jacz.peerengineservice.PeerId;
@@ -60,7 +61,7 @@ public class CreateConfigController extends GenericController {
                 @Override
                 protected Duple<String, PeerId> call()
                         throws IOException {
-                    return SessionManager.createUserConfig("./etc", randomSeed.get().array, nick.get(), country.get(), CUSTOM_STORAGE_CURRENT_VERSION);
+                    return SessionManager.createUserConfig(Paths.BASE_DIR, randomSeed.get().array, nick.get(), country.get(), CUSTOM_STORAGE_CURRENT_VERSION);
                 }
             };
         }

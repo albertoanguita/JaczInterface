@@ -7,6 +7,7 @@ import jacz.database.VideoFile;
 import jacz.face.controllers.*;
 import jacz.face.controllers.navigation.NavigationHistory;
 import jacz.face.meta.AppVersion;
+import jacz.face.meta.Paths;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.face.util.VideoFilesEditor;
@@ -33,8 +34,6 @@ public class Main extends Application {
         FAVORITES
     }
 
-    private static final String BASE_DIR = "./library";
-
     private Stage primaryStage;
 
     private Duple<MainController, Parent> mainController;
@@ -52,7 +51,7 @@ public class Main extends Application {
         PropertiesAccessor.getInstance();
 
 
-        if (!mainController.element1.listAvailableConfigs(BASE_DIR).isEmpty()) {
+        if (!mainController.element1.listAvailableConfigs(Paths.BASE_DIR).isEmpty()) {
             // there is a profile available
             //mainController.element1.loadConfig(BASE_DIR);
             //primaryStage.setScene(new Scene(mainController.element2, 1000, 675));
@@ -70,7 +69,7 @@ public class Main extends Application {
     }
 
     public void gotoMain() throws IOException {
-        mainController.element1.loadConfig(BASE_DIR);
+        mainController.element1.loadConfig(Paths.BASE_DIR);
         gotoScene(new Scene(mainController.element2, 1000, 675));
         displayCurrentNavigationWindow();
     }
