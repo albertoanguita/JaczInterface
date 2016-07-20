@@ -13,8 +13,6 @@ import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.peerengineclient.PeerEngineClient;
 import jacz.peerengineclient.SessionManager;
-import org.aanguita.jacuzzi.concurrency.ThreadUtil;
-import org.aanguita.jacuzzi.lists.tuple.Duple;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
@@ -28,6 +26,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import org.aanguita.jacuzzi.lists.tuple.Duple;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
