@@ -45,7 +45,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("vdio " + AppVersion.VERSION + ". build " + AppVersion.BUILD);
+        primaryStage.setTitle("vdio " + AppVersion.VERSION + " build " + AppVersion.BUILD);
 
         // build the singleton instance of the properties accessor
         PropertiesAccessor.getInstance();
