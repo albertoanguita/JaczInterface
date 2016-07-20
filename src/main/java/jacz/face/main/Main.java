@@ -6,6 +6,7 @@ import jacz.database.TVSeries;
 import jacz.database.VideoFile;
 import jacz.face.controllers.*;
 import jacz.face.controllers.navigation.NavigationHistory;
+import jacz.face.meta.AppVersion;
 import jacz.face.state.PropertiesAccessor;
 import jacz.face.util.MediaItemType;
 import jacz.face.util.VideoFilesEditor;
@@ -32,9 +33,7 @@ public class Main extends Application {
         FAVORITES
     }
 
-    public static final String APP_VERSION = "0.1.0";
-
-    private static final String BASE_DIR = "./etc";
+    private static final String BASE_DIR = "./library";
 
     private Stage primaryStage;
 
@@ -47,7 +46,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("media manager");
+        primaryStage.setTitle("vdio " + AppVersion.VERSION + ". build " + AppVersion.BUILD);
 
         // build the singleton instance of the properties accessor
         PropertiesAccessor.getInstance();
