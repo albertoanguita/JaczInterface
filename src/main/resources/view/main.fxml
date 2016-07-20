@@ -49,8 +49,8 @@
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="30.0">
                      <children>
                         <Label id="movies_selector" fx:id="moviesSelector" onMouseClicked="#switchToMoviesView" styleClass="left_menu_selector" text="Movies" />
-                        <Label id="series_selector" fx:id="seriesSelector" onMouseClicked="#switchToSeriesView" styleClass="left_menu_selector" text="Series" />
-                        <Label id="favorites_selector" fx:id="favoritesSelector" onMouseClicked="#switchToFavoritesView" styleClass="left_menu_selector" text="Favorites" />
+                        <Label id="series_selector" fx:id="seriesSelector" disable="true" onMouseClicked="#switchToSeriesView" styleClass="left_menu_selector" text="Series" />
+                        <Label id="favorites_selector" fx:id="favoritesSelector" disable="true" onMouseClicked="#switchToFavoritesView" styleClass="left_menu_selector" text="Favorites" />
                         <Separator prefWidth="200.0" />
                         <Label id="transfers_selector" fx:id="transfersSelector" onMouseClicked="#switchToTransfersView" styleClass="left_menu_selector" text="Transfers" />
                         <Label id="peers_selector" fx:id="peersSelector" onMouseClicked="#switchToPeersView" styleClass="left_menu_selector" text="Peers" />
